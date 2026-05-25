@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import App from './App';
 import { siteContent } from './profile';
 
@@ -13,7 +13,7 @@ describe('personal card navigation page', () => {
     expect(screen.getByText(siteContent.profile.descriptor)).toBeInTheDocument();
   });
 
-  it('renders the agreed primary navigation links', () => {
+  it('renders the agreed primary navigation tabs', () => {
     render(<App />);
 
     const navigation = screen.getByRole('navigation', {
@@ -30,34 +30,103 @@ describe('personal card navigation page', () => {
       'Resume',
       'Now',
     ]) {
-      expect(within(navigation).getByRole('link', { name: new RegExp(label) }))
+      expect(within(navigation).getByRole('tab', { name: new RegExp(label) }))
         .toBeInTheDocument();
     }
   });
 
-  it('labels external destinations accessibly', () => {
+  it('starts with the default now command selected', () => {
     render(<App />);
 
-    expect(
-      screen.getByRole('link', { name: /GitHub opens external site/i }),
-    ).toHaveAttribute('target', '_blank');
-    expect(
-      screen.getByRole('link', { name: /LinkedIn opens external site/i }),
-    ).toHaveAttribute('target', '_blank');
-    expect(
-      screen.getByRole('link', { name: /Resume opens external site/i }),
-    ).toHaveAttribute('target', '_blank');
+    const terminal = screen.getByRole('region', { name: /terminal output/i });
+
+    expect(screen.getByRole('tab', { name: /Now/i })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
+    expect(within(terminal).getByText('open now')).toBeInTheDocument();
   });
 
-  it('renders the terminal command and current developer context', () => {
+  it('shows the related terminal command inside each tab label', () => {
     render(<App />);
 
-    const terminal = screen.getByRole('region', { name: /current context/i });
+    for (const link of siteContent.links) {
+      const tab = screen.getByRole('tab', { name: link.label });
 
-    expect(within(terminal).getByText('>')).toBeInTheDocument();
-    expect(within(terminal).getByText(siteContent.terminal.command)).toBeInTheDocument();
-    expect(within(terminal).getByText(/Current:/i)).toBeInTheDocument();
-    expect(within(terminal).getByText(/Project:/i)).toBeInTheDocument();
-    expect(within(terminal).getByText(/Contact:/i)).toBeInTheDocument();
+      expect(within(tab).getByText(link.command)).toBeInTheDocument();
+    }
+  });
+
+  it('switches the terminal command and output when each tab is clicked', () => {
+    render(<App />);
+
+    const terminal = screen.getByRole('region', { name: /terminal output/i });
+
+    for (const link of siteContent.links) {
+      fireEvent.click(screen.getByRole('tab', { name: link.label }));
+
+      expect(screen.getByRole('tab', { name: link.label })).toHaveAttribute(
+        'aria-selected',
+        'true',
+      );
+      expect(within(terminal).getByText(link.command)).toBeInTheDocument();
+      expect(within(terminal).getByText(`session://chao/${link.id}`)).toBeInTheDocument();
+      expect(within(terminal).getByText(link.lines[0].text)).toBeInTheDocument();
+    }
+  });
+
+  it('keeps external destinations as terminal output links', () => {
+    render(<App />);
+
+    for (const label of ['GitHub', 'LinkedIn']) {
+      fireEvent.click(screen.getByRole('tab', { name: label }));
+
+      const matchingLinks = screen.getAllByRole('link', {
+        name: new RegExp(`${label} opens external site`, 'i'),
+      });
+
+      expect(matchingLinks.length).toBeGreaterThan(0);
+      for (const matchingLink of matchingLinks) {
+        expect(matchingLink).toHaveAttribute('target', '_blank');
+      }
+    }
+  });
+
+  it('renders real terminal action targets for contact and social links', () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Email' }));
+    expect(screen.getByRole('link', { name: /send email/i })).toHaveAttribute(
+      'href',
+      'mailto:chao.sun.me@gmail.com',
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: 'GitHub' }));
+    expect(screen.getByRole('link', { name: /open github/i })).toHaveAttribute(
+      'href',
+      'https://github.com/rootSunc',
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: 'LinkedIn' }));
+    expect(screen.getByRole('link', { name: /open linkedin/i })).toHaveAttribute(
+      'href',
+      'https://www.linkedin.com/in/chaosun526/',
+    );
+  });
+
+  it('renders both live project destinations from the projects command', () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Projects' }));
+
+    expect(screen.getByRole('link', { name: /open qparking/i })).toHaveAttribute(
+      'href',
+      'https://qparking.chaosun.xyz/',
+    );
+    expect(screen.getByRole('link', { name: /open sanakirja/i })).toHaveAttribute(
+      'href',
+      'https://sanakirja.chaosun.xyz/',
+    );
+    expect(screen.getByText('target: 2 live projects')).toBeInTheDocument();
   });
 });
