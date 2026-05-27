@@ -1,7 +1,7 @@
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeAll, vi } from 'vitest';
 import App from './App';
-import { siteContent } from './profile';
+import { siteContent } from './data/siteContent';
 
 beforeAll(() => {
   Object.defineProperty(window.HTMLMediaElement.prototype, 'play', {
@@ -9,6 +9,10 @@ beforeAll(() => {
     value: vi.fn().mockResolvedValue(undefined),
   });
   Object.defineProperty(window.HTMLMediaElement.prototype, 'pause', {
+    configurable: true,
+    value: vi.fn(),
+  });
+  Object.defineProperty(window.HTMLMediaElement.prototype, 'load', {
     configurable: true,
     value: vi.fn(),
   });
@@ -36,17 +40,16 @@ describe('personal card navigation page', () => {
       name: /primary destinations/i,
     });
 
-    for (const label of [
-      'Blog',
+    const tabs = within(navigation).getAllByRole('tab');
+
+    expect(tabs.map((tab) => tab.getAttribute('aria-label'))).toEqual([
       'Profile',
       'Projects',
       'GitHub',
       'LinkedIn',
       'Resume',
-    ]) {
-      expect(within(navigation).getByRole('tab', { name: new RegExp(label) }))
-        .toBeInTheDocument();
-    }
+      'Blog',
+    ]);
   });
 
   it('starts with the default profile command selected', () => {
@@ -54,65 +57,107 @@ describe('personal card navigation page', () => {
 
     const terminal = screen.getByRole('region', { name: /terminal output/i });
     const player = screen.getByRole('region', { name: /vinyl navigation player/i });
+    const profileLink = siteContent.links.find((link) => link.id === 'profile');
 
     expect(screen.getByRole('tab', { name: /Profile/i })).toHaveAttribute(
       'aria-selected',
       'true',
     );
-    expect(within(player).getByText(/cue \/ fight song \/ profile/i)).toBeInTheDocument();
-    expect(within(terminal).getByText('open profile')).toBeInTheDocument();
+    expect(
+      within(player).getByText(/play \/ the four seasons: spring i\. allegro \/ profile/i),
+    ).toBeInTheDocument();
+    expect(within(terminal).getByText(profileLink?.command ?? '')).toBeInTheDocument();
+    expect(within(terminal).queryByText(/chao sun/i)).not.toBeInTheDocument();
   });
 
-  it('uses the record itself for playback and updates the playing track from tabs', () => {
+  it('autoplays, uses the record itself for playback, and updates the playing track from tabs', () => {
     render(<App />);
 
     const player = screen.getByRole('region', { name: /vinyl navigation player/i });
-    const recordButton = within(player).getByRole('button', {
-      name: /play fight song chorus/i,
+    const pauseRecordButton = within(player).getByRole('button', {
+      name: /pause classical music/i,
     });
 
-    expect(recordButton).toHaveAttribute('aria-pressed', 'false');
+    expect(pauseRecordButton).toHaveAttribute('aria-pressed', 'true');
 
-    fireEvent.click(recordButton);
+    fireEvent.click(pauseRecordButton);
 
     expect(
-      within(player).getByRole('button', { name: /pause fight song chorus/i }),
-    ).toHaveAttribute('aria-pressed', 'true');
+      within(player).getByRole('button', { name: /play classical music/i }),
+    ).toHaveAttribute('aria-pressed', 'false');
+
+    fireEvent.click(within(player).getByRole('button', { name: /play classical music/i }));
 
     fireEvent.click(screen.getByRole('tab', { name: 'Projects' }));
 
-    expect(within(player).getByText(/play \/ fight song \/ projects/i)).toBeInTheDocument();
+    expect(
+      within(player).getByText(/play \/ the four seasons: spring i\. allegro \/ projects/i),
+    ).toBeInTheDocument();
   });
 
-  it('switches tracks from the display arrow controls', () => {
+  it('falls back to the paused UI when the browser blocks autoplay', async () => {
+    vi.mocked(window.HTMLMediaElement.prototype.play).mockRejectedValueOnce(
+      new DOMException('Autoplay blocked', 'NotAllowedError'),
+    );
+
+    render(<App />);
+
+    const player = screen.getByRole('region', { name: /vinyl navigation player/i });
+
+    await waitFor(() => {
+      expect(
+        within(player).getByRole('button', { name: /play classical music/i }),
+      ).toHaveAttribute('aria-pressed', 'false');
+    });
+  });
+
+  it('switches music tracks from the display arrow controls', () => {
     render(<App />);
 
     const player = screen.getByRole('region', { name: /vinyl navigation player/i });
 
     fireEvent.click(within(player).getByRole('button', { name: /next track/i }));
 
-    expect(screen.getByRole('tab', { name: 'Projects' })).toHaveAttribute(
-      'aria-selected',
-      'true',
-    );
-    expect(within(player).getByText(/cue \/ fight song \/ projects/i)).toBeInTheDocument();
-
-    fireEvent.click(within(player).getByRole('button', { name: /previous track/i }));
-
     expect(screen.getByRole('tab', { name: 'Profile' })).toHaveAttribute(
       'aria-selected',
       'true',
     );
-    expect(within(player).getByText(/cue \/ fight song \/ profile/i)).toBeInTheDocument();
+    expect(within(player).getByText(/beethoven \/ symphony no\. 5/i)).toBeInTheDocument();
+    expect(
+      within(player).getByText(/play \/ symphony no\. 5: iii\. allegro \/ profile/i),
+    ).toBeInTheDocument();
+
+    fireEvent.click(within(player).getByRole('button', { name: /previous track/i }));
+
+    expect(within(player).getByText(/vivaldi \/ the four seasons/i)).toBeInTheDocument();
+
+    fireEvent.click(within(player).getByRole('button', { name: /previous track/i }));
+
+    expect(within(player).getByText(/tchaikovsky \/ the nutcracker/i)).toBeInTheDocument();
   });
 
-  it('shows the related terminal command inside each tab label', () => {
+  it('advances to the next library track when audio ends', () => {
     render(<App />);
 
-    for (const link of siteContent.links) {
-      const tab = screen.getByRole('tab', { name: link.label });
+    const audio = screen.getByLabelText(/classical music player/i);
+    const player = screen.getByRole('region', { name: /vinyl navigation player/i });
 
-      expect(within(tab).getByText(link.command)).toBeInTheDocument();
+    fireEvent.ended(audio);
+
+    expect(within(player).getByText(/beethoven \/ symphony no\. 5/i)).toBeInTheDocument();
+  });
+
+  it('keeps the tab labels compact without command subtitles', () => {
+    render(<App />);
+
+    const navigation = screen.getByRole('navigation', {
+      name: /primary destinations/i,
+    });
+
+    for (const link of siteContent.links) {
+      const tab = within(navigation).getByRole('tab', { name: link.label });
+
+      expect(within(tab).queryByText(link.command)).not.toBeInTheDocument();
     }
   });
 
@@ -130,7 +175,11 @@ describe('personal card navigation page', () => {
       );
       expect(within(terminal).getByText(link.command)).toBeInTheDocument();
       expect(within(terminal).getByText(`session://chao/${link.id}`)).toBeInTheDocument();
-      expect(within(terminal).getByText(link.lines[0].text)).toBeInTheDocument();
+
+      const [fieldName, fieldValue] = link.lines[0].text.split(/\s{2,}/);
+
+      expect(within(terminal).getAllByText(fieldName).length).toBeGreaterThan(0);
+      expect(within(terminal).getByText(fieldValue)).toBeInTheDocument();
     }
   });
 
@@ -188,6 +237,6 @@ describe('personal card navigation page', () => {
       'href',
       'https://findata.chaosun.xyz/',
     );
-    expect(screen.getByText('target: 4 live projects')).toBeInTheDocument();
+    expect(screen.queryByText('target')).not.toBeInTheDocument();
   });
 });
