@@ -1,6 +1,22 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
+import { afterEach, beforeAll, vi } from 'vitest';
 import App from './App';
 import { siteContent } from './profile';
+
+beforeAll(() => {
+  Object.defineProperty(window.HTMLMediaElement.prototype, 'play', {
+    configurable: true,
+    value: vi.fn().mockResolvedValue(undefined),
+  });
+  Object.defineProperty(window.HTMLMediaElement.prototype, 'pause', {
+    configurable: true,
+    value: vi.fn(),
+  });
+});
+
+afterEach(() => {
+  vi.clearAllMocks();
+});
 
 describe('personal card navigation page', () => {
   it('renders the configured developer identity', () => {
@@ -39,12 +55,57 @@ describe('personal card navigation page', () => {
     render(<App />);
 
     const terminal = screen.getByRole('region', { name: /terminal output/i });
+    const player = screen.getByRole('region', { name: /vinyl navigation player/i });
 
     expect(screen.getByRole('tab', { name: /Now/i })).toHaveAttribute(
       'aria-selected',
       'true',
     );
+    expect(within(player).getByText(/cue \/ fight song \/ now/i)).toBeInTheDocument();
     expect(within(terminal).getByText('open now')).toBeInTheDocument();
+  });
+
+  it('uses the record itself for playback and updates the playing track from tabs', () => {
+    render(<App />);
+
+    const player = screen.getByRole('region', { name: /vinyl navigation player/i });
+    const recordButton = within(player).getByRole('button', {
+      name: /play fight song chorus/i,
+    });
+
+    expect(recordButton).toHaveAttribute('aria-pressed', 'false');
+
+    fireEvent.click(recordButton);
+
+    expect(
+      within(player).getByRole('button', { name: /pause fight song chorus/i }),
+    ).toHaveAttribute('aria-pressed', 'true');
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Projects' }));
+
+    expect(within(player).getByText(/play \/ fight song \/ projects/i)).toBeInTheDocument();
+  });
+
+  it('switches tracks from the display arrow controls', () => {
+    render(<App />);
+
+    const player = screen.getByRole('region', { name: /vinyl navigation player/i });
+
+    fireEvent.click(within(player).getByRole('button', { name: /next track/i }));
+
+    expect(screen.getByRole('tab', { name: 'Email' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
+    expect(within(player).getByText(/cue \/ fight song \/ email/i)).toBeInTheDocument();
+
+    fireEvent.click(within(player).getByRole('button', { name: /previous track/i }));
+
+    expect(screen.getByRole('tab', { name: 'Now' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
+    expect(within(player).getByText(/cue \/ fight song \/ now/i)).toBeInTheDocument();
   });
 
   it('shows the related terminal command inside each tab label', () => {

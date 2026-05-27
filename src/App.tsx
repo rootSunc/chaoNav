@@ -1,10 +1,12 @@
-import { useState, type CSSProperties, type PointerEvent } from 'react';
+import { useRef, useState, type CSSProperties } from 'react';
 import {
   siteContent,
   type NavigationLink,
   type TerminalAction,
   type TerminalLine,
 } from './profile';
+
+const CHORUS_AUDIO_SRC = '/audio/fight-song-chorus.mp3';
 
 function LinkText({ link }: { link: NavigationLink }) {
   return (
@@ -37,7 +39,7 @@ function DestinationTab({
       aria-controls="terminal-output"
       aria-label={link.label}
       aria-selected={selected}
-      className="nav-tab"
+      className="track-tab"
       data-command={link.command}
       id={`tab-${link.id}`}
       onClick={onSelect}
@@ -105,9 +107,94 @@ function TerminalActionLink({ action }: { action: TerminalAction }) {
   );
 }
 
+function VinylPlayer({
+  activeIndex,
+  activeLink,
+  isPlaying,
+  onNextTrack,
+  onPreviousTrack,
+  onTogglePlaying,
+}: {
+  activeIndex: number;
+  activeLink: NavigationLink;
+  isPlaying: boolean;
+  onNextTrack: () => void;
+  onPreviousTrack: () => void;
+  onTogglePlaying: () => void;
+}) {
+  const style = {
+    '--active-index': activeIndex,
+    '--tonearm-rotation': `${-20 + activeIndex * 4.7}deg`,
+  } as CSSProperties;
+
+  return (
+    <section
+      className={isPlaying ? 'player-panel is-playing' : 'player-panel is-paused'}
+      aria-label="Vinyl navigation player"
+      style={style}
+    >
+      <div className="turntable">
+        <div className="record-stage">
+          <button
+            aria-label={isPlaying ? 'Pause Fight Song chorus' : 'Play Fight Song chorus'}
+            aria-pressed={isPlaying}
+            className="record-control"
+            onClick={onTogglePlaying}
+            type="button"
+          >
+            <span className={isPlaying ? 'record is-playing' : 'record'} aria-hidden="true">
+              <span className="record-highlight" />
+              <span className="record-label" />
+              <span className="record-pin" />
+            </span>
+          </button>
+        </div>
+        <div className="tonearm" aria-hidden="true">
+          <span className="tonearm-pivot" />
+          <span className="tonearm-beam" />
+          <span className="tonearm-head" />
+        </div>
+        <span className="deck-line deck-line-top" aria-hidden="true" />
+        <span className="deck-line deck-line-bottom" aria-hidden="true" />
+      </div>
+
+      <div className="mini-player" aria-label="Small track player">
+        <button
+          aria-label="Previous track"
+          className="transport-button transport-button-previous"
+          onClick={onPreviousTrack}
+          type="button"
+        >
+          <span aria-hidden="true">‹</span>
+        </button>
+        <div className="player-display" aria-live="polite">
+          <span className="display-line">
+            {isPlaying ? 'PLAY' : 'CUE'} / Fight Song / {activeLink.label}
+          </span>
+        </div>
+        <button
+          aria-label="Next track"
+          className="transport-button transport-button-next"
+          onClick={onNextTrack}
+          type="button"
+        >
+          <span aria-hidden="true">›</span>
+        </button>
+      </div>
+
+      <div className="player-meta" aria-hidden="true">
+        <span>{String(activeIndex + 1).padStart(2, '0')}</span>
+        <span>{activeLink.command}</span>
+      </div>
+    </section>
+  );
+}
+
 export default function App() {
   const { profile, links, initialLinkId } = siteContent;
   const [selectedLinkId, setSelectedLinkId] = useState(initialLinkId);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const activeLink = links.find((link) => link.id === selectedLinkId) ?? links[0];
   const activeIndex = Math.max(
     0,
@@ -116,18 +203,41 @@ export default function App() {
   const emailLink = links.find((link) => link.id === 'email') ?? links[0];
   const projectsLink = links.find((link) => link.id === 'projects') ?? links[0];
 
-  function handlePointerMove(event: PointerEvent<HTMLElement>) {
-    const bounds = event.currentTarget.getBoundingClientRect();
-    event.currentTarget.style.setProperty('--pointer-x', `${event.clientX - bounds.left}px`);
-    event.currentTarget.style.setProperty('--pointer-y', `${event.clientY - bounds.top}px`);
+  function handleTogglePlaying() {
+    const audio = audioRef.current;
+
+    if (isPlaying) {
+      audio?.pause();
+      setIsPlaying(false);
+      return;
+    }
+
+    setIsPlaying(true);
+
+    const playAttempt = audio?.play();
+
+    if (playAttempt) {
+      void playAttempt.catch(() => undefined);
+    }
+  }
+
+  function selectRelativeTrack(direction: 1 | -1) {
+    const nextIndex = (activeIndex + direction + links.length) % links.length;
+    setSelectedLinkId(links[nextIndex].id);
   }
 
   return (
-    <main className="experience-shell" id="profile" onPointerMove={handlePointerMove}>
+    <main className="experience-shell" id="profile">
+      <audio
+        aria-label="Fight Song chorus background audio"
+        loop
+        preload="auto"
+        ref={audioRef}
+        src={CHORUS_AUDIO_SRC}
+      />
       <div className="ambient-scene" aria-hidden="true">
         <span className="ambient-grid" />
         <span className="ambient-sweep" />
-        <span className="ambient-pointer" />
       </div>
 
       <header className="site-header" aria-label="Site header">
@@ -160,35 +270,22 @@ export default function App() {
           </div>
         </div>
 
-        <div
-          className="signal-panel"
-          style={{ '--active-index': activeIndex } as CSSProperties}
-          aria-hidden="true"
-        >
-          <div className="signal-header">
-            <span />
-            <span />
-            <span />
-          </div>
-          <div className="signal-map">
-            {links.map((link, index) => (
-              <span
-                className={link.id === activeLink.id ? 'signal-row is-active' : 'signal-row'}
-                key={link.id}
-                style={{ '--item-index': index } as CSSProperties}
-              >
-                <span />
-                <span />
-              </span>
-            ))}
-            <span className="signal-cursor" />
-          </div>
-          <p className="signal-readout">{activeLink.command}</p>
-        </div>
+        <VinylPlayer
+          activeIndex={activeIndex}
+          activeLink={activeLink}
+          isPlaying={isPlaying}
+          onNextTrack={() => selectRelativeTrack(1)}
+          onPreviousTrack={() => selectRelativeTrack(-1)}
+          onTogglePlaying={handleTogglePlaying}
+        />
       </section>
 
       <section className="workspace" aria-label="Navigation workspace">
         <nav className="primary-nav" aria-label="Primary destinations">
+          <div className="nav-heading" aria-hidden="true">
+            <span>Tracks</span>
+            <span>{String(links.length).padStart(2, '0')} destinations</span>
+          </div>
           <div className="primary-tabs" role="tablist">
             {links.map((link, index) => (
               <DestinationTab
