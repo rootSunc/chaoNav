@@ -37,32 +37,30 @@ describe('personal card navigation page', () => {
     });
 
     for (const label of [
-      'Email',
       'Blog',
       'Profile',
       'Projects',
       'GitHub',
       'LinkedIn',
       'Resume',
-      'Now',
     ]) {
       expect(within(navigation).getByRole('tab', { name: new RegExp(label) }))
         .toBeInTheDocument();
     }
   });
 
-  it('starts with the default now command selected', () => {
+  it('starts with the default profile command selected', () => {
     render(<App />);
 
     const terminal = screen.getByRole('region', { name: /terminal output/i });
     const player = screen.getByRole('region', { name: /vinyl navigation player/i });
 
-    expect(screen.getByRole('tab', { name: /Now/i })).toHaveAttribute(
+    expect(screen.getByRole('tab', { name: /Profile/i })).toHaveAttribute(
       'aria-selected',
       'true',
     );
-    expect(within(player).getByText(/cue \/ fight song \/ now/i)).toBeInTheDocument();
-    expect(within(terminal).getByText('open now')).toBeInTheDocument();
+    expect(within(player).getByText(/cue \/ fight song \/ profile/i)).toBeInTheDocument();
+    expect(within(terminal).getByText('open profile')).toBeInTheDocument();
   });
 
   it('uses the record itself for playback and updates the playing track from tabs', () => {
@@ -93,19 +91,19 @@ describe('personal card navigation page', () => {
 
     fireEvent.click(within(player).getByRole('button', { name: /next track/i }));
 
-    expect(screen.getByRole('tab', { name: 'Email' })).toHaveAttribute(
+    expect(screen.getByRole('tab', { name: 'Projects' })).toHaveAttribute(
       'aria-selected',
       'true',
     );
-    expect(within(player).getByText(/cue \/ fight song \/ email/i)).toBeInTheDocument();
+    expect(within(player).getByText(/cue \/ fight song \/ projects/i)).toBeInTheDocument();
 
     fireEvent.click(within(player).getByRole('button', { name: /previous track/i }));
 
-    expect(screen.getByRole('tab', { name: 'Now' })).toHaveAttribute(
+    expect(screen.getByRole('tab', { name: 'Profile' })).toHaveAttribute(
       'aria-selected',
       'true',
     );
-    expect(within(player).getByText(/cue \/ fight song \/ now/i)).toBeInTheDocument();
+    expect(within(player).getByText(/cue \/ fight song \/ profile/i)).toBeInTheDocument();
   });
 
   it('shows the related terminal command inside each tab label', () => {
@@ -156,12 +154,6 @@ describe('personal card navigation page', () => {
   it('renders real terminal action targets for contact and social links', () => {
     render(<App />);
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Email' }));
-    expect(screen.getByRole('link', { name: /send email/i })).toHaveAttribute(
-      'href',
-      'mailto:chao.sun.me@gmail.com',
-    );
-
     fireEvent.click(screen.getByRole('tab', { name: 'GitHub' }));
     expect(screen.getByRole('link', { name: /open github/i })).toHaveAttribute(
       'href',
@@ -175,11 +167,15 @@ describe('personal card navigation page', () => {
     );
   });
 
-  it('renders both live project destinations from the projects command', () => {
+  it('renders all four live project destinations from the projects command', () => {
     render(<App />);
 
     fireEvent.click(screen.getByRole('tab', { name: 'Projects' }));
 
+    expect(screen.getByRole('link', { name: /open luxestate/i })).toHaveAttribute(
+      'href',
+      'https://luxestate-indol.vercel.app/',
+    );
     expect(screen.getByRole('link', { name: /open qparking/i })).toHaveAttribute(
       'href',
       'https://qparking.chaosun.xyz/',
@@ -188,6 +184,10 @@ describe('personal card navigation page', () => {
       'href',
       'https://sanakirja.chaosun.xyz/',
     );
-    expect(screen.getByText('target: 2 live projects')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /open findata/i })).toHaveAttribute(
+      'href',
+      'https://findata.chaosun.xyz/',
+    );
+    expect(screen.getByText('target: 4 live projects')).toBeInTheDocument();
   });
 });

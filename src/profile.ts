@@ -2,6 +2,7 @@ export type Profile = {
   name: string;
   role: string;
   descriptor: string;
+  tags: string[];
 };
 
 export type NavigationLink = {
@@ -43,30 +44,22 @@ export type SiteContent = {
 export const siteContent: SiteContent = {
   profile: {
     name: 'Chao',
-    role: 'Developer',
-    descriptor: 'Building web tools, writing notes, and shipping small useful systems.',
+    role: 'Software Craftsman',
+    descriptor: 'Crafting tools, chasing ideas, and enjoying life one commit at a time.',
+    tags: [
+      'Full-Stack',
+      'Open Source',
+      'Typography',
+      'Coffee',
+      'Vinyl',
+      'Photography',
+      'Minimalism',
+      'Cycling',
+      'Reading',
+      'Finnish Life',
+    ],
   },
   links: [
-    {
-      id: 'email',
-      label: 'Email',
-      href: 'mailto:chao.sun.me@gmail.com',
-      command: 'open email',
-      target: 'mailto:chao.sun.me@gmail.com',
-      lines: [
-        {
-          kind: 'link',
-          label: 'Email',
-          href: 'mailto:chao.sun.me@gmail.com',
-          text: 'Contact: chao.sun.me@gmail.com is the fastest path for focused conversations.',
-        },
-        {
-          kind: 'text',
-          text: 'Expect: concise context, a clear ask, and the link you want me to inspect.',
-        },
-      ],
-      actions: [{ label: 'Send Email', href: 'mailto:chao.sun.me@gmail.com' }],
-    },
     {
       id: 'blog',
       label: 'Blog',
@@ -108,22 +101,35 @@ export const siteContent: SiteContent = {
       label: 'Projects',
       href: '#projects',
       command: 'open projects',
-      target: '2 live projects',
+      target: '4 live projects',
       lines: [
         {
           kind: 'text',
-          text: 'Projects: two deployed tools are live and ready to inspect.',
+          text: 'Projects: four deployed web applications are live and ready to inspect.',
         },
         {
           kind: 'text',
-          text: 'QParking: parking-oriented utility at qparking.chaosun.xyz.',
+          text: 'LuxEstate: A premium real estate presentation and search platform.',
         },
         {
           kind: 'text',
-          text: 'Sanakirja: Finnish vocabulary tool at sanakirja.chaosun.xyz.',
+          text: 'QParking: A quick helper tool for parking zone checks and queries.',
+        },
+        {
+          kind: 'text',
+          text: 'Sanakirja: A clean utility to study and memorize Finnish vocabulary.',
+        },
+        {
+          kind: 'text',
+          text: 'Findata: A dashboard for financial data visualization and analysis.',
         },
       ],
       actions: [
+        {
+          label: 'Open LuxEstate',
+          href: 'https://luxestate-indol.vercel.app/',
+          external: true,
+        },
         {
           label: 'Open QParking',
           href: 'https://qparking.chaosun.xyz/',
@@ -132,6 +138,11 @@ export const siteContent: SiteContent = {
         {
           label: 'Open Sanakirja',
           href: 'https://sanakirja.chaosun.xyz/',
+          external: true,
+        },
+        {
+          label: 'Open Findata',
+          href: 'https://findata.chaosun.xyz/',
           external: true,
         },
       ],
@@ -210,48 +221,6 @@ export const siteContent: SiteContent = {
       ],
       actions: [],
     },
-    {
-      id: 'now',
-      label: 'Now',
-      href: '#now',
-      command: 'open now',
-      target: 'current focus',
-      lines: [
-        {
-          kind: 'text',
-          text: 'Current: building compact web tools and keeping notes on software craft.',
-        },
-        {
-          kind: 'text',
-          text: 'Stack: TypeScript, React, Node.js, automation, and pragmatic systems design.',
-        },
-        {
-          kind: 'link',
-          label: 'Projects',
-          href: '#projects',
-          text: 'Project: QParking and Sanakirja are the current public builds.',
-        },
-        {
-          kind: 'link',
-          label: 'Email',
-          href: 'mailto:chao.sun.me@gmail.com',
-          text: 'Contact: email is the fastest path for focused conversations.',
-        },
-      ],
-      actions: [
-        {
-          label: 'Open QParking',
-          href: 'https://qparking.chaosun.xyz/',
-          external: true,
-        },
-        {
-          label: 'Open Sanakirja',
-          href: 'https://sanakirja.chaosun.xyz/',
-          external: true,
-        },
-        { label: 'Send Email', href: 'mailto:chao.sun.me@gmail.com' },
-      ],
-    },
   ],
-  initialLinkId: 'now',
+  initialLinkId: 'profile',
 };
