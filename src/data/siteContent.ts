@@ -81,6 +81,10 @@ export const siteContent = {
         },
         {
           kind: 'text',
+          text: 'ai          AI practitioner applying models to daily tools, product loops, and useful automation',
+        },
+        {
+          kind: 'text',
           text: 'standard    clear tradeoffs, steady delivery, thoughtful tests, and no drama in prod',
         },
         {
@@ -110,7 +114,7 @@ export const siteContent = {
         },
         {
           kind: 'text',
-          text: 'Findata     market dashboards for reading signals without drowning in noise',
+          text: 'ArkiWatch   Finland-focused life-data assistant for weather, transit, air, and energy signals',
         },
         {
           kind: 'text',
@@ -128,8 +132,8 @@ export const siteContent = {
           external: true,
         },
         {
-          label: 'Open Findata',
-          href: 'https://findata.chaosun.xyz/',
+          label: 'Open ArkiWatch',
+          href: 'https://github.com/rootSunc/ArkiWatch',
           external: true,
         },
         {

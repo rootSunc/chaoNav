@@ -216,7 +216,7 @@ describe('personal card navigation page', () => {
     );
   });
 
-  it('renders all four live project destinations from the projects command', () => {
+  it('renders all four project destinations from the projects command', () => {
     render(<App />);
 
     fireEvent.click(screen.getByRole('tab', { name: 'Projects' }));
@@ -233,9 +233,9 @@ describe('personal card navigation page', () => {
       'href',
       'https://sanakirja.chaosun.xyz/',
     );
-    expect(screen.getByRole('link', { name: /open findata/i })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /open arkiwatch/i })).toHaveAttribute(
       'href',
-      'https://findata.chaosun.xyz/',
+      'https://github.com/rootSunc/ArkiWatch',
     );
     expect(screen.queryByText('target')).not.toBeInTheDocument();
   });
