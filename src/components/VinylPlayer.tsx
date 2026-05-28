@@ -41,6 +41,7 @@ export function VinylPlayer({
             aria-label={isPlaying ? 'Pause classical music' : 'Play classical music'}
             aria-pressed={isPlaying}
             className="record-control"
+            data-music-control="true"
             onClick={onTogglePlaying}
             type="button"
           />
@@ -52,6 +53,7 @@ export function VinylPlayer({
           <button
             aria-label="Previous track"
             className="transport-button"
+            data-music-control="true"
             onClick={onPreviousTrack}
             type="button"
           >
@@ -60,6 +62,7 @@ export function VinylPlayer({
           <button
             aria-label={isPlaying ? 'Pause track playback' : 'Play track playback'}
             className="transport-button transport-button-play"
+            data-music-control="true"
             onClick={onTogglePlaying}
             type="button"
           >
@@ -68,6 +71,7 @@ export function VinylPlayer({
           <button
             aria-label="Next track"
             className="transport-button"
+            data-music-control="true"
             onClick={onNextTrack}
             type="button"
           >

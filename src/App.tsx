@@ -22,6 +22,7 @@ export default function App() {
         aria-label="Classical music player"
         autoPlay
         onEnded={() => player.selectRelativeTrack(1)}
+        playsInline
         preload="auto"
         ref={player.audioRef}
         src={activeTrack.src}

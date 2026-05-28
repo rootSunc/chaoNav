@@ -111,6 +111,54 @@ describe('personal card navigation page', () => {
     });
   });
 
+  it('retries blocked autoplay on the first page interaction', async () => {
+    vi.mocked(window.HTMLMediaElement.prototype.play).mockRejectedValueOnce(
+      new DOMException('Autoplay blocked', 'NotAllowedError'),
+    );
+
+    render(<App />);
+
+    const player = screen.getByRole('region', { name: /vinyl navigation player/i });
+
+    await waitFor(() => {
+      expect(
+        within(player).getByRole('button', { name: /play classical music/i }),
+      ).toHaveAttribute('aria-pressed', 'false');
+    });
+
+    fireEvent.pointerDown(document.body);
+
+    await waitFor(() => {
+      expect(
+        within(player).getByRole('button', { name: /pause classical music/i }),
+      ).toHaveAttribute('aria-pressed', 'true');
+    });
+  });
+
+  it('uses the player play button to recover from blocked autoplay', async () => {
+    vi.mocked(window.HTMLMediaElement.prototype.play).mockRejectedValueOnce(
+      new DOMException('Autoplay blocked', 'NotAllowedError'),
+    );
+
+    render(<App />);
+
+    const player = screen.getByRole('region', { name: /vinyl navigation player/i });
+
+    await waitFor(() => {
+      expect(
+        within(player).getByRole('button', { name: /play classical music/i }),
+      ).toHaveAttribute('aria-pressed', 'false');
+    });
+
+    fireEvent.click(within(player).getByRole('button', { name: /play classical music/i }));
+
+    await waitFor(() => {
+      expect(
+        within(player).getByRole('button', { name: /pause classical music/i }),
+      ).toHaveAttribute('aria-pressed', 'true');
+    });
+  });
+
   it('switches music tracks from the display arrow controls', () => {
     render(<App />);
 

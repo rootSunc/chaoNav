@@ -3,10 +3,19 @@ import { formatTime } from '../lib/time';
 
 type TrackDirection = 1 | -1;
 
+function isAutoplayBlocked(error: unknown) {
+  return error instanceof DOMException && error.name === 'NotAllowedError';
+}
+
+function isFromMusicControl(target: EventTarget | null) {
+  return target instanceof Element && target.closest('[data-music-control="true"]');
+}
+
 export function useMusicPlayer(trackCount: number) {
   const safeTrackCount = Math.max(trackCount, 1);
   const [trackIndex, setTrackIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
+  const [needsUserActivation, setNeedsUserActivation] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const animationFrameRef = useRef<number | null>(null);
@@ -68,11 +77,24 @@ export function useMusicPlayer(trackCount: number) {
     const playAttempt = playAttemptRef.current + 1;
     playAttemptRef.current = playAttempt;
 
-    void audio?.play().catch(() => {
-      if (playAttemptRef.current === playAttempt) {
-        setIsPlaying(false);
-      }
-    });
+    if (!audio) {
+      return;
+    }
+
+    void audio
+      .play()
+      .then(() => {
+        if (playAttemptRef.current === playAttempt) {
+          setNeedsUserActivation(false);
+          setIsPlaying(true);
+        }
+      })
+      .catch((error: unknown) => {
+        if (playAttemptRef.current === playAttempt) {
+          setNeedsUserActivation(isAutoplayBlocked(error));
+          setIsPlaying(false);
+        }
+      });
   }, []);
 
   const selectRelativeTrack = useCallback(
@@ -85,12 +107,43 @@ export function useMusicPlayer(trackCount: number) {
   );
 
   const togglePlaying = useCallback(() => {
-    setIsPlaying((playing) => !playing);
-  }, []);
+    if (isPlayingRef.current) {
+      playAttemptRef.current += 1;
+      setNeedsUserActivation(false);
+      setIsPlaying(false);
+      return;
+    }
+
+    setIsPlaying(true);
+    requestAudioPlay(audioRef.current);
+  }, [requestAudioPlay]);
 
   useEffect(() => {
     isPlayingRef.current = isPlaying;
   }, [isPlaying]);
+
+  useEffect(() => {
+    if (!needsUserActivation) {
+      return;
+    }
+
+    const resumeFromGesture = (event: Event) => {
+      if (isFromMusicControl(event.target)) {
+        return;
+      }
+
+      setIsPlaying(true);
+      requestAudioPlay(audioRef.current);
+    };
+
+    document.addEventListener('pointerdown', resumeFromGesture, true);
+    document.addEventListener('keydown', resumeFromGesture, true);
+
+    return () => {
+      document.removeEventListener('pointerdown', resumeFromGesture, true);
+      document.removeEventListener('keydown', resumeFromGesture, true);
+    };
+  }, [needsUserActivation, requestAudioPlay]);
 
   useEffect(() => {
     setTrackIndex((currentIndex) => Math.min(currentIndex, safeTrackCount - 1));
