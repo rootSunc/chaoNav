@@ -1276,13 +1276,13 @@ button:focus-visible {
   .home-grid {
     height: 100%;
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto auto auto;
+    grid-template-rows: auto auto minmax(0, 1fr);
     gap: clamp(0.56rem, 1.35vh, 0.82rem);
-    align-content: center;
+    align-content: stretch;
     padding:
       max(0.72rem, env(safe-area-inset-top))
       0.88rem
-      max(2.05rem, calc(env(safe-area-inset-bottom) + 1.45rem));
+      max(1.75rem, calc(env(safe-area-inset-bottom) + 1.16rem));
     overflow: hidden;
   }
 
@@ -1437,8 +1437,8 @@ button:focus-visible {
 
   .terminal {
     grid-row: 3;
-    align-self: center;
-    height: clamp(18.5rem, 50dvh, 26.5rem);
+    align-self: stretch;
+    height: auto;
     min-height: 0;
     border-radius: 0.5rem;
     box-shadow:
@@ -1628,17 +1628,17 @@ button:focus-visible {
   }
 
   .terminal {
-    height: clamp(18.8rem, 49dvh, 25.8rem);
+    height: auto;
   }
 }
 
 @media (max-width: 680px) and (max-height: 720px) {
   .home-grid {
-    grid-template-rows: auto auto auto;
+    grid-template-rows: auto auto minmax(0, 1fr);
     gap: 0.48rem;
-    align-content: start;
+    align-content: stretch;
     padding-top: max(0.56rem, env(safe-area-inset-top));
-    padding-bottom: max(1.82rem, calc(env(safe-area-inset-bottom) + 1.18rem));
+    padding-bottom: max(1.55rem, calc(env(safe-area-inset-bottom) + 0.98rem));
   }
 
   .descriptor {
@@ -1665,8 +1665,8 @@ button:focus-visible {
   }
 
   .terminal {
-    height: clamp(17.2rem, 51dvh, 22rem);
-    align-self: start;
+    height: auto;
+    align-self: stretch;
   }
 
   .terminal-content {
