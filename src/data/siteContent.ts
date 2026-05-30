@@ -2,6 +2,8 @@ export type NavigationId = 'profile' | 'projects' | 'github' | 'linkedin' | 'res
 
 type NonEmptyArray<T> = readonly [T, ...T[]];
 
+export type ProjectId = 'sanakirja' | 'arkiwatch' | 'qparking' | 'luxestate';
+
 export type Profile = {
   readonly name: string;
   readonly role: string;
@@ -37,9 +39,40 @@ export type NavigationLink = {
   readonly actions: readonly TerminalAction[];
 };
 
+export type ProjectShowcaseItem = {
+  readonly id: ProjectId;
+  readonly name: string;
+  readonly category: string;
+  readonly headline: string;
+  readonly summary: string;
+  readonly href: string;
+  readonly ctaLabel: string;
+  readonly external: boolean;
+  readonly screenshots: {
+    readonly web: {
+      readonly src: string;
+      readonly alt: string;
+    };
+    readonly mobile: {
+      readonly src: string;
+      readonly alt: string;
+    };
+  };
+  readonly highlights: readonly [string, string];
+  readonly note?: string;
+};
+
+export type ProjectsPageContent = {
+  readonly eyebrow: string;
+  readonly title: string;
+  readonly intro: string;
+  readonly projects: NonEmptyArray<ProjectShowcaseItem>;
+};
+
 export type SiteContent = {
   readonly profile: Profile;
   readonly links: NonEmptyArray<NavigationLink>;
+  readonly projectsPage: ProjectsPageContent;
   readonly initialLinkId: NavigationId;
 };
 
@@ -126,6 +159,10 @@ export const siteContent = {
         },
       ],
       actions: [
+        {
+          label: 'View project page',
+          href: '/projects',
+        },
         {
           label: 'Open Sanakirja',
           href: 'https://sanakirja.chaosun.xyz/',
@@ -258,5 +295,101 @@ export const siteContent = {
       actions: [],
     },
   ],
+  projectsPage: {
+    eyebrow: '',
+    title: 'Projects',
+    intro: '',
+    projects: [
+      {
+        id: 'sanakirja',
+        name: 'Sanakirja',
+        category: 'Language learning',
+        headline: 'Finnish dictionary and study workspace for everyday learning.',
+        summary:
+          'A clean learning surface that keeps dictionary lookup, grammar help, translation, flashcards, and notes close together.',
+        href: 'https://sanakirja.chaosun.xyz/',
+        ctaLabel: 'Open Sanakirja',
+        external: true,
+        screenshots: {
+          web: {
+            src: '/images/projects/sanakirja-web.jpg',
+            alt: 'Sanakirja web screenshot',
+          },
+          mobile: {
+            src: '/images/projects/sanakirja-mobile.jpg',
+            alt: 'Sanakirja mobile screenshot',
+          },
+        },
+        highlights: ['Focused learning workflow', 'Responsive product shell'],
+      },
+      {
+        id: 'arkiwatch',
+        name: 'ArkiWatch',
+        category: 'Local intelligence',
+        headline: 'Finland public-data platform for daily life signals.',
+        summary:
+          'A monorepo concept that normalizes weather, air quality, transit, energy, city events, and other public data into useful daily context.',
+        href: 'https://github.com/rootSunc/ArkiWatch',
+        ctaLabel: 'Open ArkiWatch',
+        external: true,
+        screenshots: {
+          web: {
+            src: '/images/projects/arkiwatch-web.jpg',
+            alt: 'ArkiWatch repository web screenshot',
+          },
+          mobile: {
+            src: '/images/projects/arkiwatch-mobile.jpg',
+            alt: 'ArkiWatch repository mobile screenshot',
+          },
+        },
+        highlights: ['FastAPI + Next.js architecture', 'Public-data normalization'],
+        note: 'Public project source is shown because no live deployment is attached.',
+      },
+      {
+        id: 'qparking',
+        name: 'QParking',
+        category: 'Urban utility',
+        headline: 'Helsinki parking-zone lookup with fast comparison.',
+        summary:
+          'A compact parking app that makes zones, city filtering, and price context easier to scan before a trip.',
+        href: 'https://qparking.chaosun.xyz/',
+        ctaLabel: 'Open QParking',
+        external: true,
+        screenshots: {
+          web: {
+            src: '/images/projects/qparking-web.jpg',
+            alt: 'QParking web screenshot',
+          },
+          mobile: {
+            src: '/images/projects/qparking-mobile.jpg',
+            alt: 'QParking mobile screenshot',
+          },
+        },
+        highlights: ['City-focused data presentation', 'Mobile-first errand flow'],
+      },
+      {
+        id: 'luxestate',
+        name: 'LuxEstate',
+        category: 'Property search',
+        headline: 'Real-estate marketplace with polished browsing and search.',
+        summary:
+          'A property search interface focused on strong first impression, listing cards, filtering, and a clear marketplace browsing path.',
+        href: 'https://luxestate-indol.vercel.app/',
+        ctaLabel: 'Open LuxEstate',
+        external: true,
+        screenshots: {
+          web: {
+            src: '/images/projects/luxestate-web.jpg',
+            alt: 'LuxEstate web screenshot',
+          },
+          mobile: {
+            src: '/images/projects/luxestate-mobile.jpg',
+            alt: 'LuxEstate mobile screenshot',
+          },
+        },
+        highlights: ['Hero-led marketplace positioning', 'Responsive listing layout'],
+      },
+    ],
+  },
   initialLinkId: 'profile',
 } satisfies SiteContent;

@@ -20,6 +20,8 @@ beforeAll(() => {
 
 afterEach(() => {
   vi.clearAllMocks();
+  window.history.replaceState(null, '', '/');
+  delete document.body.dataset.page;
 });
 
 describe('personal card navigation page', () => {
@@ -262,6 +264,57 @@ describe('personal card navigation page', () => {
       'href',
       'https://www.linkedin.com/in/chaosun526/',
     );
+  });
+
+  it('opens a dedicated projects page with concise portfolio copy and real screenshots', () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole('button', { name: /open projects page/i }));
+
+    expect(
+      screen.getByRole('heading', {
+        level: 1,
+        name: siteContent.projectsPage.title,
+      }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/A compact portfolio of apps/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Commercial enough to sell/i)).not.toBeInTheDocument();
+
+    for (const project of siteContent.projectsPage.projects) {
+      expect(screen.getByRole('heading', { name: project.name })).toBeInTheDocument();
+      expect(screen.getByAltText(project.screenshots.web.alt)).toHaveAttribute(
+        'src',
+        project.screenshots.web.src,
+      );
+      expect(screen.getByAltText(project.screenshots.mobile.alt)).toHaveAttribute(
+        'src',
+        project.screenshots.mobile.src,
+      );
+      expect(
+        screen.getByRole('link', {
+          name: new RegExp(`${project.ctaLabel} opens external site`, 'i'),
+        }),
+      ).toHaveAttribute('href', project.href);
+    }
+  });
+
+  it('supports loading the projects route directly and returning home', () => {
+    window.history.replaceState(null, '', '/projects');
+
+    render(<App />);
+
+    expect(
+      screen.getByRole('heading', {
+        level: 1,
+        name: siteContent.projectsPage.title,
+      }),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /home/i }));
+
+    expect(
+      screen.getByRole('heading', { level: 1, name: siteContent.profile.name }),
+    ).toBeInTheDocument();
   });
 
   it('renders all four project destinations from the projects command', () => {
