@@ -1354,20 +1354,20 @@ button:focus-visible {
     grid-area: actions;
     justify-self: end;
     display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 5.9rem;
     margin-top: 0;
-    gap: 0;
+    gap: 0.34rem;
   }
 
   .action-button {
+    width: 100%;
     min-width: 0;
-    min-height: 2.42rem;
-    padding: 0 0.82rem;
+    min-height: 2.12rem;
+    padding: 0 0.62rem;
     border-radius: 0.45rem;
     font-size: 0.68rem;
-  }
-
-  .action-button-secondary {
-    display: none;
   }
 
   .player-panel {

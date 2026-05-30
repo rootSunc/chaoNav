@@ -160,17 +160,13 @@ export const siteContent = {
       ],
       actions: [
         {
-          label: 'View project page',
-          href: '/projects',
-        },
-        {
           label: 'Open Sanakirja',
           href: 'https://sanakirja.chaosun.xyz/',
           external: true,
         },
         {
           label: 'Open ArkiWatch',
-          href: 'https://github.com/rootSunc/ArkiWatch',
+          href: 'https://arkiwatch.chaosun.xyz/',
           external: true,
         },
         {
@@ -329,21 +325,20 @@ export const siteContent = {
         headline: 'Finland public-data platform for daily life signals.',
         summary:
           'A monorepo concept that normalizes weather, air quality, transit, energy, city events, and other public data into useful daily context.',
-        href: 'https://github.com/rootSunc/ArkiWatch',
+        href: 'https://arkiwatch.chaosun.xyz/',
         ctaLabel: 'Open ArkiWatch',
         external: true,
         screenshots: {
           web: {
             src: '/images/projects/arkiwatch-web.jpg',
-            alt: 'ArkiWatch repository web screenshot',
+            alt: 'ArkiWatch web screenshot',
           },
           mobile: {
             src: '/images/projects/arkiwatch-mobile.jpg',
-            alt: 'ArkiWatch repository mobile screenshot',
+            alt: 'ArkiWatch mobile screenshot',
           },
         },
         highlights: ['FastAPI + Next.js architecture', 'Public-data normalization'],
-        note: 'Public project source is shown because no live deployment is attached.',
       },
       {
         id: 'qparking',

@@ -336,7 +336,7 @@ describe('personal card navigation page', () => {
     );
     expect(screen.getByRole('link', { name: /open arkiwatch/i })).toHaveAttribute(
       'href',
-      'https://github.com/rootSunc/ArkiWatch',
+      'https://arkiwatch.chaosun.xyz/',
     );
     expect(screen.queryByText('target')).not.toBeInTheDocument();
   });
