@@ -322,23 +322,23 @@ export const siteContent = {
         id: 'arkiwatch',
         name: 'ArkiWatch',
         category: 'Local intelligence',
-        headline: 'Finland public-data platform for daily life signals.',
+        headline: 'Live Finland public-data dashboard for daily life signals.',
         summary:
-          'A monorepo concept that normalizes weather, air quality, transit, energy, city events, and other public data into useful daily context.',
+          'A running dashboard that turns weather, air quality, commute, energy, and city signals into one daily operating view for Finland.',
         href: 'https://arkiwatch.chaosun.xyz/',
         ctaLabel: 'Open ArkiWatch',
         external: true,
         screenshots: {
           web: {
             src: '/images/projects/arkiwatch-web.jpg',
-            alt: 'ArkiWatch web screenshot',
+            alt: 'ArkiWatch live dashboard web screenshot',
           },
           mobile: {
             src: '/images/projects/arkiwatch-mobile.jpg',
-            alt: 'ArkiWatch mobile screenshot',
+            alt: 'ArkiWatch live dashboard mobile screenshot',
           },
         },
-        highlights: ['FastAPI + Next.js architecture', 'Public-data normalization'],
+        highlights: ['Weather, transit, air, and energy signals', 'FastAPI + Next.js public-data pipeline'],
       },
       {
         id: 'qparking',
