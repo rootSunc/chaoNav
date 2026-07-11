@@ -57,7 +57,7 @@ describe('personal card navigation page', () => {
   it('starts with the default profile command selected', () => {
     render(<App />);
 
-    const terminal = screen.getByRole('region', { name: /terminal output/i });
+    const terminal = screen.getByRole('tabpanel');
     const player = screen.getByRole('region', { name: /vinyl navigation player/i });
     const profileLink = siteContent.links.find((link) => link.id === 'profile');
 
@@ -220,7 +220,7 @@ describe('personal card navigation page', () => {
   it('switches the terminal command and output when each tab is clicked', () => {
     render(<App />);
 
-    const terminal = screen.getByRole('region', { name: /terminal output/i });
+    const terminal = screen.getByRole('tabpanel');
 
     for (const link of siteContent.links) {
       fireEvent.click(screen.getByRole('tab', { name: link.label }));
@@ -316,7 +316,7 @@ describe('personal card navigation page', () => {
       }),
     ).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: /home/i }));
+    fireEvent.click(screen.getByRole('button', { name: 'Home' }));
 
     expect(
       screen.getByRole('heading', { level: 1, name: siteContent.profile.name }),
@@ -352,7 +352,7 @@ describe('personal card navigation page', () => {
 
     fireEvent.click(screen.getByRole('tab', { name: 'Blog' }));
 
-    const terminal = screen.getByRole('region', { name: /terminal output/i });
+    const terminal = screen.getByRole('tabpanel');
 
     expect(within(terminal).getByText(/calmer study tools/i)).toBeInTheDocument();
     expect(within(terminal).getByText(/public data in daily life/i)).toBeInTheDocument();
@@ -365,6 +365,22 @@ describe('personal card navigation page', () => {
       'href',
       'https://github.com/rootSunc',
     );
+  });
+
+  it('exposes a skip link and keyboard navigation between tabs', () => {
+    render(<App />);
+
+    expect(screen.getByRole('link', { name: /skip to main content/i })).toHaveAttribute(
+      'href',
+      '#site-title',
+    );
+
+    const projectsTab = screen.getByRole('tab', { name: 'Projects' });
+    projectsTab.focus();
+    fireEvent.keyDown(projectsTab, { key: 'ArrowRight' });
+
+    expect(screen.getByRole('tab', { name: 'GitHub' })).toHaveFocus();
+    expect(screen.getByRole('tab', { name: 'GitHub' })).toHaveAttribute('aria-selected', 'true');
   });
 
   it('shows project craft notes and a projects hero eyebrow on the projects page', () => {

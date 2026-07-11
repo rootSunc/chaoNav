@@ -90,11 +90,12 @@ export function TerminalPanel({ activeLink }: { readonly activeLink: NavigationL
 
   return (
     <section
-      aria-label="Terminal output"
+      aria-labelledby={`tab-${activeLink.id}`}
       aria-live="polite"
       className={`terminal${isSwapping ? ' is-swapping' : ''}`}
       id="terminal-output"
-      role="region"
+      role="tabpanel"
+      tabIndex={-1}
     >
       <div className="terminal-chrome">
         <span aria-hidden="true" className="chrome-lights">

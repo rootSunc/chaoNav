@@ -220,17 +220,6 @@
   color: var(--ink);
 }
 
-[data-theme="light"] .track-tab:hover {
-  background: rgb(255 255 255 / 88%);
-}
-
-[data-theme="light"] .track-tab[aria-selected="true"] {
-  background:
-    linear-gradient(90deg, rgb(241 65 77 / 8%), transparent 58%),
-    white;
-  box-shadow: inset 0 0 0 1px rgb(241 65 77 / 8%);
-}
-
 [data-theme="light"] .command-deck .primary-tabs {
   background: rgb(255 255 255 / 62%);
   box-shadow:

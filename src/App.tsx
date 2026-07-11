@@ -9,6 +9,7 @@ import { VinylPlayer } from './components/VinylPlayer';
 import { MUSIC_LIBRARY } from './data/musicLibrary';
 import { siteContent, type NavigationId } from './data/siteContent';
 import { useMusicPlayer } from './hooks/useMusicPlayer';
+import { useRouteFocus, useTerminalFocus } from './hooks/useRouteFocus';
 import { useSceneQuality } from './hooks/useSceneQuality';
 import { useSessionAccent } from './hooks/useSessionAccent';
 import type { CssVars } from './lib/cssVars';
@@ -49,6 +50,9 @@ export default function App() {
     sceneQuality.quality !== 'off' && currentPage === 'home' && sceneQuality.projectStage;
   const showSharedProjectsScene =
     sceneQuality.quality !== 'off' && currentPage === 'projects' && sceneQuality.projectStage;
+
+  useRouteFocus(currentPage);
+  useTerminalFocus(currentPage, activeLink.id);
 
   useEffect(() => {
     const handlePopState = () => setCurrentPage(getPageFromLocation());
@@ -100,6 +104,13 @@ export default function App() {
       className={`page-shell ${currentPage === 'projects' ? 'page-shell-projects' : ''}`}
       ref={pageShellRef}
     >
+      <a
+        className="skip-link"
+        href={currentPage === 'projects' ? '#projects-title' : '#site-title'}
+      >
+        Skip to main content
+      </a>
+
       {showSharedHomeScene ? (
         <Suspense fallback={null}>
           <SceneErrorBoundary fallback={null} label="shared-home-scene">
@@ -144,7 +155,7 @@ export default function App() {
           <div className="hero-wing">
             <section aria-labelledby="site-title" className="hero-copy">
               <p className="hero-eyebrow">{profile.heroEyebrow}</p>
-              <h1 id="site-title">{profile.name}</h1>
+              <h1 id="site-title" tabIndex={-1}>{profile.name}</h1>
               <p className="role">{profile.role}</p>
               <p className="descriptor">{profile.descriptor}</p>
 

@@ -153,7 +153,7 @@ export function ProjectsPage({
   return (
     <main className="projects-page" id="projects">
       <header className="projects-topbar">
-        <button className="projects-brand" onClick={onBackHome} type="button">
+        <button aria-label="Return home" className="projects-brand" onClick={onBackHome} type="button">
           <span>Chao</span>
           <span>portfolio</span>
         </button>
@@ -169,7 +169,7 @@ export function ProjectsPage({
 
       <section aria-labelledby="projects-title" className="projects-hero">
         {content.eyebrow ? <p className="projects-eyebrow">{content.eyebrow}</p> : null}
-        <h1 id="projects-title">{content.title}</h1>
+        <h1 id="projects-title" tabIndex={-1}>{content.title}</h1>
         {content.intro ? <p className="projects-lede">{content.intro}</p> : null}
       </section>
 

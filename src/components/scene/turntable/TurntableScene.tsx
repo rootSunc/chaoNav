@@ -37,6 +37,7 @@ function VinylDisc({
 }) {
   const discRef = useRef<THREE.Group>(null);
   const labelTexture = useLabelTexture(activeLinkLabel, accentColor);
+  const emissiveIntensity = isPlaying ? 0.1 : 0.03;
 
   useFrame((_, delta) => {
     if (isPlaying && discRef.current) {
@@ -46,13 +47,32 @@ function VinylDisc({
 
   return (
     <group position={[0.04, 0.34, 0.18]} ref={discRef} rotation={[-Math.PI / 2, 0, -0.07]}>
+      <mesh position={[0, -0.012, 0]} receiveShadow rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[0.46, 0.46, 0.028, 64]} />
+        <meshStandardMaterial color="#090909" metalness={0.72} roughness={0.28} />
+      </mesh>
       <mesh castShadow rotation={[Math.PI / 2, 0, 0]}>
         <cylinderGeometry args={[0.42, 0.42, 0.018, 64]} />
-        <meshStandardMaterial color="#101010" metalness={0.58} roughness={0.22} />
+        <meshStandardMaterial
+          color="#101010"
+          emissive={accentColor}
+          emissiveIntensity={emissiveIntensity}
+          metalness={0.62}
+          roughness={0.18}
+        />
+      </mesh>
+      <mesh position={[0, 0.01, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[0.14, 0.39, 64]} />
+        <meshStandardMaterial
+          color="#181818"
+          metalness={0.48}
+          roughness={0.36}
+          side={THREE.DoubleSide}
+        />
       </mesh>
       <mesh position={[0, 0.012, 0]} rotation={[Math.PI / 2, 0, 0]}>
         <circleGeometry args={[0.11, 32]} />
-        <meshStandardMaterial map={labelTexture} metalness={0.15} roughness={0.62} />
+        <meshStandardMaterial map={labelTexture} metalness={0.18} roughness={0.58} />
       </mesh>
     </group>
   );
@@ -88,6 +108,10 @@ function ToneArm({ isPlaying }: { readonly isPlaying: boolean }) {
         <cylinderGeometry args={[0.016, 0.016, 0.46, 12]} />
         <meshStandardMaterial color="#d2d2d2" metalness={0.92} roughness={0.12} />
       </mesh>
+      <mesh castShadow position={[0.44, 0.02, 0.02]} rotation={[0, 0, Math.PI / 2]}>
+        <sphereGeometry args={[0.028, 12, 12]} />
+        <meshStandardMaterial color="#ececec" metalness={0.95} roughness={0.08} />
+      </mesh>
     </group>
   );
 }
@@ -119,10 +143,23 @@ export function TurntableScene({
 
   return (
     <group ref={stageRef}>
-      <ambientLight intensity={0.78} />
-      <directionalLight intensity={0.95} position={[2.4, 4.2, 3.2]} />
-      <directionalLight color="#ffd2d6" intensity={0.28} position={[-2.2, 2.4, 1.4]} />
-      <pointLight color={accentColor} intensity={0.35} position={[0.2, 0.8, 1.2]} />
+      <ambientLight intensity={0.72} />
+      <directionalLight castShadow intensity={1.05} position={[2.4, 4.2, 3.2]} />
+      <directionalLight color="#ffd2d6" intensity={0.32} position={[-2.2, 2.4, 1.4]} />
+      <pointLight
+        color={accentColor}
+        decay={2}
+        distance={4.5}
+        intensity={isPlaying ? 0.52 : 0.28}
+        position={[0.2, 0.8, 1.2]}
+      />
+      <spotLight
+        angle={0.42}
+        color={accentColor}
+        intensity={isPlaying ? 0.24 : 0.1}
+        penumbra={0.8}
+        position={[0.1, 1.6, 1.4]}
+      />
 
       <GramophoneBackdrop />
       <VinylDisc
