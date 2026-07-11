@@ -2,6 +2,7 @@ import { useTexture } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
+import { GRAMOPHONE_TEXTURE } from '../../../lib/sceneTextures';
 import { useLabelTexture } from './useLabelTexture';
 
 export type TurntableSceneProps = {
@@ -12,7 +13,6 @@ export type TurntableSceneProps = {
 };
 
 const ROTATION_SPEED = (33.333 * Math.PI * 2) / 60;
-const GRAMOPHONE_TEXTURE = '/images/gramophone.png';
 
 function GramophoneBackdrop() {
   const texture = useTexture(GRAMOPHONE_TEXTURE);

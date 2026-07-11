@@ -51,11 +51,11 @@ test.describe('webgl scenes', () => {
     await waitForStableShell(page);
     await expectSceneQuality(page, 'active');
 
+    await waitForWebGLCanvas(page, '.shared-home-canvas');
     await expect(page.locator('.gramophone-frame')).toBeVisible();
     await expect(page.locator('.gramophone-image')).toBeVisible();
     await expect(page.locator('.vinyl-stage-3d')).toHaveCount(0);
-    await expect(page.locator('.shared-home-canvas')).toHaveCount(0);
-    await expect(page.locator('.scene-canvas canvas')).toBeVisible();
+    await expect(page.locator('.scene-canvas')).toBeVisible();
   });
 
   test('projects mobile keeps scenes off', async ({ page }) => {

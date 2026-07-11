@@ -13,12 +13,6 @@ import { useSceneQuality } from './hooks/useSceneQuality';
 import { useSessionAccent } from './hooks/useSessionAccent';
 import type { CssVars } from './lib/cssVars';
 
-const SceneCanvas = lazy(() =>
-  import('./components/scene/SceneCanvas').then((module) => ({
-    default: module.SceneCanvas,
-  })),
-);
-
 const SharedHomeScene = lazy(() =>
   import('./components/scene/shared/SharedHomeScene').then((module) => ({
     default: module.SharedHomeScene,
@@ -52,7 +46,7 @@ export default function App() {
   const activeTrack = MUSIC_LIBRARY[player.trackIndex] ?? MUSIC_LIBRARY[0];
   const projectsLink = links.find((link) => link.id === 'projects') ?? activeLink;
   const showSharedHomeScene =
-    sceneQuality.quality !== 'off' && currentPage === 'home' && sceneQuality.vinylStage;
+    sceneQuality.quality !== 'off' && currentPage === 'home' && sceneQuality.projectStage;
   const showSharedProjectsScene =
     sceneQuality.quality !== 'off' && currentPage === 'projects' && sceneQuality.projectStage;
 
@@ -118,17 +112,6 @@ export default function App() {
             />
           </SceneErrorBoundary>
         </Suspense>
-      ) : sceneQuality.quality !== 'off' && currentPage === 'home' ? (
-        <Suspense fallback={null}>
-          <SceneErrorBoundary fallback={null} label="background">
-            <SceneCanvas
-              activeLinkId={activeLink.id}
-              isPlaying={player.isPlaying}
-              particleCount={sceneQuality.particleCount}
-              quality={sceneQuality.quality}
-            />
-          </SceneErrorBoundary>
-        </Suspense>
       ) : null}
 
       {showSharedProjectsScene ? (
@@ -155,7 +138,6 @@ export default function App() {
           onBackHome={() => navigateToPage('home')}
           projectStage={sceneQuality.projectStage}
           sceneQuality={sceneQuality.quality}
-          useSharedProjectsScene={showSharedProjectsScene}
         />
       ) : (
         <main className="command-deck" id="profile">
@@ -206,7 +188,6 @@ export default function App() {
                 sceneQuality={sceneQuality.quality}
                 timeTextRef={player.timeTextRef}
                 vinylStage={sceneQuality.vinylStage}
-                useSharedHomeScene={showSharedHomeScene}
                 visualizerRef={player.visualizerRef}
               />
             </div>
