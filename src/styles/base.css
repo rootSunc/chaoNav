@@ -1,0 +1,139 @@
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+  background: var(--background);
+  scroll-behavior: smooth;
+}
+
+body {
+  position: relative;
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  overflow-x: hidden;
+  background-color: var(--background);
+  background-image:
+    radial-gradient(circle at 14% 10%, rgb(255 77 90 / 16%), transparent 36%),
+    radial-gradient(circle at 88% 14%, rgb(94 234 212 / 12%), transparent 32%),
+    radial-gradient(circle at 50% 100%, rgb(255 77 90 / 8%), transparent 40%),
+    linear-gradient(180deg, #101011 0%, #0a0b0c 48%, #060607 100%);
+  background-size: 100% 100%;
+  color: var(--ink);
+}
+
+body::before {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background:
+    linear-gradient(112deg, transparent 0 36%, rgb(94 234 212 / 6%) 58%, transparent 100%),
+    repeating-linear-gradient(
+      90deg,
+      rgb(255 255 255 / 2.5%) 0 1px,
+      transparent 1px 4rem
+    );
+  content: "";
+  pointer-events: none;
+}
+
+body::after {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(circle at 22% 72%, rgb(94 234 212 / 8%) 0, transparent 24%),
+    radial-gradient(circle at 78% 38%, rgb(255 77 90 / 10%) 0, transparent 22%);
+  content: "";
+  pointer-events: none;
+  animation: ambient-drift 14s ease-in-out infinite alternate;
+}
+
+body::selection {
+  background: var(--accent);
+  color: white;
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+}
+
+.scene-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.scene-canvas canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+body[data-scene='high']::after,
+body[data-scene='low']::after {
+  opacity: 0.72;
+  animation: ambient-drift 14s ease-in-out infinite alternate;
+}
+
+.page-shell:not(.page-shell-projects)::before {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(90deg, rgb(0 0 0 / 38%) 0 44%, transparent 44%);
+  content: "";
+  pointer-events: none;
+}
+
+a,
+button {
+  color: inherit;
+  font: inherit;
+  letter-spacing: 0;
+}
+
+a {
+  text-decoration: none;
+}
+
+button {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 0.25rem;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+  white-space: nowrap;
+}
+
+.page-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: visible;
+}
+
+@supports (height: 100dvh) {
+  .page-shell {
+    min-height: 100dvh;
+  }
+}

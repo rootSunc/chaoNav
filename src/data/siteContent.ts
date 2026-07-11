@@ -275,22 +275,33 @@ export const siteContent = {
     {
       id: 'blog',
       label: 'Blog',
-      command: 'cat ~/writing/field-notes.md',
+      command: 'ls ~/writing/recent --newest 3',
       lines: [
         {
-          kind: 'text',
-          text: 'notes       field notes on software craft, product taste, tools, and living well',
+          kind: 'link',
+          label: 'Sanakirja build notes',
+          href: 'https://sanakirja.chaosun.xyz/',
+          text: '2025-12   designing a calmer Finnish study surface',
+          external: true,
+        },
+        {
+          kind: 'link',
+          label: 'ArkiWatch field notes',
+          href: 'https://arkiwatch.chaosun.xyz/',
+          text: '2025-10   live public-data dashboards for daily life',
+          external: true,
         },
         {
           kind: 'text',
-          text: 'status      curated writing surface coming online at a sustainable pace',
-        },
-        {
-          kind: 'text',
-          text: 'promise     fewer hot takes, more decisions worth rereading after a quiet morning',
+          text: 'cadence     fewer hot takes, more notes worth rereading after a quiet morning',
         },
       ],
-      actions: [],
+      actions: [
+        {
+          label: 'Request writing updates',
+          href: 'mailto:chao.sun.me@gmail.com?subject=Writing%20updates',
+        },
+      ],
     },
   ],
   projectsPage: {

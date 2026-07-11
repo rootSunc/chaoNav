@@ -1,0 +1,259 @@
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  color: #171819;
+  background: #f2f0f0;
+  --background: #f2f0f0;
+  --background-warm: #eae8e6;
+  --surface: #ffffff;
+  --surface-soft: #f7f6f4;
+  --surface-deep: #e8e6e4;
+  --glass: rgb(23 24 24 / 4%);
+  --glass-border: rgb(23 24 24 / 9%);
+  --glass-highlight: rgb(255 255 255 / 82%);
+  --ink: #171819;
+  --ink-soft: #4a4c4b;
+  --muted: #686c6a;
+  --line: rgb(23 24 24 / 10%);
+  --line-strong: rgb(23 24 24 / 16%);
+  --accent-deep: #92001c;
+  --accent-glow: rgb(40 109 104 / 18%);
+  --terminal: #ffffff;
+  --terminal-top: #f7f6f4;
+  --terminal-ink: #171819;
+  --terminal-glass: rgb(255 255 255 / 88%);
+  --focus: #286d68;
+  --shadow: 0 1.8rem 4rem rgb(23 24 24 / 10%);
+  --shadow-soft: 0 1rem 2.4rem rgb(23 24 24 / 7%);
+  --shadow-lift: 0 1.4rem 3rem rgb(23 24 24 / 12%);
+  --hero-gradient: linear-gradient(132deg, #171819 0%, #286d68 46%, #92001c 92%);
+}
+
+[data-theme="light"] body {
+  background-image:
+    radial-gradient(circle at 14% 10%, rgb(241 65 77 / 10%), transparent 36%),
+    radial-gradient(circle at 88% 14%, rgb(40 109 104 / 10%), transparent 32%),
+    radial-gradient(circle at 50% 100%, rgb(241 65 77 / 6%), transparent 40%),
+    linear-gradient(180deg, #ffffff 0%, #f2f0f0 48%, #eae8e6 100%);
+}
+
+[data-theme="light"] body::before {
+  background:
+    linear-gradient(112deg, transparent 0 36%, rgb(40 109 104 / 5%) 58%, transparent 100%),
+    repeating-linear-gradient(
+      90deg,
+      rgb(23 24 24 / 3%) 0 1px,
+      transparent 1px 4rem
+    );
+}
+
+[data-theme="light"] body::after {
+  background:
+    radial-gradient(circle at 22% 72%, rgb(40 109 104 / 7%) 0, transparent 24%),
+    radial-gradient(circle at 78% 38%, rgb(241 65 77 / 8%) 0, transparent 22%);
+  opacity: 0.85;
+}
+
+[data-theme="light"] .page-shell:not(.page-shell-projects)::before {
+  background: linear-gradient(90deg, rgb(255 255 255 / 72%) 0 44%, transparent 44%);
+}
+
+[data-theme="light"] .hero-wing {
+  border-right-color: rgb(23 24 24 / 8%);
+  background:
+    radial-gradient(circle at 18% 16%, rgb(241 65 77 / 12%), transparent 44%),
+    radial-gradient(circle at 82% 82%, rgb(40 109 104 / 10%), transparent 40%),
+    linear-gradient(165deg, #ffffff 0%, #f7f6f4 58%, #f2f0f0 100%);
+}
+
+[data-theme="light"] .hero-wing::before {
+  background: repeating-linear-gradient(
+    0deg,
+    rgb(23 24 24 / 3%) 0 1px,
+    transparent 1px 4px
+  );
+}
+
+[data-theme="light"] .hero-wing::after {
+  background: radial-gradient(circle, rgb(241 65 77 / 10%), transparent 68%);
+}
+
+[data-theme="light"] .hero-eyebrow {
+  color: rgb(40 109 104 / 88%);
+}
+
+[data-theme="light"] .command-stage {
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 72%), transparent 12%),
+    linear-gradient(180deg, #f7f6f4 0%, #f2f0f0 100%);
+}
+
+[data-theme="light"] .player-card {
+  border-color: rgb(23 24 24 / 10%);
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 92%), rgb(255 255 255 / 72%)),
+    var(--surface-soft);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 92%),
+    var(--shadow-soft);
+}
+
+[data-theme="light"] .player-panel:hover .player-card,
+[data-theme="light"] .player-panel.is-playing .player-card {
+  border-color: rgb(40 109 104 / 24%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 96%),
+    0 0 1.2rem rgb(40 109 104 / 10%),
+    var(--shadow-soft);
+}
+
+[data-theme="light"] .mini-player {
+  border-color: rgb(23 24 24 / 10%);
+  background: rgb(255 255 255 / 62%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 88%);
+}
+
+[data-theme="light"] .transport-controls {
+  background: rgb(23 24 24 / 3%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 72%);
+}
+
+[data-theme="light"] .transport-button {
+  border-color: rgb(23 24 24 / 12%);
+  background: rgb(255 255 255 / 72%);
+}
+
+[data-theme="light"] .transport-button:hover {
+  background: white;
+  border-color: rgb(23 24 24 / 18%);
+}
+
+[data-theme="light"] .command-deck .terminal {
+  border-color: rgb(23 24 24 / 10%);
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 92%), transparent 9rem),
+    linear-gradient(120deg, rgb(40 109 104 / 6%), transparent 42%),
+    var(--terminal);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--session-accent) 10%, transparent),
+    0 2rem 4rem rgb(23 24 24 / 10%),
+    inset 0 1px 0 rgb(255 255 255 / 88%);
+}
+
+[data-theme="light"] .command-deck .terminal.is-swapping {
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--session-accent) 22%, transparent),
+    0 0 1.4rem color-mix(in srgb, var(--session-accent) 12%, transparent),
+    0 2rem 4rem rgb(23 24 24 / 12%),
+    inset 0 1px 0 rgb(255 255 255 / 92%);
+}
+
+[data-theme="light"] .terminal-meta-card {
+  border-color: rgb(23 24 24 / 10%);
+  background:
+    linear-gradient(135deg, rgb(255 255 255 / 88%), transparent 68%),
+    var(--terminal-glass);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 88%),
+    0 0.45rem 1rem rgb(23 24 24 / 6%);
+}
+
+[data-theme="light"] .terminal-meta dt {
+  border-color: rgb(23 24 24 / 8%);
+  background: rgb(23 24 24 / 4%);
+  color: rgb(23 24 24 / 52%);
+}
+
+[data-theme="light"] .track-tab:hover {
+  background: rgb(255 255 255 / 88%);
+}
+
+[data-theme="light"] .track-tab[aria-selected="true"] {
+  background:
+    linear-gradient(90deg, rgb(241 65 77 / 8%), transparent 58%),
+    white;
+  box-shadow: inset 0 0 0 1px rgb(241 65 77 / 8%);
+}
+
+[data-theme="light"] .command-deck .primary-tabs {
+  background: rgb(255 255 255 / 62%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 88%),
+    var(--shadow-soft);
+}
+
+[data-theme="light"] .portfolio-project {
+  border-color: rgb(23 24 24 / 10%);
+  background:
+    linear-gradient(135deg, rgb(255 255 255 / 92%), rgb(255 255 255 / 72%)),
+    var(--surface-soft);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 92%),
+    var(--shadow-soft);
+}
+
+[data-theme="light"] .portfolio-project:hover {
+  border-color: rgb(40 109 104 / 28%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 96%),
+    0 0 1.2rem rgb(40 109 104 / 10%),
+    var(--shadow-soft);
+}
+
+[data-theme="light"] .portfolio-project .project-category {
+  border-color: rgb(40 109 104 / 18%);
+  background: rgb(40 109 104 / 8%);
+  color: #286d68;
+}
+
+[data-theme="light"] .portfolio-screen {
+  border-color: rgb(23 24 24 / 10%);
+  background: white;
+}
+
+[data-theme="light"] .site-footer {
+  color: rgb(74 76 75 / 88%);
+}
+
+[data-theme="light"] .page-shell:has(.command-deck) .site-footer {
+  color: rgb(74 76 75 / 88%);
+}
+
+[data-theme="light"] .theme-toggle {
+  border-color: rgb(23 24 24 / 12%);
+  background: rgb(255 255 255 / 72%);
+  color: var(--ink-soft);
+}
+
+[data-theme="light"] .theme-toggle:hover {
+  border-color: rgb(40 109 104 / 28%);
+  background: white;
+  color: var(--ink);
+}
+
+@media (max-width: 680px) {
+  [data-theme="light"] body {
+    background-image:
+      radial-gradient(circle at 78% 24%, rgb(241 65 77 / 8%), transparent 32%),
+      radial-gradient(circle at 18% 18%, rgb(40 109 104 / 7%), transparent 28%),
+      linear-gradient(150deg, #ffffff 0%, #f2f0f0 52%, #eae8e6 100%);
+  }
+
+  [data-theme="light"] .deck-player-slot .player-card {
+    background:
+      linear-gradient(180deg, rgb(255 255 255 / 92%), rgb(255 255 255 / 78%)),
+      var(--surface-soft);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 92%),
+      0 0.85rem 2rem rgb(23 24 24 / 10%);
+  }
+
+  [data-theme="light"] .command-deck .primary-tabs {
+    border-color: rgb(23 24 24 / 10%);
+    background: rgb(255 255 255 / 72%);
+  }
+}

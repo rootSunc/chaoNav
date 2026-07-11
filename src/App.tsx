@@ -1,8 +1,10 @@
 import { Suspense, lazy, useEffect, useState } from 'react';
 import { DestinationTabs } from './components/DestinationTabs';
+import { HeroWaveStrip } from './components/HeroWaveStrip';
 import { ProjectsPage } from './components/ProjectsPage';
 import { SceneErrorBoundary } from './components/scene/SceneErrorBoundary';
 import { TerminalPanel } from './components/TerminalPanel';
+import { ThemeToggle } from './components/ThemeToggle';
 import { VinylPlayer } from './components/VinylPlayer';
 import { MUSIC_LIBRARY } from './data/musicLibrary';
 import { siteContent, type NavigationId } from './data/siteContent';
@@ -117,7 +119,7 @@ export default function App() {
           sceneQuality={sceneQuality.quality}
         />
       ) : (
-        <main className="home-grid command-deck" id="profile">
+        <main className="command-deck" id="profile">
           <div className="hero-wing">
             <section aria-labelledby="site-title" className="hero-copy">
               <p className="hero-eyebrow">{profile.heroEyebrow}</p>
@@ -150,6 +152,8 @@ export default function App() {
                 </button>
               </div>
             </section>
+
+            <HeroWaveStrip isPlaying={player.isPlaying} />
 
             <div className="deck-player-slot">
               <VinylPlayer
@@ -185,6 +189,7 @@ export default function App() {
           <span aria-hidden="true" className="footer-cube" />
           © 2026 Software designed by Chao
         </p>
+        <ThemeToggle />
       </footer>
     </div>
   );

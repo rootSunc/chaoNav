@@ -1,0 +1,36 @@
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  body::after {
+    animation: none;
+  }
+
+  .hero-copy h1 {
+    animation: none;
+  }
+
+  .footer-cube {
+    animation: none;
+  }
+
+  .scene-canvas,
+  .vinyl-stage-3d,
+  .project-device-stage {
+    display: none;
+  }
+
+  .terminal,
+  .terminal.is-swapping {
+    transform: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
