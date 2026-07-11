@@ -14,7 +14,7 @@ function isFromMusicControl(target: EventTarget | null) {
 export function useMusicPlayer(trackCount: number) {
   const safeTrackCount = Math.max(trackCount, 1);
   const [trackIndex, setTrackIndex] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [needsUserActivation, setNeedsUserActivation] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -115,8 +115,7 @@ export function useMusicPlayer(trackCount: number) {
     }
 
     setIsPlaying(true);
-    requestAudioPlay(audioRef.current);
-  }, [requestAudioPlay]);
+  }, []);
 
   useEffect(() => {
     isPlayingRef.current = isPlaying;
@@ -133,7 +132,6 @@ export function useMusicPlayer(trackCount: number) {
       }
 
       setIsPlaying(true);
-      requestAudioPlay(audioRef.current);
     };
 
     document.addEventListener('pointerdown', resumeFromGesture, true);
@@ -143,7 +141,7 @@ export function useMusicPlayer(trackCount: number) {
       document.removeEventListener('pointerdown', resumeFromGesture, true);
       document.removeEventListener('keydown', resumeFromGesture, true);
     };
-  }, [needsUserActivation, requestAudioPlay]);
+  }, [needsUserActivation]);
 
   useEffect(() => {
     setTrackIndex((currentIndex) => Math.min(currentIndex, safeTrackCount - 1));

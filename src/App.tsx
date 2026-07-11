@@ -62,13 +62,15 @@ export default function App() {
     <div className={`page-shell ${currentPage === 'projects' ? 'page-shell-projects' : ''}`}>
       <audio
         aria-label="Classical music player"
-        autoPlay
         onEnded={() => player.selectRelativeTrack(1)}
         playsInline
         preload="auto"
         ref={player.audioRef}
-        src={activeTrack.src}
-      />
+      >
+        {activeTrack.sources.map((source) => (
+          <source key={source.src} src={source.src} type={source.type} />
+        ))}
+      </audio>
 
       {currentPage === 'projects' ? (
         <ProjectsPage

@@ -66,16 +66,24 @@ describe('personal card navigation page', () => {
       'true',
     );
     expect(
-      within(player).getByText(/play \/ the four seasons: spring i\. allegro \/ profile/i),
+      within(player).getByText(/cue \/ the four seasons: spring i\. allegro \/ profile/i),
     ).toBeInTheDocument();
     expect(within(terminal).getByText(profileLink?.command ?? '')).toBeInTheDocument();
     expect(within(terminal).queryByText(/chao sun/i)).not.toBeInTheDocument();
   });
 
-  it('autoplays, uses the record itself for playback, and updates the playing track from tabs', () => {
+  it('starts paused, uses the record itself for playback, and updates the playing track from tabs', () => {
     render(<App />);
 
     const player = screen.getByRole('region', { name: /vinyl navigation player/i });
+    const playRecordButton = within(player).getByRole('button', {
+      name: /play classical music/i,
+    });
+
+    expect(playRecordButton).toHaveAttribute('aria-pressed', 'false');
+
+    fireEvent.click(playRecordButton);
+
     const pauseRecordButton = within(player).getByRole('button', {
       name: /pause classical music/i,
     });
@@ -97,30 +105,26 @@ describe('personal card navigation page', () => {
     ).toBeInTheDocument();
   });
 
-  it('falls back to the paused UI when the browser blocks autoplay', async () => {
-    vi.mocked(window.HTMLMediaElement.prototype.play).mockRejectedValueOnce(
-      new DOMException('Autoplay blocked', 'NotAllowedError'),
-    );
-
+  it('renders the paused UI on initial load', () => {
     render(<App />);
 
     const player = screen.getByRole('region', { name: /vinyl navigation player/i });
 
-    await waitFor(() => {
-      expect(
-        within(player).getByRole('button', { name: /play classical music/i }),
-      ).toHaveAttribute('aria-pressed', 'false');
-    });
+    expect(
+      within(player).getByRole('button', { name: /play classical music/i }),
+    ).toHaveAttribute('aria-pressed', 'false');
   });
 
-  it('retries blocked autoplay on the first page interaction', async () => {
-    vi.mocked(window.HTMLMediaElement.prototype.play).mockRejectedValueOnce(
-      new DOMException('Autoplay blocked', 'NotAllowedError'),
-    );
+  it('retries blocked playback on the first page interaction', async () => {
+    vi.mocked(window.HTMLMediaElement.prototype.play)
+      .mockRejectedValueOnce(new DOMException('Playback blocked', 'NotAllowedError'))
+      .mockResolvedValueOnce(undefined);
 
     render(<App />);
 
     const player = screen.getByRole('region', { name: /vinyl navigation player/i });
+
+    fireEvent.click(within(player).getByRole('button', { name: /play classical music/i }));
 
     await waitFor(() => {
       expect(
@@ -137,14 +141,16 @@ describe('personal card navigation page', () => {
     });
   });
 
-  it('uses the player play button to recover from blocked autoplay', async () => {
-    vi.mocked(window.HTMLMediaElement.prototype.play).mockRejectedValueOnce(
-      new DOMException('Autoplay blocked', 'NotAllowedError'),
-    );
+  it('uses the player play button to recover from blocked playback', async () => {
+    vi.mocked(window.HTMLMediaElement.prototype.play)
+      .mockRejectedValueOnce(new DOMException('Playback blocked', 'NotAllowedError'))
+      .mockResolvedValueOnce(undefined);
 
     render(<App />);
 
     const player = screen.getByRole('region', { name: /vinyl navigation player/i });
+
+    fireEvent.click(within(player).getByRole('button', { name: /play classical music/i }));
 
     await waitFor(() => {
       expect(
@@ -174,7 +180,7 @@ describe('personal card navigation page', () => {
     );
     expect(within(player).getByText(/beethoven \/ symphony no\. 5/i)).toBeInTheDocument();
     expect(
-      within(player).getByText(/play \/ symphony no\. 5: iii\. allegro \/ profile/i),
+      within(player).getByText(/cue \/ symphony no\. 5: iii\. allegro \/ profile/i),
     ).toBeInTheDocument();
 
     fireEvent.click(within(player).getByRole('button', { name: /previous track/i }));
