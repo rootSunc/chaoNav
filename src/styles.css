@@ -1855,7 +1855,7 @@ button:focus-visible {
     padding:
       max(0.72rem, env(safe-area-inset-top))
       0.88rem
-      max(1.75rem, calc(env(safe-area-inset-bottom) + 1.16rem));
+      max(4.8rem, calc(env(safe-area-inset-bottom) + 4.2rem));
     overflow: hidden;
   }
 
@@ -1875,7 +1875,39 @@ button:focus-visible {
   }
 
   .deck-player-slot {
+    position: fixed;
+    right: 0.88rem;
+    bottom: max(2.35rem, calc(env(safe-area-inset-bottom) + 1.85rem));
+    left: 0.88rem;
+    z-index: 6;
+    width: auto;
+    margin-top: 0;
+  }
+
+  .deck-player-slot .player-panel {
+    display: flex;
+    width: 100%;
+  }
+
+  .deck-player-slot .player-card {
+    width: 100%;
+    padding: 0.42rem 0.48rem;
+    border-radius: 0.65rem;
+    background:
+      linear-gradient(180deg, rgb(255 255 255 / 8%), rgb(255 255 255 / 4%)),
+      rgb(12 12 13 / 92%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 8%),
+      0 0.85rem 2rem rgb(0 0 0 / 42%);
+  }
+
+  .deck-player-slot .gramophone-frame,
+  .deck-player-slot .vinyl-stage-3d {
     display: none;
+  }
+
+  .deck-player-slot .mini-player {
+    width: 100%;
   }
 
   .command-stage {
@@ -1995,7 +2027,8 @@ button:focus-visible {
   }
 
   .player-panel {
-    display: none;
+    justify-self: stretch;
+    width: 100%;
   }
 
   .primary-nav {
@@ -2641,7 +2674,7 @@ body[data-page="projects"] .page-shell {
 
 .portfolio-list {
   display: grid;
-  gap: clamp(1rem, 2.4vw, 1.6rem);
+  gap: clamp(1.2rem, 2.6vw, 1.8rem);
 }
 
 .portfolio-project {
@@ -2650,16 +2683,36 @@ body[data-page="projects"] .page-shell {
   gap: clamp(1rem, 3vw, 2rem);
   align-items: center;
   min-width: 0;
-  padding: clamp(1rem, 2.4vw, 1.45rem) 0;
-  border-top: 1px solid var(--line-strong);
+  padding: clamp(1.15rem, 2.4vw, 1.65rem);
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 0.85rem;
+  background:
+    linear-gradient(135deg, rgb(255 255 255 / 5%), transparent 58%),
+    linear-gradient(180deg, rgb(18 19 20 / 92%), rgb(10 11 12 / 88%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 6%),
+    0 1.2rem 2.8rem rgb(0 0 0 / 28%);
   opacity: 0;
   transform: translateY(0.55rem);
   animation: project-card-in 420ms calc(var(--project-index, 0) * 80ms + 120ms)
     cubic-bezier(0.22, 1, 0.36, 1) both;
+  transition:
+    border-color 220ms ease,
+    box-shadow 220ms ease,
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.portfolio-project:hover {
+  border-color: rgb(94 234 212 / 22%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 8%),
+    0 0 1.4rem rgb(94 234 212 / 10%),
+    0 1.4rem 3rem rgb(0 0 0 / 34%);
+  transform: translateY(-0.12rem);
 }
 
 .portfolio-project:last-child {
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid rgb(255 255 255 / 10%);
 }
 
 .portfolio-project-copy {
@@ -2669,7 +2722,11 @@ body[data-page="projects"] .page-shell {
 .portfolio-project .project-category {
   display: inline-flex;
   margin: 0 0 0.64rem;
-  color: var(--accent-deep);
+  padding: 0.12rem 0.42rem;
+  border: 1px solid rgb(255 77 90 / 28%);
+  border-radius: 999px;
+  background: rgb(255 77 90 / 8%);
+  color: #ffb3ba;
   font-size: 0.68rem;
   font-weight: 850;
   text-transform: uppercase;
@@ -2726,6 +2783,7 @@ body[data-page="projects"] .page-shell {
   height: 0.38rem;
   border-radius: 50%;
   background: var(--accent-cool);
+  box-shadow: 0 0 0.45rem rgb(94 234 212 / 42%);
   content: "";
 }
 
@@ -2817,17 +2875,21 @@ body[data-page="projects"] .page-shell {
   display: block;
   min-width: 0;
   overflow: hidden;
-  border: 1px solid var(--line-strong);
-  border-radius: 0.5rem;
-  background: var(--surface);
-  box-shadow: var(--shadow-soft);
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 0.65rem;
+  background: rgb(8 9 9 / 88%);
+  box-shadow: 0 1rem 2.2rem rgb(0 0 0 / 32%);
   transition:
     box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1),
-    transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 220ms ease;
 }
 
 .portfolio-screen:hover {
-  box-shadow: 0 1.35rem 2.8rem rgb(23 24 24 / 16%);
+  border-color: rgb(94 234 212 / 24%);
+  box-shadow:
+    0 0 1rem rgb(94 234 212 / 12%),
+    0 1.35rem 2.8rem rgb(0 0 0 / 38%);
   transform: translateY(-0.22rem);
 }
 

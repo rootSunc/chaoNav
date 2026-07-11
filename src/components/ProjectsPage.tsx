@@ -29,7 +29,12 @@ function ClassicProjectScreens({ project }: { readonly project: ProjectShowcaseI
         target={project.external ? '_blank' : undefined}
       >
         <span aria-hidden="true">Web</span>
-        <img alt={project.screenshots.web.alt} src={project.screenshots.web.src} />
+        <img
+          alt={project.screenshots.web.alt}
+          decoding="async"
+          loading="lazy"
+          src={project.screenshots.web.src}
+        />
       </a>
       <a
         aria-label={`${project.name} mobile screenshot opens project`}
@@ -39,7 +44,12 @@ function ClassicProjectScreens({ project }: { readonly project: ProjectShowcaseI
         target={project.external ? '_blank' : undefined}
       >
         <span aria-hidden="true">Mobile</span>
-        <img alt={project.screenshots.mobile.alt} src={project.screenshots.mobile.src} />
+        <img
+          alt={project.screenshots.mobile.alt}
+          decoding="async"
+          loading="lazy"
+          src={project.screenshots.mobile.src}
+        />
       </a>
     </div>
   );

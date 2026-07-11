@@ -37,7 +37,7 @@ export function VinylStageCanvas({
       ref={ref}
     >
       <EmbeddedSceneCanvas
-        camera={{ fov: 36, position: [0, 1.55, 3.35] }}
+        camera={{ fov: 34, position: [0, 0.92, 2.75] }}
         isActive={isActive}
         quality={quality}
       >
