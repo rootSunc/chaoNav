@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { Suspense, lazy, useEffect, useState } from 'react';
 import { DestinationTabs } from './components/DestinationTabs';
 import { ProjectsPage } from './components/ProjectsPage';
 import { TerminalPanel } from './components/TerminalPanel';
@@ -6,7 +6,14 @@ import { VinylPlayer } from './components/VinylPlayer';
 import { MUSIC_LIBRARY } from './data/musicLibrary';
 import { siteContent, type NavigationId } from './data/siteContent';
 import { useMusicPlayer } from './hooks/useMusicPlayer';
+import { useSceneQuality } from './hooks/useSceneQuality';
 import type { CssVars } from './lib/cssVars';
+
+const SceneCanvas = lazy(() =>
+  import('./components/scene/SceneCanvas').then((module) => ({
+    default: module.SceneCanvas,
+  })),
+);
 
 type PageId = 'home' | 'projects';
 
@@ -21,6 +28,7 @@ export default function App() {
   const [selectedLinkId, setSelectedLinkId] = useState<NavigationId>(initialLinkId);
   const [currentPage, setCurrentPage] = useState<PageId>(() => getPageFromLocation());
   const player = useMusicPlayer(MUSIC_LIBRARY.length);
+  const sceneQuality = useSceneQuality();
 
   const activeLink = links.find((link) => link.id === selectedLinkId) ?? links[0];
   const activeTrack = MUSIC_LIBRARY[player.trackIndex] ?? MUSIC_LIBRARY[0];
@@ -42,6 +50,19 @@ export default function App() {
     };
   }, [currentPage]);
 
+  useEffect(() => {
+    if (sceneQuality.quality === 'off') {
+      delete document.body.dataset.scene;
+      return;
+    }
+
+    document.body.dataset.scene = sceneQuality.quality;
+
+    return () => {
+      delete document.body.dataset.scene;
+    };
+  }, [sceneQuality.quality]);
+
   const navigateToPage = (page: PageId) => {
     const nextPath = page === 'projects' ? PROJECTS_PATH : '/';
 
@@ -60,6 +81,17 @@ export default function App() {
 
   return (
     <div className={`page-shell ${currentPage === 'projects' ? 'page-shell-projects' : ''}`}>
+      {sceneQuality.quality !== 'off' ? (
+        <Suspense fallback={null}>
+          <SceneCanvas
+            activeLinkId={activeLink.id}
+            isPlaying={player.isPlaying}
+            particleCount={sceneQuality.particleCount}
+            quality={sceneQuality.quality}
+          />
+        </Suspense>
+      ) : null}
+
       <audio
         aria-label="Classical music player"
         onEnded={() => player.selectRelativeTrack(1)}
@@ -133,7 +165,10 @@ export default function App() {
       )}
 
       <footer className="site-footer">
-        <p>© 2026 Software designed by Chao</p>
+        <p>
+          <span aria-hidden="true" className="footer-cube" />
+          © 2026 Software designed by Chao
+        </p>
       </footer>
     </div>
   );

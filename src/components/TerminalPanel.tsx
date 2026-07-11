@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import type { NavigationLink, TerminalAction, TerminalLine } from '../data/siteContent';
 import type { CssVars } from '../lib/cssVars';
 import { parseTerminalText } from '../lib/terminal';
@@ -71,11 +72,26 @@ function TerminalActionLink({ action }: { readonly action: TerminalAction }) {
 }
 
 export function TerminalPanel({ activeLink }: { readonly activeLink: NavigationLink }) {
+  const isFirstRender = useRef(true);
+  const [isSwapping, setIsSwapping] = useState(false);
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
+    setIsSwapping(true);
+    const timer = window.setTimeout(() => setIsSwapping(false), 420);
+
+    return () => window.clearTimeout(timer);
+  }, [activeLink.id]);
+
   return (
     <section
       aria-label="Terminal output"
       aria-live="polite"
-      className="terminal"
+      className={`terminal${isSwapping ? ' is-swapping' : ''}`}
       id="terminal-output"
       role="region"
     >
@@ -88,7 +104,7 @@ export function TerminalPanel({ activeLink }: { readonly activeLink: NavigationL
         <p className="terminal-path">session://chao/{activeLink.id}</p>
         <p className="terminal-link-state">linked to {activeLink.label}</p>
       </div>
-      <div className="terminal-content" key={activeLink.id}>
+      <div className={`terminal-content${isSwapping ? ' is-swapping' : ''}`} key={activeLink.id}>
         <p className="terminal-command">
           <span aria-hidden="true" className="terminal-prompt">
             chao@nav:{activeLink.id}$

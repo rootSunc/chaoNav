@@ -10,14 +10,18 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.6.1",
     "react": "19.2.6",
-    "react-dom": "19.2.6"
+    "react-dom": "19.2.6",
+    "three": "^0.185.1"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "6.9.1",
     "@testing-library/react": "16.3.2",
     "@types/react": "19.2.15",
     "@types/react-dom": "19.2.3",
+    "@types/three": "^0.185.1",
     "@vitejs/plugin-react": "6.0.2",
     "jsdom": "29.1.1",
     "typescript": "6.0.3",
