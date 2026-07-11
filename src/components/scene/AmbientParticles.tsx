@@ -113,8 +113,8 @@ export function AmbientParticles({ count, gather, isPlaying, pointer }: AmbientP
     points.geometry.attributes.position.needsUpdate = true;
 
     if (material) {
-      material.opacity = 0.16 + currentGather * 0.05 + pulse * 0.07;
-      material.size = 0.042 + pulse * 0.01 + currentGather * 0.004;
+      material.opacity = 0.34 + currentGather * 0.08 + pulse * 0.12;
+      material.size = 0.055 + pulse * 0.014 + currentGather * 0.006;
     }
   });
 
@@ -126,10 +126,10 @@ export function AmbientParticles({ count, gather, isPlaying, pointer }: AmbientP
       <pointsMaterial
         ref={materialRef}
         blending={THREE.AdditiveBlending}
-        color="#4a938c"
+        color="#8ef0e3"
         depthWrite={false}
-        opacity={0.2}
-        size={0.045}
+        opacity={0.38}
+        size={0.055}
         sizeAttenuation
         transparent
       />

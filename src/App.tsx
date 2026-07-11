@@ -115,59 +115,66 @@ export default function App() {
           sceneQuality={sceneQuality.quality}
         />
       ) : (
-        <main className="home-grid" id="profile">
-          <section aria-labelledby="site-title" className="hero-copy">
-            <h1 id="site-title">{profile.name}</h1>
-            <p className="role">{profile.role}</p>
-            <p className="descriptor">{profile.descriptor}</p>
+        <main className="home-grid command-deck" id="profile">
+          <div className="hero-wing">
+            <section aria-labelledby="site-title" className="hero-copy">
+              <p className="hero-eyebrow">Personal navigation / session online</p>
+              <h1 id="site-title">{profile.name}</h1>
+              <p className="role">{profile.role}</p>
+              <p className="descriptor">{profile.descriptor}</p>
 
-            <div aria-label="Interest tags" className="tag-cloud">
-              {profile.tags.map((tag, index) => (
-                <span className="tag-pill" key={tag} style={{ '--tag-index': index } as CssVars}>
-                  {tag}
-                </span>
-              ))}
-            </div>
+              <div aria-label="Interest tags" className="tag-cloud">
+                {profile.tags.map((tag, index) => (
+                  <span className="tag-pill" key={tag} style={{ '--tag-index': index } as CssVars}>
+                    {tag}
+                  </span>
+                ))}
+              </div>
 
-            <div aria-label="Primary actions" className="hero-actions">
-              <a
-                className="action-button action-button-primary"
-                href="mailto:chao.sun.me@gmail.com"
-              >
-                Email
-              </a>
-              <button
-                aria-label="Open projects page"
-                className="action-button action-button-secondary"
-                onClick={() => navigateToPage('projects')}
-                type="button"
-              >
-                Projects
-              </button>
+              <div aria-label="Primary actions" className="hero-actions">
+                <a
+                  className="action-button action-button-primary"
+                  href="mailto:chao.sun.me@gmail.com"
+                >
+                  Email
+                </a>
+                <button
+                  aria-label="Open projects page"
+                  className="action-button action-button-secondary"
+                  onClick={() => navigateToPage('projects')}
+                  type="button"
+                >
+                  Projects
+                </button>
+              </div>
+            </section>
+
+            <div className="deck-player-slot">
+              <VinylPlayer
+                activeLink={activeLink}
+                activeTrack={activeTrack}
+                isPlaying={player.isPlaying}
+                onNextTrack={() => player.selectRelativeTrack(1)}
+                onPreviousTrack={() => player.selectRelativeTrack(-1)}
+                onTogglePlaying={player.togglePlaying}
+                progressBarRef={player.progressBarRef}
+                sceneQuality={sceneQuality.quality}
+                timeTextRef={player.timeTextRef}
+                vinylStage={sceneQuality.vinylStage}
+                visualizerRef={player.visualizerRef}
+              />
             </div>
+          </div>
+
+          <section aria-label="Command interface" className="command-stage">
+            <DestinationTabs
+              links={links}
+              onSelect={setSelectedLinkId}
+              selectedLinkId={activeLink.id}
+            />
+
+            <TerminalPanel activeLink={activeLink} />
           </section>
-
-          <VinylPlayer
-            activeLink={activeLink}
-            activeTrack={activeTrack}
-            isPlaying={player.isPlaying}
-            onNextTrack={() => player.selectRelativeTrack(1)}
-            onPreviousTrack={() => player.selectRelativeTrack(-1)}
-            onTogglePlaying={player.togglePlaying}
-            progressBarRef={player.progressBarRef}
-            sceneQuality={sceneQuality.quality}
-            timeTextRef={player.timeTextRef}
-            vinylStage={sceneQuality.vinylStage}
-            visualizerRef={player.visualizerRef}
-          />
-
-          <DestinationTabs
-            links={links}
-            onSelect={setSelectedLinkId}
-            selectedLinkId={activeLink.id}
-          />
-
-          <TerminalPanel activeLink={activeLink} />
         </main>
       )}
 
