@@ -14,7 +14,6 @@ export default defineConfig({
   use: {
     baseURL: previewUrl,
     trace: 'on-first-retry',
-    reducedMotion: 'reduce',
     colorScheme: 'dark',
   },
   webServer: {
@@ -26,7 +25,19 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      testMatch: /visual\.spec\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        reducedMotion: 'reduce',
+      },
+    },
+    {
+      name: 'chromium-webgl',
+      testMatch: /webgl\.spec\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        reducedMotion: 'no-preference',
+      },
     },
   ],
 });
