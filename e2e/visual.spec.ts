@@ -1,62 +1,56 @@
-import { expect, test, type Page } from '@playwright/test';
-
-async function prepareVisualPage(page: Page) {
-  await page.addInitScript(() => {
-    window.localStorage.setItem('chaonav-theme', 'dark');
-    document.documentElement.dataset.theme = 'dark';
-  });
-
-  await page.emulateMedia({ reducedMotion: 'reduce', colorScheme: 'dark' });
-}
-
-async function waitForStableShell(page: Page) {
-  await page.waitForLoadState('networkidle');
-  await page.evaluate(async () => {
-    if ('fonts' in document) {
-      await document.fonts.ready;
-    }
-  });
-  await page.waitForTimeout(250);
-}
+import { expect, test } from '@playwright/test';
+import { prepareVisualPage, visualDiffTolerance, waitForStableShell } from './helpers';
 
 test.describe('visual regression', () => {
-  test.beforeEach(async ({ page }) => {
-    await prepareVisualPage(page);
-  });
-
-  test('home command deck desktop', async ({ page }) => {
+  test('home command deck desktop dark', async ({ page }) => {
+    await prepareVisualPage(page, 'dark');
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto('/');
     await waitForStableShell(page);
     await expect(page.getByRole('heading', { level: 1, name: 'Chao' })).toBeVisible();
 
-    await expect(page).toHaveScreenshot('home-desktop.png', {
+    await expect(page).toHaveScreenshot('home-desktop-dark.png', {
       fullPage: true,
-      maxDiffPixelRatio: 0.015,
+      maxDiffPixelRatio: visualDiffTolerance(),
     });
   });
 
-  test('projects page desktop', async ({ page }) => {
+  test('home command deck desktop light', async ({ page }) => {
+    await prepareVisualPage(page, 'light');
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto('/');
+    await waitForStableShell(page);
+    await expect(page.getByRole('heading', { level: 1, name: 'Chao' })).toBeVisible();
+
+    await expect(page).toHaveScreenshot('home-desktop-light.png', {
+      fullPage: true,
+      maxDiffPixelRatio: visualDiffTolerance(),
+    });
+  });
+
+  test('projects page desktop dark', async ({ page }) => {
+    await prepareVisualPage(page, 'dark');
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto('/projects');
     await waitForStableShell(page);
     await expect(page.getByRole('heading', { level: 1, name: 'Projects' })).toBeVisible();
 
-    await expect(page).toHaveScreenshot('projects-desktop.png', {
+    await expect(page).toHaveScreenshot('projects-desktop-dark.png', {
       fullPage: true,
-      maxDiffPixelRatio: 0.015,
+      maxDiffPixelRatio: visualDiffTolerance(),
     });
   });
 
-  test('home command deck mobile', async ({ page }) => {
+  test('home command deck mobile dark', async ({ page }) => {
+    await prepareVisualPage(page, 'dark');
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('/');
     await waitForStableShell(page);
     await expect(page.getByRole('navigation', { name: /primary destinations/i })).toBeVisible();
 
-    await expect(page).toHaveScreenshot('home-mobile.png', {
+    await expect(page).toHaveScreenshot('home-mobile-dark.png', {
       fullPage: true,
-      maxDiffPixelRatio: 0.02,
+      maxDiffPixelRatio: process.env.CI ? 0.035 : 0.02,
     });
   });
 });

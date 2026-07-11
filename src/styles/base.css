@@ -147,6 +147,7 @@ button:focus-visible {
 }
 
 .page-shell {
+  position: relative;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
