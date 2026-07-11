@@ -30,25 +30,26 @@ export function VinylPlayer({
       aria-label="Vinyl navigation player"
       className={`player-panel ${isPlaying ? 'is-playing' : 'is-paused'}`}
     >
-      <div className="gramophone-frame">
-        <img
-          alt="Vintage gramophone with a record player base"
-          className="gramophone-image"
-          src="/images/gramophone.png"
-        />
-        <div className="record-stage">
-          <button
-            aria-label={isPlaying ? 'Pause classical music' : 'Play classical music'}
-            aria-pressed={isPlaying}
-            className="record-control"
-            data-music-control="true"
-            onClick={onTogglePlaying}
-            type="button"
+      <div className="player-card">
+        <div className="gramophone-frame">
+          <img
+            alt="Vintage gramophone with a record player base"
+            className="gramophone-image"
+            src="/images/gramophone.png"
           />
+          <div className="record-stage">
+            <button
+              aria-label={isPlaying ? 'Pause classical music' : 'Play classical music'}
+              aria-pressed={isPlaying}
+              className="record-control"
+              data-music-control="true"
+              onClick={onTogglePlaying}
+              type="button"
+            />
+          </div>
         </div>
-      </div>
 
-      <div aria-label="Small track player" className="mini-player">
+        <div aria-label="Small track player" className="mini-player">
         <div className="transport-controls">
           <button
             aria-label="Previous track"
@@ -99,6 +100,7 @@ export function VinylPlayer({
           <span className="player-progress">
             <span ref={progressBarRef} />
           </span>
+        </div>
         </div>
       </div>
 
