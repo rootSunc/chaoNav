@@ -1606,11 +1606,8 @@
   }
 
   .player-panel .gramophone-frame {
-    display: none;
-  }
-
-  .player-panel.has-vinyl-stage .vinyl-stage-3d {
-    display: none;
+    max-width: min(16rem, 28vh);
+    margin-inline: auto;
   }
 
   .player-panel .player-card {

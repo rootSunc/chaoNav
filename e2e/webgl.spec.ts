@@ -44,6 +44,20 @@ test.describe('webgl scenes', () => {
     await expect(page.locator('.vinyl-stage-3d')).toHaveCount(0);
   });
 
+  test('home tablet shows gramophone fallback without vinyl stage', async ({ page }) => {
+    await prepareWebGLPage(page, 'dark');
+    await page.setViewportSize({ width: 900, height: 900 });
+    await page.goto('/');
+    await waitForStableShell(page);
+    await expectSceneQuality(page, 'active');
+
+    await expect(page.locator('.gramophone-frame')).toBeVisible();
+    await expect(page.locator('.gramophone-image')).toBeVisible();
+    await expect(page.locator('.vinyl-stage-3d')).toHaveCount(0);
+    await expect(page.locator('.shared-home-canvas')).toHaveCount(0);
+    await expect(page.locator('.scene-canvas canvas')).toBeVisible();
+  });
+
   test('projects mobile keeps scenes off', async ({ page }) => {
     await prepareWebGLPage(page, 'dark');
     await page.setViewportSize({ width: 390, height: 844 });
