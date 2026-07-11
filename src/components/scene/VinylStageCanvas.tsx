@@ -1,7 +1,8 @@
-import { Canvas } from '@react-three/fiber';
 import { Suspense, useState } from 'react';
 import type { NavigationId } from '../../data/siteContent';
+import { useCanvasLifecycle } from '../../hooks/useCanvasLifecycle';
 import type { SceneQuality } from '../../hooks/useSceneQuality';
+import { EmbeddedSceneCanvas } from './EmbeddedSceneCanvas';
 import { TurntableScene } from './turntable/TurntableScene';
 import { getLinkAccentColor } from './turntable/linkColors';
 
@@ -21,7 +22,7 @@ export function VinylStageCanvas({
   quality,
 }: VinylStageCanvasProps) {
   const [hoverTilt, setHoverTilt] = useState(0);
-  const devicePixelRatio = typeof window === 'undefined' ? 1 : window.devicePixelRatio;
+  const { isActive, ref } = useCanvasLifecycle<HTMLDivElement>();
 
   return (
     <div
@@ -33,15 +34,12 @@ export function VinylStageCanvas({
 
         setHoverTilt(normalizedX);
       }}
+      ref={ref}
     >
-      <Canvas
+      <EmbeddedSceneCanvas
         camera={{ fov: 36, position: [0, 1.55, 3.35] }}
-        dpr={Math.min(devicePixelRatio, quality === 'low' ? 1 : 1.5)}
-        gl={{
-          alpha: true,
-          antialias: quality === 'high',
-          powerPreference: 'high-performance',
-        }}
+        isActive={isActive}
+        quality={quality}
       >
         <Suspense fallback={null}>
           <TurntableScene
@@ -51,7 +49,7 @@ export function VinylStageCanvas({
             isPlaying={isPlaying}
           />
         </Suspense>
-      </Canvas>
+      </EmbeddedSceneCanvas>
 
       <button
         aria-label={isPlaying ? 'Pause classical music' : 'Play classical music'}

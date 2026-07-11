@@ -1,8 +1,8 @@
-import { Canvas } from '@react-three/fiber';
 import { Suspense, useState } from 'react';
 import type { ProjectShowcaseItem } from '../../data/siteContent';
 import { useInViewProgress } from '../../hooks/useInViewProgress';
 import type { SceneQuality } from '../../hooks/useSceneQuality';
+import { EmbeddedSceneCanvas } from './EmbeddedSceneCanvas';
 import { DeviceGalleryScene } from './portfolio/DeviceGalleryScene';
 
 export type ProjectDeviceStageProps = {
@@ -11,9 +11,8 @@ export type ProjectDeviceStageProps = {
 };
 
 export function ProjectDeviceStage({ project, quality }: ProjectDeviceStageProps) {
-  const { progress, ref } = useInViewProgress();
+  const { isActive, progress, ref } = useInViewProgress();
   const [hoverTilt, setHoverTilt] = useState(0);
-  const devicePixelRatio = typeof window === 'undefined' ? 1 : window.devicePixelRatio;
 
   return (
     <div
@@ -27,19 +26,15 @@ export function ProjectDeviceStage({ project, quality }: ProjectDeviceStageProps
       }}
       ref={ref}
     >
-      <Canvas
+      <EmbeddedSceneCanvas
         camera={{ fov: 34, position: [0, 1.05, 4.15] }}
-        dpr={Math.min(devicePixelRatio, quality === 'low' ? 1 : 1.5)}
-        gl={{
-          alpha: true,
-          antialias: quality === 'high',
-          powerPreference: 'high-performance',
-        }}
+        isActive={isActive}
+        quality={quality}
       >
         <Suspense fallback={null}>
           <DeviceGalleryScene hoverTilt={hoverTilt} progress={progress} project={project} />
         </Suspense>
-      </Canvas>
+      </EmbeddedSceneCanvas>
 
       <a
         aria-label={`${project.name} web screenshot opens project`}

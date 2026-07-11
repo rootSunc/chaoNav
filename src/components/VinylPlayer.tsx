@@ -3,6 +3,7 @@ import type { RefObject } from 'react';
 import type { MusicTrack } from '../data/musicLibrary';
 import type { NavigationLink } from '../data/siteContent';
 import type { SceneQuality } from '../hooks/useSceneQuality';
+import { SceneErrorBoundary } from './scene/SceneErrorBoundary';
 
 const VinylStageCanvas = lazy(() =>
   import('./scene/VinylStageCanvas').then((module) => ({
@@ -75,13 +76,18 @@ export function VinylPlayer({
       <div className="player-card">
         {showVinylStage ? (
           <Suspense fallback={<ClassicGramophoneStage isPlaying={isPlaying} onTogglePlaying={onTogglePlaying} />}>
-            <VinylStageCanvas
-              activeLinkId={activeLink.id}
-              activeLinkLabel={activeLink.label}
-              isPlaying={isPlaying}
-              onTogglePlaying={onTogglePlaying}
-              quality={sceneQuality}
-            />
+            <SceneErrorBoundary
+              fallback={<ClassicGramophoneStage isPlaying={isPlaying} onTogglePlaying={onTogglePlaying} />}
+              label="vinyl-stage"
+            >
+              <VinylStageCanvas
+                activeLinkId={activeLink.id}
+                activeLinkLabel={activeLink.label}
+                isPlaying={isPlaying}
+                onTogglePlaying={onTogglePlaying}
+                quality={sceneQuality}
+              />
+            </SceneErrorBoundary>
           </Suspense>
         ) : (
           <ClassicGramophoneStage isPlaying={isPlaying} onTogglePlaying={onTogglePlaying} />

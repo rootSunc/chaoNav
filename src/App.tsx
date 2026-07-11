@@ -1,6 +1,7 @@
 import { Suspense, lazy, useEffect, useState } from 'react';
 import { DestinationTabs } from './components/DestinationTabs';
 import { ProjectsPage } from './components/ProjectsPage';
+import { SceneErrorBoundary } from './components/scene/SceneErrorBoundary';
 import { TerminalPanel } from './components/TerminalPanel';
 import { VinylPlayer } from './components/VinylPlayer';
 import { MUSIC_LIBRARY } from './data/musicLibrary';
@@ -83,12 +84,14 @@ export default function App() {
     <div className={`page-shell ${currentPage === 'projects' ? 'page-shell-projects' : ''}`}>
       {sceneQuality.quality !== 'off' ? (
         <Suspense fallback={null}>
-          <SceneCanvas
-            activeLinkId={activeLink.id}
-            isPlaying={player.isPlaying}
-            particleCount={sceneQuality.particleCount}
-            quality={sceneQuality.quality}
-          />
+          <SceneErrorBoundary fallback={null} label="background">
+            <SceneCanvas
+              activeLinkId={activeLink.id}
+              isPlaying={player.isPlaying}
+              particleCount={sceneQuality.particleCount}
+              quality={sceneQuality.quality}
+            />
+          </SceneErrorBoundary>
         </Suspense>
       ) : null}
 

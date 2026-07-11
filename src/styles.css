@@ -2861,6 +2861,12 @@ body[data-page="projects"] .page-shell {
     animation: none;
   }
 
+  .scene-canvas,
+  .vinyl-stage-3d,
+  .project-device-stage {
+    display: none;
+  }
+
   .terminal,
   .terminal.is-swapping {
     transform: none;

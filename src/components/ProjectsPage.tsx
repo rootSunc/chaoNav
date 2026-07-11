@@ -3,6 +3,7 @@ import type { ProjectShowcaseItem, ProjectsPageContent } from '../data/siteConte
 import type { SceneQuality } from '../hooks/useSceneQuality';
 import type { CssVars } from '../lib/cssVars';
 import { ExternalMark } from './ExternalMark';
+import { SceneErrorBoundary } from './scene/SceneErrorBoundary';
 
 const ProjectDeviceStage = lazy(() =>
   import('./scene/ProjectDeviceStage').then((module) => ({
@@ -62,7 +63,12 @@ function ProjectScreens({
         className="portfolio-screens has-device-stage"
       >
         <Suspense fallback={<ClassicProjectScreens project={project} />}>
-          <ProjectDeviceStage project={project} quality={sceneQuality} />
+          <SceneErrorBoundary
+            fallback={<ClassicProjectScreens project={project} />}
+            label={`project-${project.id}`}
+          >
+            <ProjectDeviceStage project={project} quality={sceneQuality} />
+          </SceneErrorBoundary>
         </Suspense>
       </div>
     );

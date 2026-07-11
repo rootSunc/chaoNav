@@ -5,12 +5,17 @@ type UseInViewProgressOptions = {
   readonly threshold?: number;
 };
 
+function isDocumentVisible(): boolean {
+  return typeof document === 'undefined' || document.visibilityState === 'visible';
+}
+
 export function useInViewProgress({
   rootMargin = '0px 0px -12% 0px',
   threshold = 0.42,
 }: UseInViewProgressOptions = {}) {
   const ref = useRef<HTMLDivElement>(null);
   const [progress, setProgress] = useState(0);
+  const [isActive, setIsActive] = useState(false);
 
   useEffect(() => {
     const element = ref.current;
@@ -19,17 +24,31 @@ export function useInViewProgress({
       return;
     }
 
+    let isIntersecting = false;
+
+    const sync = () => {
+      const active = isIntersecting && isDocumentVisible();
+      setIsActive(active);
+
+      if (!active) {
+        setProgress(0);
+      }
+    };
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (!entry) {
           return;
         }
 
-        if (!entry.isIntersecting) {
-          setProgress(0);
+        isIntersecting = entry.isIntersecting;
+
+        if (!entry.isIntersecting || !isDocumentVisible()) {
+          sync();
           return;
         }
 
+        setIsActive(true);
         setProgress(Math.min(1, entry.intersectionRatio / threshold));
       },
       {
@@ -40,8 +59,17 @@ export function useInViewProgress({
 
     observer.observe(element);
 
-    return () => observer.disconnect();
+    const handleVisibilityChange = () => {
+      sync();
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      observer.disconnect();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, [rootMargin, threshold]);
 
-  return { progress, ref };
+  return { isActive, progress, ref };
 }
