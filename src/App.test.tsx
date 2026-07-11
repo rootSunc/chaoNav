@@ -346,4 +346,37 @@ describe('personal card navigation page', () => {
     );
     expect(screen.queryByText('target')).not.toBeInTheDocument();
   });
+
+  it('renders blog notes in the terminal without masquerading product pages as articles', () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Blog' }));
+
+    const terminal = screen.getByRole('region', { name: /terminal output/i });
+
+    expect(within(terminal).getByText(/calmer study tools/i)).toBeInTheDocument();
+    expect(within(terminal).getByText(/public data in daily life/i)).toBeInTheDocument();
+    expect(within(terminal).queryByRole('link', { name: /sanakirja build notes/i })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /ask for a longer essay/i })).toHaveAttribute(
+      'href',
+      'mailto:chao.sun.me@gmail.com?subject=Essay%20request',
+    );
+    expect(screen.getByRole('link', { name: /browse build notes on github/i })).toHaveAttribute(
+      'href',
+      'https://github.com/rootSunc',
+    );
+  });
+
+  it('shows project craft notes and a projects hero eyebrow on the projects page', () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole('button', { name: /open projects page/i }));
+
+    expect(screen.getByText(siteContent.projectsPage.eyebrow)).toBeInTheDocument();
+
+    for (const project of siteContent.projectsPage.projects) {
+      expect(project.note).toBeTruthy();
+      expect(screen.getByText(project.note ?? '')).toBeInTheDocument();
+    }
+  });
 });

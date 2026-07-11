@@ -275,37 +275,40 @@ export const siteContent = {
     {
       id: 'blog',
       label: 'Blog',
-      command: 'ls ~/writing/recent --newest 3',
+      command: 'cat ~/writing/index.txt --recent 3',
       lines: [
         {
-          kind: 'link',
-          label: 'Sanakirja build notes',
-          href: 'https://sanakirja.chaosun.xyz/',
-          text: '2025-12   designing a calmer Finnish study surface',
-          external: true,
-        },
-        {
-          kind: 'link',
-          label: 'ArkiWatch field notes',
-          href: 'https://arkiwatch.chaosun.xyz/',
-          text: '2025-10   live public-data dashboards for daily life',
-          external: true,
+          kind: 'text',
+          text: '2025-12   calmer study tools — fewer surfaces, tighter loops, Finnish on the side',
         },
         {
           kind: 'text',
-          text: 'cadence     fewer hot takes, more notes worth rereading after a quiet morning',
+          text: '2025-10   public data in daily life — weather, air, and commute as one morning glance',
+        },
+        {
+          kind: 'text',
+          text: '2025-06   shipping without burnout — scope tiers, good-enough polish, and weekend boundaries',
+        },
+        {
+          kind: 'text',
+          text: 'channel     short notes live here; longer essays shared by email when they help',
         },
       ],
       actions: [
         {
-          label: 'Request writing updates',
-          href: 'mailto:chao.sun.me@gmail.com?subject=Writing%20updates',
+          label: 'Ask for a longer essay',
+          href: 'mailto:chao.sun.me@gmail.com?subject=Essay%20request',
+        },
+        {
+          label: 'Browse build notes on GitHub',
+          href: 'https://github.com/rootSunc',
+          external: true,
         },
       ],
     },
   ],
   projectsPage: {
-    eyebrow: '',
+    eyebrow: 'Selected work / 2024–2026',
     title: 'Projects',
     intro:
       'A small set of products and experiments—language tools, local data dashboards, and urban utilities—built for daily use rather than demo polish.',
@@ -331,6 +334,7 @@ export const siteContent = {
           },
         },
         highlights: ['Focused learning workflow', 'Responsive product shell'],
+        note: 'Built while learning Finnish—calm rhythm over streak pressure.',
       },
       {
         id: 'arkiwatch',
@@ -353,6 +357,7 @@ export const siteContent = {
           },
         },
         highlights: ['Weather, transit, air, and energy signals', 'FastAPI + Next.js public-data pipeline'],
+        note: 'Public APIs piped into one morning glance—accuracy before feature sprawl.',
       },
       {
         id: 'qparking',
@@ -375,6 +380,7 @@ export const siteContent = {
           },
         },
         highlights: ['City-focused data presentation', 'Mobile-first errand flow'],
+        note: 'Errand-scale utility: scan zones quickly, decide, and move on.',
       },
       {
         id: 'luxestate',
@@ -397,6 +403,7 @@ export const siteContent = {
           },
         },
         highlights: ['Hero-led marketplace positioning', 'Responsive listing layout'],
+        note: 'Presentation-layer exploration—search UX and listing rhythm over backend depth.',
       },
     ],
   },
