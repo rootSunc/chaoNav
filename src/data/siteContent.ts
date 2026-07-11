@@ -294,7 +294,8 @@ export const siteContent = {
   projectsPage: {
     eyebrow: '',
     title: 'Projects',
-    intro: '',
+    intro:
+      'A small set of products and experiments—language tools, local data dashboards, and urban utilities—built for daily use rather than demo polish.',
     projects: [
       {
         id: 'sanakirja',

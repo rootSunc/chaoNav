@@ -2193,13 +2193,13 @@ body[data-page="projects"] .page-shell {
   background: var(--surface);
   box-shadow: var(--shadow-soft);
   transition:
-    box-shadow 180ms ease,
-    transform 180ms ease;
+    box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .portfolio-screen:hover {
-  box-shadow: 0 1.1rem 2.4rem rgb(23 24 24 / 13%);
-  transform: translateY(-0.12rem);
+  box-shadow: 0 1.35rem 2.8rem rgb(23 24 24 / 16%);
+  transform: translateY(-0.22rem);
 }
 
 .portfolio-screen span {
