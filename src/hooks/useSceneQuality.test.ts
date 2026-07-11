@@ -9,6 +9,7 @@ describe('useSceneQuality', () => {
     expect(result.current).toEqual({
       quality: 'off',
       particleCount: 0,
+      vinylStage: false,
     });
   });
 });

@@ -431,6 +431,74 @@ button:focus-visible {
   filter: drop-shadow(0 1.7rem 2.7rem rgb(23 24 24 / 21%));
 }
 
+.vinyl-stage-3d {
+  position: relative;
+  width: 100%;
+  max-width: min(18.5rem, 30vh);
+  aspect-ratio: 1.08 / 1;
+  margin-bottom: -0.35rem;
+  isolation: isolate;
+  perspective: 1000px;
+  transform-style: preserve-3d;
+  transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.vinyl-stage-3d::after {
+  position: absolute;
+  right: 13%;
+  bottom: 3%;
+  left: 12%;
+  z-index: -1;
+  height: 13%;
+  border-radius: 50%;
+  background: rgb(23 24 24 / 20%);
+  content: "";
+  filter: blur(1rem);
+  opacity: 0.78;
+  transform: translateY(0.45rem);
+}
+
+.vinyl-stage-3d canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 0.5rem;
+  filter: drop-shadow(0 1.3rem 2.1rem rgb(23 24 24 / 17%));
+}
+
+.player-panel.has-vinyl-stage.is-playing .vinyl-stage-3d {
+  animation: player-breathe 5.8s ease-in-out infinite;
+}
+
+.player-panel.has-vinyl-stage .vinyl-stage-3d:hover {
+  transform: translateY(-3px) rotateX(2deg) rotateY(-2deg);
+}
+
+.player-panel.has-vinyl-stage .vinyl-stage-3d:hover canvas {
+  filter: drop-shadow(0 1.7rem 2.7rem rgb(23 24 24 / 21%));
+}
+
+.vinyl-stage-hit {
+  position: absolute;
+  top: 58%;
+  left: 51%;
+  z-index: 4;
+  width: 38%;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  opacity: 0.95;
+  transform: translate(-50%, -50%);
+}
+
+.vinyl-stage-hit:focus-visible {
+  outline: 1px solid rgb(255 255 255 / 72%);
+  outline-offset: 0.08rem;
+}
+
 .record-stage {
   position: absolute;
   top: 58.6%;
@@ -1430,6 +1498,10 @@ button:focus-visible {
   }
 
   .player-panel .gramophone-frame {
+    display: none;
+  }
+
+  .player-panel.has-vinyl-stage .vinyl-stage-3d {
     display: none;
   }
 

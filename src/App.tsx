@@ -150,7 +150,9 @@ export default function App() {
             onPreviousTrack={() => player.selectRelativeTrack(-1)}
             onTogglePlaying={player.togglePlaying}
             progressBarRef={player.progressBarRef}
+            sceneQuality={sceneQuality.quality}
             timeTextRef={player.timeTextRef}
+            vinylStage={sceneQuality.vinylStage}
             visualizerRef={player.visualizerRef}
           />
 
