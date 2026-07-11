@@ -75,6 +75,27 @@ body::selection {
   height: 100%;
 }
 
+.shared-home-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.shared-home-canvas canvas,
+.shared-projects-canvas canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.shared-projects-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
 body[data-scene='high']::after,
 body[data-scene='low']::after {
   opacity: 0.72;

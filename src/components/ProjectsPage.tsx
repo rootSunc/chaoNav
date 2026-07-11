@@ -16,6 +16,7 @@ type ProjectsPageProps = {
   readonly onBackHome: () => void;
   readonly projectStage: boolean;
   readonly sceneQuality: SceneQuality;
+  readonly useSharedProjectsScene?: boolean;
 };
 
 function ClassicProjectScreens({ project }: { readonly project: ProjectShowcaseItem }) {
@@ -59,10 +60,14 @@ function ProjectScreens({
   project,
   projectStage,
   sceneQuality,
+  useSharedProjectsScene,
+  viewIndex,
 }: {
   readonly project: ProjectShowcaseItem;
   readonly projectStage: boolean;
   readonly sceneQuality: SceneQuality;
+  readonly useSharedProjectsScene?: boolean;
+  readonly viewIndex: number;
 }) {
   const showDeviceStage = projectStage && sceneQuality !== 'off';
 
@@ -77,7 +82,12 @@ function ProjectScreens({
             fallback={<ClassicProjectScreens project={project} />}
             label={`project-${project.id}`}
           >
-            <ProjectDeviceStage project={project} quality={sceneQuality} />
+            <ProjectDeviceStage
+              project={project}
+              quality={sceneQuality}
+              useSharedProjectsScene={useSharedProjectsScene}
+              viewIndex={viewIndex}
+            />
           </SceneErrorBoundary>
         </Suspense>
       </div>
@@ -92,11 +102,13 @@ function ProjectItem({
   index,
   projectStage,
   sceneQuality,
+  useSharedProjectsScene,
 }: {
   readonly project: ProjectShowcaseItem;
   readonly index: number;
   readonly projectStage: boolean;
   readonly sceneQuality: SceneQuality;
+  readonly useSharedProjectsScene?: boolean;
 }) {
   return (
     <article className="portfolio-project" style={{ '--project-index': index } as CssVars}>
@@ -127,6 +139,8 @@ function ProjectItem({
         project={project}
         projectStage={projectStage}
         sceneQuality={sceneQuality}
+        useSharedProjectsScene={useSharedProjectsScene}
+        viewIndex={index + 1}
       />
     </article>
   );
@@ -137,6 +151,7 @@ export function ProjectsPage({
   onBackHome,
   projectStage,
   sceneQuality,
+  useSharedProjectsScene = false,
 }: ProjectsPageProps) {
   return (
     <main className="projects-page" id="projects">
@@ -169,6 +184,7 @@ export function ProjectsPage({
             project={project}
             projectStage={projectStage}
             sceneQuality={sceneQuality}
+            useSharedProjectsScene={useSharedProjectsScene}
           />
         ))}
       </section>

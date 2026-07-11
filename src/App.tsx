@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useState } from 'react';
+import { Suspense, lazy, useEffect, useRef, useState } from 'react';
 import { DestinationTabs } from './components/DestinationTabs';
 import { HeroWaveStrip } from './components/HeroWaveStrip';
 import { ProjectsPage } from './components/ProjectsPage';
@@ -19,6 +19,18 @@ const SceneCanvas = lazy(() =>
   })),
 );
 
+const SharedHomeScene = lazy(() =>
+  import('./components/scene/shared/SharedHomeScene').then((module) => ({
+    default: module.SharedHomeScene,
+  })),
+);
+
+const SharedProjectsScene = lazy(() =>
+  import('./components/scene/shared/SharedProjectsScene').then((module) => ({
+    default: module.SharedProjectsScene,
+  })),
+);
+
 type PageId = 'home' | 'projects';
 
 const PROJECTS_PATH = '/projects';
@@ -33,11 +45,16 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState<PageId>(() => getPageFromLocation());
   const player = useMusicPlayer(MUSIC_LIBRARY.length);
   const sceneQuality = useSceneQuality();
+  const pageShellRef = useRef<HTMLDivElement>(null);
 
   const activeLink = links.find((link) => link.id === selectedLinkId) ?? links[0];
   useSessionAccent(activeLink.id);
   const activeTrack = MUSIC_LIBRARY[player.trackIndex] ?? MUSIC_LIBRARY[0];
   const projectsLink = links.find((link) => link.id === 'projects') ?? activeLink;
+  const showSharedHomeScene =
+    sceneQuality.quality !== 'off' && currentPage === 'home' && sceneQuality.vinylStage;
+  const showSharedProjectsScene =
+    sceneQuality.quality !== 'off' && currentPage === 'projects' && sceneQuality.projectStage;
 
   useEffect(() => {
     const handlePopState = () => setCurrentPage(getPageFromLocation());
@@ -85,8 +102,23 @@ export default function App() {
   };
 
   return (
-    <div className={`page-shell ${currentPage === 'projects' ? 'page-shell-projects' : ''}`}>
-      {sceneQuality.quality !== 'off' ? (
+    <div
+      className={`page-shell ${currentPage === 'projects' ? 'page-shell-projects' : ''}`}
+      ref={pageShellRef}
+    >
+      {showSharedHomeScene ? (
+        <Suspense fallback={null}>
+          <SceneErrorBoundary fallback={null} label="shared-home-scene">
+            <SharedHomeScene
+              activeLinkId={activeLink.id}
+              containerRef={pageShellRef}
+              isPlaying={player.isPlaying}
+              particleCount={sceneQuality.particleCount}
+              quality={sceneQuality.quality}
+            />
+          </SceneErrorBoundary>
+        </Suspense>
+      ) : sceneQuality.quality !== 'off' && currentPage === 'home' ? (
         <Suspense fallback={null}>
           <SceneErrorBoundary fallback={null} label="background">
             <SceneCanvas
@@ -96,6 +128,12 @@ export default function App() {
               quality={sceneQuality.quality}
             />
           </SceneErrorBoundary>
+        </Suspense>
+      ) : null}
+
+      {showSharedProjectsScene ? (
+        <Suspense fallback={null}>
+          <SharedProjectsScene containerRef={pageShellRef} quality={sceneQuality.quality} />
         </Suspense>
       ) : null}
 
@@ -117,6 +155,7 @@ export default function App() {
           onBackHome={() => navigateToPage('home')}
           projectStage={sceneQuality.projectStage}
           sceneQuality={sceneQuality.quality}
+          useSharedProjectsScene={showSharedProjectsScene}
         />
       ) : (
         <main className="command-deck" id="profile">
@@ -167,6 +206,7 @@ export default function App() {
                 sceneQuality={sceneQuality.quality}
                 timeTextRef={player.timeTextRef}
                 vinylStage={sceneQuality.vinylStage}
+                useSharedHomeScene={showSharedHomeScene}
                 visualizerRef={player.visualizerRef}
               />
             </div>

@@ -1,25 +1,15 @@
+import { PerspectiveCamera, View } from '@react-three/drei';
 import { Suspense, useState } from 'react';
-import type { ProjectShowcaseItem } from '../../data/siteContent';
-import { useInViewProgress } from '../../hooks/useInViewProgress';
-import type { SceneQuality } from '../../hooks/useSceneQuality';
-import { EmbeddedSceneCanvas } from './EmbeddedSceneCanvas';
-import { DeviceGalleryScene } from './portfolio/DeviceGalleryScene';
-import { ProjectDeviceView } from './shared/ProjectDeviceView';
+import type { ProjectShowcaseItem } from '../../../data/siteContent';
+import { useInViewProgress } from '../../../hooks/useInViewProgress';
+import { DeviceGalleryScene } from '../portfolio/DeviceGalleryScene';
 
-export type ProjectDeviceStageProps = {
+export type ProjectDeviceViewProps = {
   readonly project: ProjectShowcaseItem;
-  readonly quality: Exclude<SceneQuality, 'off'>;
-  readonly useSharedProjectsScene?: boolean;
-  readonly viewIndex?: number;
+  readonly viewIndex: number;
 };
 
-function ProjectDeviceStageEmbedded({
-  project,
-  quality,
-}: {
-  readonly project: ProjectShowcaseItem;
-  readonly quality: Exclude<SceneQuality, 'off'>;
-}) {
+export function ProjectDeviceView({ project, viewIndex }: ProjectDeviceViewProps) {
   const { isActive, progress, ref } = useInViewProgress({
     rootMargin: '160px 0px 160px 0px',
   });
@@ -38,29 +28,18 @@ function ProjectDeviceStageEmbedded({
       ref={ref}
     >
       {isActive ? (
-        <EmbeddedSceneCanvas
-          camera={{ fov: 34, position: [0, 1.05, 4.15] }}
-          isActive={isActive}
-          quality={quality}
-        >
+        <View className="project-device-view" index={viewIndex}>
+          <PerspectiveCamera makeDefault fov={34} position={[0, 1.05, 4.15]} />
           <Suspense fallback={null}>
             <DeviceGalleryScene hoverTilt={hoverTilt} progress={progress} project={project} />
           </Suspense>
-        </EmbeddedSceneCanvas>
+        </View>
       ) : (
         <div aria-hidden="true" className="project-device-stage-placeholder">
           <img alt="" decoding="async" loading="lazy" src={project.screenshots.web.src} />
         </div>
       )}
 
-      <ProjectDeviceLinks project={project} />
-    </div>
-  );
-}
-
-function ProjectDeviceLinks({ project }: { readonly project: ProjectShowcaseItem }) {
-  return (
-    <>
       <a
         aria-label={`${project.name} web screenshot opens project`}
         className="project-device-link project-device-link-web"
@@ -75,19 +54,6 @@ function ProjectDeviceLinks({ project }: { readonly project: ProjectShowcaseItem
         rel={project.external ? 'noreferrer' : undefined}
         target={project.external ? '_blank' : undefined}
       />
-    </>
+    </div>
   );
-}
-
-export function ProjectDeviceStage({
-  project,
-  quality,
-  useSharedProjectsScene = false,
-  viewIndex = 1,
-}: ProjectDeviceStageProps) {
-  if (useSharedProjectsScene) {
-    return <ProjectDeviceView project={project} viewIndex={viewIndex} />;
-  }
-
-  return <ProjectDeviceStageEmbedded project={project} quality={quality} />;
 }

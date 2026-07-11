@@ -394,12 +394,19 @@
   filter: drop-shadow(0 1.7rem 2.7rem rgb(23 24 24 / 21%));
 }
 
-.vinyl-stage-3d {
+.vinyl-stage-shell {
   position: relative;
   width: 100%;
   max-width: min(18.5rem, 30vh);
-  aspect-ratio: 1.08 / 1;
   margin-bottom: -0.35rem;
+}
+
+.vinyl-stage-3d {
+  position: relative;
+  width: 100%;
+  max-width: none;
+  aspect-ratio: 1.08 / 1;
+  margin-bottom: 0;
   isolation: isolate;
   perspective: 1000px;
   transform-style: preserve-3d;

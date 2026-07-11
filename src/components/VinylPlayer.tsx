@@ -1,6 +1,6 @@
+import type { MusicTrack } from '../data/musicLibrary';
 import { Suspense, lazy } from 'react';
 import type { RefObject } from 'react';
-import type { MusicTrack } from '../data/musicLibrary';
 import type { NavigationLink } from '../data/siteContent';
 import type { SceneQuality } from '../hooks/useSceneQuality';
 import { SceneErrorBoundary } from './scene/SceneErrorBoundary';
@@ -8,6 +8,12 @@ import { SceneErrorBoundary } from './scene/SceneErrorBoundary';
 const VinylStageCanvas = lazy(() =>
   import('./scene/VinylStageCanvas').then((module) => ({
     default: module.VinylStageCanvas,
+  })),
+);
+
+const VinylStageView = lazy(() =>
+  import('./scene/shared/VinylStageView').then((module) => ({
+    default: module.VinylStageView,
   })),
 );
 
@@ -22,6 +28,7 @@ type VinylPlayerProps = {
   readonly sceneQuality: SceneQuality;
   readonly timeTextRef: RefObject<HTMLSpanElement | null>;
   readonly vinylStage: boolean;
+  readonly useSharedHomeScene?: boolean;
   readonly visualizerRef: RefObject<HTMLDivElement | null>;
 };
 
@@ -64,9 +71,45 @@ export function VinylPlayer({
   sceneQuality,
   timeTextRef,
   vinylStage,
+  useSharedHomeScene = false,
   visualizerRef,
 }: VinylPlayerProps) {
   const showVinylStage = vinylStage && sceneQuality !== 'off';
+
+  const vinylStageContent = showVinylStage ? (
+    useSharedHomeScene ? (
+      <Suspense fallback={<ClassicGramophoneStage isPlaying={isPlaying} onTogglePlaying={onTogglePlaying} />}>
+        <SceneErrorBoundary
+          fallback={<ClassicGramophoneStage isPlaying={isPlaying} onTogglePlaying={onTogglePlaying} />}
+          label="vinyl-stage"
+        >
+          <VinylStageView
+            activeLinkId={activeLink.id}
+            activeLinkLabel={activeLink.label}
+            isPlaying={isPlaying}
+            onTogglePlaying={onTogglePlaying}
+          />
+        </SceneErrorBoundary>
+      </Suspense>
+    ) : (
+      <Suspense fallback={<ClassicGramophoneStage isPlaying={isPlaying} onTogglePlaying={onTogglePlaying} />}>
+        <SceneErrorBoundary
+          fallback={<ClassicGramophoneStage isPlaying={isPlaying} onTogglePlaying={onTogglePlaying} />}
+          label="vinyl-stage"
+        >
+          <VinylStageCanvas
+            activeLinkId={activeLink.id}
+            activeLinkLabel={activeLink.label}
+            isPlaying={isPlaying}
+            onTogglePlaying={onTogglePlaying}
+            quality={sceneQuality}
+          />
+        </SceneErrorBoundary>
+      </Suspense>
+    )
+  ) : (
+    <ClassicGramophoneStage isPlaying={isPlaying} onTogglePlaying={onTogglePlaying} />
+  );
 
   return (
     <section
@@ -74,24 +117,7 @@ export function VinylPlayer({
       className={`player-panel ${isPlaying ? 'is-playing' : 'is-paused'}${showVinylStage ? ' has-vinyl-stage' : ''}`}
     >
       <div className="player-card">
-        {showVinylStage ? (
-          <Suspense fallback={<ClassicGramophoneStage isPlaying={isPlaying} onTogglePlaying={onTogglePlaying} />}>
-            <SceneErrorBoundary
-              fallback={<ClassicGramophoneStage isPlaying={isPlaying} onTogglePlaying={onTogglePlaying} />}
-              label="vinyl-stage"
-            >
-              <VinylStageCanvas
-                activeLinkId={activeLink.id}
-                activeLinkLabel={activeLink.label}
-                isPlaying={isPlaying}
-                onTogglePlaying={onTogglePlaying}
-                quality={sceneQuality}
-              />
-            </SceneErrorBoundary>
-          </Suspense>
-        ) : (
-          <ClassicGramophoneStage isPlaying={isPlaying} onTogglePlaying={onTogglePlaying} />
-        )}
+        {vinylStageContent}
 
         <div aria-label="Small track player" className="mini-player">
           <div className="transport-controls">

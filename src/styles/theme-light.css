@@ -215,6 +215,19 @@
   background: white;
 }
 
+[data-theme="light"] .project-device-stage-placeholder {
+  border-color: rgb(23 24 24 / 10%);
+  background:
+    linear-gradient(135deg, rgb(255 255 255 / 88%), transparent 58%),
+    var(--surface-soft);
+  box-shadow: var(--shadow-soft);
+}
+
+[data-theme="light"] .project-device-stage-placeholder img {
+  opacity: 0.92;
+  filter: none;
+}
+
 [data-theme="light"] .site-footer {
   color: rgb(74 76 75 / 88%);
 }
