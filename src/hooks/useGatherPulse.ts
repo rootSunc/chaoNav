@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-const GATHER_DURATION_MS = 320;
+import { SESSION_TRANSITION_MS } from '../lib/sessionTiming';
 
 export function useGatherPulse(triggerKey: string): number {
   const [gather, setGather] = useState(0);
@@ -17,7 +17,7 @@ export function useGatherPulse(triggerKey: string): number {
     const startedAt = performance.now();
 
     const tick = (now: number) => {
-      const progress = Math.min(1, (now - startedAt) / GATHER_DURATION_MS);
+      const progress = Math.min(1, (now - startedAt) / SESSION_TRANSITION_MS);
       const nextGather = 1 - progress;
 
       setGather(nextGather);

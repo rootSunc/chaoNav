@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { NavigationLink, TerminalAction, TerminalLine } from '../data/siteContent';
 import type { CssVars } from '../lib/cssVars';
 import { parseTerminalText } from '../lib/terminal';
+import { SESSION_TRANSITION_MS } from '../lib/sessionTiming';
 import { ExternalMark } from './ExternalMark';
 
 function TerminalLineContent({ text }: { readonly text: string }) {
@@ -82,7 +83,7 @@ export function TerminalPanel({ activeLink }: { readonly activeLink: NavigationL
     }
 
     setIsSwapping(true);
-    const timer = window.setTimeout(() => setIsSwapping(false), 420);
+    const timer = window.setTimeout(() => setIsSwapping(false), SESSION_TRANSITION_MS);
 
     return () => window.clearTimeout(timer);
   }, [activeLink.id]);

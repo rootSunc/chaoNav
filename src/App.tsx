@@ -8,6 +8,7 @@ import { MUSIC_LIBRARY } from './data/musicLibrary';
 import { siteContent, type NavigationId } from './data/siteContent';
 import { useMusicPlayer } from './hooks/useMusicPlayer';
 import { useSceneQuality } from './hooks/useSceneQuality';
+import { useSessionAccent } from './hooks/useSessionAccent';
 import type { CssVars } from './lib/cssVars';
 
 const SceneCanvas = lazy(() =>
@@ -32,6 +33,7 @@ export default function App() {
   const sceneQuality = useSceneQuality();
 
   const activeLink = links.find((link) => link.id === selectedLinkId) ?? links[0];
+  useSessionAccent(activeLink.id);
   const activeTrack = MUSIC_LIBRARY[player.trackIndex] ?? MUSIC_LIBRARY[0];
   const projectsLink = links.find((link) => link.id === 'projects') ?? activeLink;
 
@@ -118,7 +120,7 @@ export default function App() {
         <main className="home-grid command-deck" id="profile">
           <div className="hero-wing">
             <section aria-labelledby="site-title" className="hero-copy">
-              <p className="hero-eyebrow">Personal navigation / session online</p>
+              <p className="hero-eyebrow">{profile.heroEyebrow}</p>
               <h1 id="site-title">{profile.name}</h1>
               <p className="role">{profile.role}</p>
               <p className="descriptor">{profile.descriptor}</p>

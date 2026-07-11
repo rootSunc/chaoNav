@@ -8,6 +8,7 @@ export type Profile = {
   readonly name: string;
   readonly role: string;
   readonly descriptor: string;
+  readonly heroEyebrow: string;
   readonly tags: readonly string[];
 };
 
@@ -81,6 +82,7 @@ export const siteContent = {
     name: 'Chao',
     role: 'Software Architect',
     descriptor: 'Crafting tools, chasing ideas, and enjoying life one commit at a time.',
+    heroEyebrow: 'Personal navigation / session online',
     tags: [
       'Full-Stack',
       'Open Source',

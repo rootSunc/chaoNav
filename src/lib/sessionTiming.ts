@@ -1,0 +1,1 @@
+export const SESSION_TRANSITION_MS = 400;
