@@ -1,13 +1,23 @@
+import { Suspense, lazy } from 'react';
 import type { ProjectShowcaseItem, ProjectsPageContent } from '../data/siteContent';
+import type { SceneQuality } from '../hooks/useSceneQuality';
 import type { CssVars } from '../lib/cssVars';
 import { ExternalMark } from './ExternalMark';
+
+const ProjectDeviceStage = lazy(() =>
+  import('./scene/ProjectDeviceStage').then((module) => ({
+    default: module.ProjectDeviceStage,
+  })),
+);
 
 type ProjectsPageProps = {
   readonly content: ProjectsPageContent;
   readonly onBackHome: () => void;
+  readonly projectStage: boolean;
+  readonly sceneQuality: SceneQuality;
 };
 
-function ProjectScreens({ project }: { readonly project: ProjectShowcaseItem }) {
+function ClassicProjectScreens({ project }: { readonly project: ProjectShowcaseItem }) {
   return (
     <div aria-label={`${project.name} screenshots`} className="portfolio-screens">
       <a
@@ -34,7 +44,44 @@ function ProjectScreens({ project }: { readonly project: ProjectShowcaseItem }) 
   );
 }
 
-function ProjectItem({ project, index }: { readonly project: ProjectShowcaseItem; readonly index: number }) {
+function ProjectScreens({
+  project,
+  projectStage,
+  sceneQuality,
+}: {
+  readonly project: ProjectShowcaseItem;
+  readonly projectStage: boolean;
+  readonly sceneQuality: SceneQuality;
+}) {
+  const showDeviceStage = projectStage && sceneQuality !== 'off';
+
+  if (showDeviceStage) {
+    return (
+      <div
+        aria-label={`${project.name} screenshots`}
+        className="portfolio-screens has-device-stage"
+      >
+        <Suspense fallback={<ClassicProjectScreens project={project} />}>
+          <ProjectDeviceStage project={project} quality={sceneQuality} />
+        </Suspense>
+      </div>
+    );
+  }
+
+  return <ClassicProjectScreens project={project} />;
+}
+
+function ProjectItem({
+  project,
+  index,
+  projectStage,
+  sceneQuality,
+}: {
+  readonly project: ProjectShowcaseItem;
+  readonly index: number;
+  readonly projectStage: boolean;
+  readonly sceneQuality: SceneQuality;
+}) {
   return (
     <article className="portfolio-project" style={{ '--project-index': index } as CssVars}>
       <div className="portfolio-project-copy">
@@ -60,12 +107,21 @@ function ProjectItem({ project, index }: { readonly project: ProjectShowcaseItem
         </a>
       </div>
 
-      <ProjectScreens project={project} />
+      <ProjectScreens
+        project={project}
+        projectStage={projectStage}
+        sceneQuality={sceneQuality}
+      />
     </article>
   );
 }
 
-export function ProjectsPage({ content, onBackHome }: ProjectsPageProps) {
+export function ProjectsPage({
+  content,
+  onBackHome,
+  projectStage,
+  sceneQuality,
+}: ProjectsPageProps) {
   return (
     <main className="projects-page" id="projects">
       <header className="projects-topbar">
@@ -91,7 +147,13 @@ export function ProjectsPage({ content, onBackHome }: ProjectsPageProps) {
 
       <section aria-label="Project portfolio" className="portfolio-list">
         {content.projects.map((project, index) => (
-          <ProjectItem index={index} key={project.id} project={project} />
+          <ProjectItem
+            index={index}
+            key={project.id}
+            project={project}
+            projectStage={projectStage}
+            sceneQuality={sceneQuality}
+          />
         ))}
       </section>
     </main>

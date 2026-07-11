@@ -6,12 +6,14 @@ export type SceneQuality = 'off' | 'low' | 'high';
 export type SceneQualityState = {
   readonly quality: SceneQuality;
   readonly particleCount: number;
+  readonly projectStage: boolean;
   readonly vinylStage: boolean;
 };
 
 const MOBILE_QUERY = '(max-width: 680px)';
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
 const VINYL_STAGE_QUERY = '(min-width: 1081px)';
+const PROJECT_STAGE_QUERY = '(min-width: 681px)';
 
 function matchesMediaQuery(query: string): boolean {
   if (typeof window.matchMedia !== 'function') {
@@ -23,34 +25,35 @@ function matchesMediaQuery(query: string): boolean {
 
 function resolveSceneQuality(): SceneQualityState {
   if (typeof window === 'undefined') {
-    return { quality: 'off', particleCount: 0, vinylStage: false };
+    return { quality: 'off', particleCount: 0, projectStage: false, vinylStage: false };
   }
 
   if (import.meta.env.MODE === 'test') {
-    return { quality: 'off', particleCount: 0, vinylStage: false };
+    return { quality: 'off', particleCount: 0, projectStage: false, vinylStage: false };
   }
 
   if (matchesMediaQuery(REDUCED_MOTION_QUERY)) {
-    return { quality: 'off', particleCount: 0, vinylStage: false };
+    return { quality: 'off', particleCount: 0, projectStage: false, vinylStage: false };
   }
 
   if (matchesMediaQuery(MOBILE_QUERY)) {
-    return { quality: 'off', particleCount: 0, vinylStage: false };
+    return { quality: 'off', particleCount: 0, projectStage: false, vinylStage: false };
   }
 
   const gpuTier = getGpuTier();
 
   if (gpuTier === 0) {
-    return { quality: 'off', particleCount: 0, vinylStage: false };
+    return { quality: 'off', particleCount: 0, projectStage: false, vinylStage: false };
   }
 
+  const projectStage = matchesMediaQuery(PROJECT_STAGE_QUERY);
   const vinylStage = matchesMediaQuery(VINYL_STAGE_QUERY);
 
   if (gpuTier === 1) {
-    return { quality: 'low', particleCount: 88, vinylStage };
+    return { quality: 'low', particleCount: 88, projectStage, vinylStage };
   }
 
-  return { quality: 'high', particleCount: 168, vinylStage };
+  return { quality: 'high', particleCount: 168, projectStage, vinylStage };
 }
 
 export function useSceneQuality(): SceneQualityState {

@@ -2462,6 +2462,53 @@ body[data-page="projects"] .page-shell {
   min-width: 0;
 }
 
+.portfolio-screens.has-device-stage {
+  display: block;
+  min-height: clamp(16rem, 28vw, 22rem);
+}
+
+.project-device-stage {
+  position: relative;
+  width: 100%;
+  min-height: clamp(16rem, 28vw, 22rem);
+  aspect-ratio: 4 / 3;
+  isolation: isolate;
+}
+
+.project-device-stage canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 0.5rem;
+  filter: drop-shadow(0 1.1rem 2.2rem rgb(23 24 24 / 12%));
+}
+
+.project-device-link {
+  position: absolute;
+  z-index: 2;
+  border-radius: 0.35rem;
+  transition: outline-color 160ms ease;
+}
+
+.project-device-link:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 0.18rem;
+}
+
+.project-device-link-web {
+  top: 12%;
+  right: 8%;
+  width: 62%;
+  height: 58%;
+}
+
+.project-device-link-mobile {
+  bottom: 8%;
+  left: 8%;
+  width: 22%;
+  height: 52%;
+}
+
 .portfolio-screen {
   position: relative;
   display: block;
@@ -2728,6 +2775,10 @@ body[data-page="projects"] .page-shell {
     border-bottom: 1px solid rgb(23 24 24 / 13%);
     background: transparent;
     color: var(--ink);
+  }
+
+  .portfolio-screens.has-device-stage {
+    display: none;
   }
 
   .portfolio-screens {

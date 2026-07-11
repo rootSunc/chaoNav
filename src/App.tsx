@@ -108,6 +108,8 @@ export default function App() {
         <ProjectsPage
           content={siteContent.projectsPage}
           onBackHome={() => navigateToPage('home')}
+          projectStage={sceneQuality.projectStage}
+          sceneQuality={sceneQuality.quality}
         />
       ) : (
         <main className="home-grid" id="profile">
