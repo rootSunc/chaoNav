@@ -1,5 +1,6 @@
 import { Suspense, lazy, useEffect, useRef, useState } from 'react';
 import { DestinationTabs } from './components/DestinationTabs';
+import { DraggablePlayerDock } from './components/DraggablePlayerDock';
 import { HeroWaveStrip } from './components/HeroWaveStrip';
 import { ProjectsPage } from './components/ProjectsPage';
 import { SceneErrorBoundary } from './components/scene/SceneErrorBoundary';
@@ -26,6 +27,12 @@ const SharedProjectsScene = lazy(() =>
   })),
 );
 
+const CosmicStage = lazy(() =>
+  import('./components/scene/shared/CosmicStage').then((module) => ({
+    default: module.CosmicStage,
+  })),
+);
+
 type PageId = 'home' | 'projects';
 
 const PROJECTS_PATH = '/projects';
@@ -41,6 +48,7 @@ export default function App() {
   const player = useMusicPlayer(MUSIC_LIBRARY.length);
   const sceneQuality = useSceneQuality();
   const pageShellRef = useRef<HTMLDivElement>(null);
+  const emailAnchorRef = useRef<HTMLAnchorElement>(null);
 
   const activeLink = links.find((link) => link.id === selectedLinkId) ?? links[0];
   useSessionAccent(activeLink.id);
@@ -50,6 +58,9 @@ export default function App() {
     sceneQuality.quality !== 'off' && currentPage === 'home' && sceneQuality.projectStage;
   const showSharedProjectsScene =
     sceneQuality.quality !== 'off' && currentPage === 'projects' && sceneQuality.projectStage;
+  const showCosmicStage =
+    sceneQuality.quality !== 'off' && currentPage === 'home' && sceneQuality.audioStage;
+  const cosmicQuality = sceneQuality.quality === 'off' ? 'low' : sceneQuality.quality;
 
   useRouteFocus(currentPage);
   useTerminalFocus(currentPage, activeLink.id);
@@ -111,6 +122,10 @@ export default function App() {
         Skip to main content
       </a>
 
+      <div className="theme-toggle-shell">
+        <ThemeToggle />
+      </div>
+
       {showSharedHomeScene ? (
         <Suspense fallback={null}>
           <SceneErrorBoundary fallback={null} label="shared-home-scene">
@@ -128,6 +143,18 @@ export default function App() {
       {showSharedProjectsScene ? (
         <Suspense fallback={null}>
           <SharedProjectsScene containerRef={pageShellRef} quality={sceneQuality.quality} />
+        </Suspense>
+      ) : null}
+
+      {showCosmicStage ? (
+        <Suspense fallback={null}>
+          <SceneErrorBoundary fallback={null} label="cosmic-stage">
+            <CosmicStage
+              activeLinkId={activeLink.id}
+              isPlaying={player.isPlaying}
+              quality={cosmicQuality}
+            />
+          </SceneErrorBoundary>
         </Suspense>
       ) : null}
 
@@ -171,6 +198,7 @@ export default function App() {
                 <a
                   className="action-button action-button-primary"
                   href="mailto:chao.sun.me@gmail.com"
+                  ref={emailAnchorRef}
                 >
                   Email
                 </a>
@@ -183,25 +211,34 @@ export default function App() {
                   Projects
                 </button>
               </div>
+
+              <div className="deck-player-slot">
+                <DraggablePlayerDock anchorRef={emailAnchorRef}>
+                  {(dock) => (
+                    <VinylPlayer
+                      activeLink={activeLink}
+                      activeTrack={activeTrack}
+                      dockRef={dock.dockRef}
+                      dockStyle={dock.dockStyle}
+                      isFloating={dock.isFloating}
+                      isPlaying={player.isPlaying}
+                      onDragHandlePointerCancel={dock.onDragHandlePointerCancel}
+                      onDragHandlePointerDown={dock.onDragHandlePointerDown}
+                      onDragHandlePointerMove={dock.onDragHandlePointerMove}
+                      onDragHandlePointerUp={dock.onDragHandlePointerUp}
+                      onNextTrack={() => player.selectRelativeTrack(1)}
+                      onPreviousTrack={() => player.selectRelativeTrack(-1)}
+                      onTogglePlaying={player.togglePlaying}
+                      progressBarRef={player.progressBarRef}
+                      timeTextRef={player.timeTextRef}
+                      visualizerRef={player.visualizerRef}
+                    />
+                  )}
+                </DraggablePlayerDock>
+              </div>
             </section>
 
             <HeroWaveStrip isPlaying={player.isPlaying} />
-
-            <div className="deck-player-slot">
-              <VinylPlayer
-                activeLink={activeLink}
-                activeTrack={activeTrack}
-                isPlaying={player.isPlaying}
-                onNextTrack={() => player.selectRelativeTrack(1)}
-                onPreviousTrack={() => player.selectRelativeTrack(-1)}
-                onTogglePlaying={player.togglePlaying}
-                progressBarRef={player.progressBarRef}
-                sceneQuality={sceneQuality.quality}
-                timeTextRef={player.timeTextRef}
-                vinylStage={sceneQuality.vinylStage}
-                visualizerRef={player.visualizerRef}
-              />
-            </div>
           </div>
 
           <section aria-label="Command interface" className="command-stage">
@@ -221,7 +258,6 @@ export default function App() {
           <span aria-hidden="true" className="footer-cube" />
           © 2026 Software designed by Chao
         </p>
-        <ThemeToggle />
       </footer>
     </div>
   );

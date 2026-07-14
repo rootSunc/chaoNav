@@ -16,6 +16,7 @@ type ParticleData = {
   readonly positions: Float32Array;
   readonly velocities: Float32Array;
   readonly seeds: Float32Array;
+  readonly colors: Float32Array;
 };
 
 const GATHER_TARGET = new THREE.Vector3(2.4, -0.85, 0);
@@ -25,10 +26,21 @@ const BOUNDS = {
   z: 2.2,
 };
 
+const COSMIC_PALETTE = [
+  '#22d3ee',
+  '#60a5fa',
+  '#a78bfa',
+  '#f472b6',
+  '#fbbf24',
+  '#eef1ff',
+] as const;
+
 function createParticleData(count: number): ParticleData {
   const positions = new Float32Array(count * 3);
   const velocities = new Float32Array(count * 3);
   const seeds = new Float32Array(count);
+  const colors = new Float32Array(count * 3);
+  const swatch = new THREE.Color();
 
   for (let index = 0; index < count; index += 1) {
     const offset = index * 3;
@@ -40,9 +52,14 @@ function createParticleData(count: number): ParticleData {
     velocities[offset + 1] = (Math.random() - 0.5) * 0.014;
     velocities[offset + 2] = (Math.random() - 0.5) * 0.01;
     seeds[index] = Math.random();
+
+    swatch.set(COSMIC_PALETTE[index % COSMIC_PALETTE.length]);
+    colors[offset] = swatch.r;
+    colors[offset + 1] = swatch.g;
+    colors[offset + 2] = swatch.b;
   }
 
-  return { positions, velocities, seeds };
+  return { positions, velocities, seeds, colors };
 }
 
 function wrapAxis(value: number, limit: number): number {
@@ -122,16 +139,17 @@ export function AmbientParticles({ count, gather, isPlaying, pointer }: AmbientP
     <points ref={pointsRef}>
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" args={[particleData.positions, 3]} />
+        <bufferAttribute attach="attributes-color" args={[particleData.colors, 3]} />
       </bufferGeometry>
       <pointsMaterial
         ref={materialRef}
         blending={THREE.AdditiveBlending}
-        color="#8ef0e3"
         depthWrite={false}
-        opacity={0.38}
+        opacity={0.42}
         size={0.055}
         sizeAttenuation
         transparent
+        vertexColors
       />
     </points>
   );

@@ -10,7 +10,7 @@ describe('useSceneQuality', () => {
       quality: 'off',
       particleCount: 0,
       projectStage: false,
-      vinylStage: false,
+      audioStage: false,
     });
   });
 });

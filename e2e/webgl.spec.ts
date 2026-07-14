@@ -7,7 +7,7 @@ import {
 } from './helpers';
 
 test.describe('webgl scenes', () => {
-  test('home desktop mounts shared canvas with vinyl stage', async ({ page }) => {
+  test('home desktop mounts shared canvas with interactive sonic stage', async ({ page }) => {
     await prepareWebGLPage(page, 'dark');
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto('/');
@@ -15,8 +15,16 @@ test.describe('webgl scenes', () => {
     await expectSceneQuality(page, 'active');
 
     await waitForWebGLCanvas(page, '.shared-home-canvas');
-    await expect(page.locator('.vinyl-stage-3d')).toBeVisible();
+    await expect(page.locator('.sonic-stage-3d')).toBeVisible();
+    await expect(page.getByText('Resonance field')).toBeVisible();
     await expect(page.locator('.scene-canvas')).toBeVisible();
+
+    const playControl = page.locator('.player-dock .transport-button-play');
+    await expect(playControl).toHaveAccessibleName(/play classical music/i);
+    await playControl.click();
+    await expect(playControl).toHaveAttribute('aria-pressed', 'true');
+    await expect(playControl).toHaveAccessibleName(/pause classical music/i);
+    await expect(page.getByText('signal live')).toBeVisible();
   });
 
   test('projects desktop mounts shared canvas with device stage', async ({ page }) => {
@@ -41,10 +49,10 @@ test.describe('webgl scenes', () => {
     await expectSceneQuality(page, 'off');
 
     await expect(page.locator('.shared-home-canvas')).toHaveCount(0);
-    await expect(page.locator('.vinyl-stage-3d')).toHaveCount(0);
+    await expect(page.locator('.sonic-stage-3d')).toHaveCount(0);
   });
 
-  test('home tablet mounts vinyl stage in shared canvas', async ({ page }) => {
+  test('home tablet mounts sonic stage in shared canvas', async ({ page }) => {
     await prepareWebGLPage(page, 'dark');
     await page.setViewportSize({ width: 900, height: 900 });
     await page.goto('/');
@@ -52,7 +60,7 @@ test.describe('webgl scenes', () => {
     await expectSceneQuality(page, 'active');
 
     await waitForWebGLCanvas(page, '.shared-home-canvas');
-    await expect(page.locator('.vinyl-stage-3d')).toBeVisible();
+    await expect(page.locator('.sonic-stage-3d')).toBeVisible();
     await expect(page.locator('.scene-canvas')).toBeVisible();
   });
 

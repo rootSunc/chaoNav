@@ -42,6 +42,14 @@ export function SharedSceneCanvas({ className, containerRef, quality }: SharedSc
         ...SCENE_GL,
         antialias: shouldAntialias(quality),
       }}
+      style={{
+        height: '100vh',
+        inset: 0,
+        pointerEvents: 'none',
+        position: 'fixed',
+        width: '100vw',
+        zIndex: 0,
+      }}
     >
       <View.Port />
     </Canvas>

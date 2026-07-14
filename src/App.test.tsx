@@ -58,7 +58,7 @@ describe('personal card navigation page', () => {
     render(<App />);
 
     const terminal = screen.getByRole('tabpanel');
-    const player = screen.getByRole('region', { name: /vinyl navigation player/i });
+    const player = screen.getByRole('region', { name: /interactive resonance audio player/i });
     const profileLink = siteContent.links.find((link) => link.id === 'profile');
 
     expect(screen.getByRole('tab', { name: /Profile/i })).toHaveAttribute(
@@ -66,16 +66,16 @@ describe('personal card navigation page', () => {
       'true',
     );
     expect(
-      within(player).getByText(/cue \/ the four seasons: spring i\. allegro \/ profile/i),
+      within(player).getByText(/idle \/ the four seasons: spring i\. allegro \/ profile/i),
     ).toBeInTheDocument();
     expect(within(terminal).getByText(profileLink?.command ?? '')).toBeInTheDocument();
     expect(within(terminal).queryByText(/chao sun/i)).not.toBeInTheDocument();
   });
 
-  it('starts paused, uses the record itself for playback, and updates the playing track from tabs', () => {
+  it('starts paused, uses the sculpture for playback, and updates the playing track from tabs', () => {
     render(<App />);
 
-    const player = screen.getByRole('region', { name: /vinyl navigation player/i });
+    const player = screen.getByRole('region', { name: /interactive resonance audio player/i });
     const playRecordButton = within(player).getByRole('button', {
       name: /play classical music/i,
     });
@@ -101,14 +101,14 @@ describe('personal card navigation page', () => {
     fireEvent.click(screen.getByRole('tab', { name: 'Projects' }));
 
     expect(
-      within(player).getByText(/play \/ the four seasons: spring i\. allegro \/ projects/i),
+      within(player).getByText(/live \/ the four seasons: spring i\. allegro \/ projects/i),
     ).toBeInTheDocument();
   });
 
   it('renders the paused UI on initial load', () => {
     render(<App />);
 
-    const player = screen.getByRole('region', { name: /vinyl navigation player/i });
+    const player = screen.getByRole('region', { name: /interactive resonance audio player/i });
 
     expect(
       within(player).getByRole('button', { name: /play classical music/i }),
@@ -122,7 +122,7 @@ describe('personal card navigation page', () => {
 
     render(<App />);
 
-    const player = screen.getByRole('region', { name: /vinyl navigation player/i });
+    const player = screen.getByRole('region', { name: /interactive resonance audio player/i });
 
     fireEvent.click(within(player).getByRole('button', { name: /play classical music/i }));
 
@@ -148,7 +148,7 @@ describe('personal card navigation page', () => {
 
     render(<App />);
 
-    const player = screen.getByRole('region', { name: /vinyl navigation player/i });
+    const player = screen.getByRole('region', { name: /interactive resonance audio player/i });
 
     fireEvent.click(within(player).getByRole('button', { name: /play classical music/i }));
 
@@ -170,7 +170,7 @@ describe('personal card navigation page', () => {
   it('switches music tracks from the display arrow controls', () => {
     render(<App />);
 
-    const player = screen.getByRole('region', { name: /vinyl navigation player/i });
+    const player = screen.getByRole('region', { name: /interactive resonance audio player/i });
 
     fireEvent.click(within(player).getByRole('button', { name: /next track/i }));
 
@@ -180,7 +180,7 @@ describe('personal card navigation page', () => {
     );
     expect(within(player).getByText(/beethoven \/ symphony no\. 5/i)).toBeInTheDocument();
     expect(
-      within(player).getByText(/cue \/ symphony no\. 5: iii\. allegro \/ profile/i),
+      within(player).getByText(/idle \/ symphony no\. 5: iii\. allegro \/ profile/i),
     ).toBeInTheDocument();
 
     fireEvent.click(within(player).getByRole('button', { name: /previous track/i }));
@@ -196,7 +196,7 @@ describe('personal card navigation page', () => {
     render(<App />);
 
     const audio = screen.getByLabelText(/classical music player/i);
-    const player = screen.getByRole('region', { name: /vinyl navigation player/i });
+    const player = screen.getByRole('region', { name: /interactive resonance audio player/i });
 
     fireEvent.ended(audio);
 
