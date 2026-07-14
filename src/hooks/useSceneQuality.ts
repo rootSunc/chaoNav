@@ -12,7 +12,7 @@ export type SceneQualityState = {
 
 const MOBILE_QUERY = '(max-width: 680px)';
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
-const VINYL_STAGE_QUERY = '(min-width: 1081px)';
+const VINYL_STAGE_QUERY = '(min-width: 681px)';
 const PROJECT_STAGE_QUERY = '(min-width: 681px)';
 
 function matchesMediaQuery(query: string): boolean {

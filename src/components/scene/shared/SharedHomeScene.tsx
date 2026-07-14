@@ -1,7 +1,5 @@
 import type { RefObject } from 'react';
-import { useEffect } from 'react';
 import type { NavigationId } from '../../../data/siteContent';
-import { preloadHomeSceneTextures } from '../../../lib/sceneTextures';
 import type { SceneQuality } from '../../../hooks/useSceneQuality';
 import { SceneErrorBoundary } from '../SceneErrorBoundary';
 import { HomeBackgroundViewBoundary } from './HomeBackgroundView';
@@ -22,10 +20,6 @@ export function SharedHomeScene({
   particleCount,
   quality,
 }: SharedHomeSceneProps) {
-  useEffect(() => {
-    preloadHomeSceneTextures();
-  }, []);
-
   return (
     <>
       <SceneErrorBoundary fallback={null} label="shared-home-background">

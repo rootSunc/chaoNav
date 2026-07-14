@@ -25,7 +25,7 @@ type VinylPlayerProps = {
   readonly visualizerRef: RefObject<HTMLDivElement | null>;
 };
 
-function ClassicGramophoneStage({
+function TurntableFallback({
   isPlaying,
   onTogglePlaying,
 }: {
@@ -33,22 +33,20 @@ function ClassicGramophoneStage({
   readonly onTogglePlaying: () => void;
 }) {
   return (
-    <div className="gramophone-frame">
-      <img
-        alt="Vintage gramophone with a record player base"
-        className="gramophone-image"
-        src="/images/gramophone.png"
-      />
-      <div className="record-stage">
-        <button
-          aria-label={isPlaying ? 'Pause classical music' : 'Play classical music'}
-          aria-pressed={isPlaying}
-          className="record-control"
-          data-music-control="true"
-          onClick={onTogglePlaying}
-          type="button"
-        />
+    <div className="turntable-fallback">
+      <div aria-hidden="true" className="turntable-fallback-stage">
+        <span className="turntable-fallback-platter" />
+        <span className="turntable-fallback-arm" />
+        <span className="turntable-fallback-led" />
       </div>
+      <button
+        aria-label={isPlaying ? 'Pause classical music' : 'Play classical music'}
+        aria-pressed={isPlaying}
+        className="turntable-fallback-control"
+        data-music-control="true"
+        onClick={onTogglePlaying}
+        type="button"
+      />
     </div>
   );
 }
@@ -67,11 +65,12 @@ export function VinylPlayer({
   visualizerRef,
 }: VinylPlayerProps) {
   const showVinylStage = vinylStage && sceneQuality !== 'off';
+  const activeQuality = sceneQuality === 'off' ? 'low' : sceneQuality;
 
   const vinylStageContent = showVinylStage ? (
-    <Suspense fallback={<ClassicGramophoneStage isPlaying={isPlaying} onTogglePlaying={onTogglePlaying} />}>
+    <Suspense fallback={<TurntableFallback isPlaying={isPlaying} onTogglePlaying={onTogglePlaying} />}>
       <SceneErrorBoundary
-        fallback={<ClassicGramophoneStage isPlaying={isPlaying} onTogglePlaying={onTogglePlaying} />}
+        fallback={<TurntableFallback isPlaying={isPlaying} onTogglePlaying={onTogglePlaying} />}
         label="vinyl-stage"
       >
         <VinylStageView
@@ -79,11 +78,12 @@ export function VinylPlayer({
           activeLinkLabel={activeLink.label}
           isPlaying={isPlaying}
           onTogglePlaying={onTogglePlaying}
+          quality={activeQuality}
         />
       </SceneErrorBoundary>
     </Suspense>
   ) : (
-    <ClassicGramophoneStage isPlaying={isPlaying} onTogglePlaying={onTogglePlaying} />
+    <TurntableFallback isPlaying={isPlaying} onTogglePlaying={onTogglePlaying} />
   );
 
   return (
