@@ -11,13 +11,15 @@ describe('sceneTextures', () => {
   it('collects every project screenshot url for preloading', () => {
     const urls = getProjectScreenshotUrls();
 
-    expect(urls).toHaveLength(8);
+    expect(urls).toHaveLength(10);
     expect(urls).toEqual(
       expect.arrayContaining([
         '/images/projects/sanakirja-web.jpg',
         '/images/projects/sanakirja-mobile.jpg',
         '/images/projects/luxestate-web.jpg',
         '/images/projects/luxestate-mobile.jpg',
+        '/images/projects/ashare-web.jpg',
+        '/images/projects/ashare-mobile.jpg',
       ]),
     );
   });

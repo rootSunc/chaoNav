@@ -50,10 +50,10 @@ function resolveSceneQuality(): SceneQualityState {
   const audioStage = matchesMediaQuery(AUDIO_STAGE_QUERY);
 
   if (gpuTier === 1) {
-    return { quality: 'low', particleCount: 88, projectStage, audioStage };
+    return { quality: 'low', particleCount: 100, projectStage, audioStage };
   }
 
-  return { quality: 'high', particleCount: 168, projectStage, audioStage };
+  return { quality: 'high', particleCount: 200, projectStage, audioStage };
 }
 
 export function useSceneQuality(): SceneQualityState {

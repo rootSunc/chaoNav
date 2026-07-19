@@ -5,6 +5,7 @@ const PROJECT_THEME_COLORS: Record<ProjectId, string> = {
   arkiwatch: '#286d68',
   qparking: '#f1414d',
   luxestate: '#c9a962',
+  ashare: '#3d5a80',
 };
 
 export function getProjectThemeColor(projectId: ProjectId): string {

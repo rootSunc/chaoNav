@@ -2,7 +2,7 @@ export type NavigationId = 'profile' | 'projects' | 'github' | 'linkedin' | 'res
 
 type NonEmptyArray<T> = readonly [T, ...T[]];
 
-export type ProjectId = 'sanakirja' | 'arkiwatch' | 'qparking' | 'luxestate';
+export type ProjectId = 'sanakirja' | 'arkiwatch' | 'qparking' | 'luxestate' | 'ashare';
 
 export type Profile = {
   readonly name: string;
@@ -159,6 +159,10 @@ export const siteContent = {
           kind: 'text',
           text: 'LuxEstate   premium property search with a calm, polished presentation layer',
         },
+        {
+          kind: 'text',
+          text: 'Ashare      local A-share data lake plus research workbench for factors and signals',
+        },
       ],
       actions: [
         {
@@ -179,6 +183,11 @@ export const siteContent = {
         {
           label: 'Open LuxEstate',
           href: 'https://luxestate-indol.vercel.app/',
+          external: true,
+        },
+        {
+          label: 'View Ashare',
+          href: 'https://github.com/rootSunc/ashare-workbench',
           external: true,
         },
       ],
@@ -311,7 +320,7 @@ export const siteContent = {
     eyebrow: 'Selected work / 2024–2026',
     title: 'Projects',
     intro:
-      'A small set of products and experiments—language tools, local data dashboards, and urban utilities—built for daily use rather than demo polish.',
+      'A small set of products and experiments—language tools, local data dashboards, urban utilities, and a quant research stack—built for daily use rather than demo polish.',
     projects: [
       {
         id: 'sanakirja',
@@ -404,6 +413,32 @@ export const siteContent = {
         },
         highlights: ['Hero-led marketplace positioning', 'Responsive listing layout'],
         note: 'Presentation-layer exploration—search UX and listing rhythm over backend depth.',
+      },
+      {
+        id: 'ashare',
+        name: 'Ashare',
+        category: 'Quant research',
+        headline: 'Local A-share data lake and research workbench.',
+        summary:
+          'ashare-lake ingests and curates multi-source Parquet market data; ashare-workbench turns it into factors, backtests, daily signals, and review—advisory only, no order routing.',
+        href: 'https://github.com/rootSunc/ashare-workbench',
+        ctaLabel: 'View on GitHub',
+        external: true,
+        screenshots: {
+          web: {
+            src: '/images/projects/ashare-web.jpg',
+            alt: 'Ashare workbench dashboard web screenshot',
+          },
+          mobile: {
+            src: '/images/projects/ashare-mobile.jpg',
+            alt: 'Ashare workbench dashboard mobile screenshot',
+          },
+        },
+        highlights: [
+          'Parquet lake with multi-source daily refresh',
+          'Factors, walk-forward backtests, and daily brief',
+        ],
+        note: 'Two repos, one stack—ashare-lake for data, ashare-workbench for research.',
       },
     ],
   },

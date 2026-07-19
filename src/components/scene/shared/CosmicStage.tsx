@@ -16,23 +16,33 @@ import { SonicCoreScene } from '../audio/SonicCoreScene';
 
 export type CosmicStageProps = {
   readonly activeLinkId: NavigationId;
+  readonly introPhase?: number;
   readonly isPlaying: boolean;
   readonly quality: Exclude<SceneQuality, 'off'>;
 };
 
 // Shift the sculpture toward the open left/hero side of the composition so it
 // reads as a glowing centerpiece instead of hiding behind the terminal panel.
-function CosmicCamera({ isPlaying }: { readonly isPlaying: boolean }) {
+function CosmicCamera({
+  introPhase = 0,
+  isPlaying,
+}: {
+  readonly introPhase?: number;
+  readonly isPlaying: boolean;
+}) {
   const camera = useThree((state) => state.camera);
   const size = useThree((state) => state.size);
   const target = useRef(new THREE.Vector3(0, 0, 0));
+  const introRef = useRef(introPhase);
+  introRef.current = introPhase;
 
   useFrame((_, delta) => {
     const wide = size.width >= 1024;
+    const intro = introRef.current;
     target.current.x = wide ? 1.45 : 0;
     target.current.y = wide ? -0.12 : 0;
 
-    const targetZ = (isPlaying ? 3.7 : 3.95) - (wide ? 0.1 : 0);
+    const targetZ = (isPlaying ? 3.7 : 3.95) - (wide ? 0.1 : 0) - intro * 0.45;
     camera.position.z = THREE.MathUtils.damp(camera.position.z, targetZ, 3.4, delta);
     camera.lookAt(target.current);
   });
@@ -40,7 +50,12 @@ function CosmicCamera({ isPlaying }: { readonly isPlaying: boolean }) {
   return null;
 }
 
-export function CosmicStage({ activeLinkId, isPlaying, quality }: CosmicStageProps) {
+export function CosmicStage({
+  activeLinkId,
+  introPhase = 0,
+  isPlaying,
+  quality,
+}: CosmicStageProps) {
   const pointer = usePointerParallax(true);
   const { isActive, ref } = useCanvasLifecycle<HTMLDivElement>();
 
@@ -60,11 +75,12 @@ export function CosmicStage({ activeLinkId, isPlaying, quality }: CosmicStagePro
           antialias: shouldAntialias(quality),
         }}
       >
-        <CosmicCamera isPlaying={isPlaying} />
+        <CosmicCamera introPhase={introPhase} isPlaying={isPlaying} />
         <Suspense fallback={null}>
           <SonicCoreScene
             accentColor={getLinkAccentColor(activeLinkId)}
             hovered={false}
+            introPhase={introPhase}
             isPlaying={isPlaying}
             pointer={[pointer.x, pointer.y]}
             quality={quality}

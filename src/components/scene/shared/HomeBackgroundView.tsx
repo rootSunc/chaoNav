@@ -7,6 +7,7 @@ import { AmbientParticles } from '../AmbientParticles';
 
 export type HomeBackgroundViewProps = {
   readonly activeLinkId: string;
+  readonly introPhase?: number;
   readonly isPlaying: boolean;
   readonly particleCount: number;
   readonly quality: Exclude<SceneQuality, 'off'>;
@@ -14,9 +15,9 @@ export type HomeBackgroundViewProps = {
 
 export function HomeBackgroundView({
   activeLinkId,
+  introPhase = 0,
   isPlaying,
   particleCount,
-  quality,
 }: HomeBackgroundViewProps) {
   const pointer = usePointerParallax(true);
   const gather = useGatherPulse(activeLinkId);
@@ -27,6 +28,7 @@ export function HomeBackgroundView({
       <AmbientParticles
         count={particleCount}
         gather={gather}
+        introPhase={introPhase}
         isPlaying={isPlaying}
         pointer={pointer}
       />

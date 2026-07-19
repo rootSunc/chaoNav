@@ -29,6 +29,9 @@ export async function prepareVisualPage(page: Page, theme: VisualTheme = 'dark')
 
 export async function prepareWebGLPage(page: Page, theme: VisualTheme = 'dark') {
   await preparePage(page, { theme, motion: 'no-preference' });
+  await page.addInitScript(() => {
+    window.sessionStorage.setItem('chao-entry-seen', '1');
+  });
 }
 
 export async function waitForStableShell(page: Page) {

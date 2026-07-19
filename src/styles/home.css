@@ -38,10 +38,10 @@
   overflow: hidden;
   border-right: 1px solid var(--line);
   background:
-    radial-gradient(circle at 12% 18%, rgb(167 139 250 / 16%), transparent 46%),
-    radial-gradient(circle at 84% 88%, rgb(34 211 238 / 12%), transparent 44%),
-    linear-gradient(165deg, rgb(15 17 34 / 42%) 0%, rgb(7 8 24 / 30%) 100%);
-  backdrop-filter: blur(6px);
+    radial-gradient(circle at 12% 18%, rgb(167 139 250 / 14%), transparent 46%),
+    radial-gradient(circle at 84% 88%, rgb(34 211 238 / 10%), transparent 44%),
+    linear-gradient(165deg, rgb(15 17 34 / 32%) 0%, rgb(7 8 24 / 22%) 100%);
+  backdrop-filter: blur(4px);
 }
 
 .hero-wing::before {
@@ -77,9 +77,9 @@
   min-width: 0;
   min-height: 0;
   background:
-    linear-gradient(180deg, rgb(170 180 255 / 4%), transparent 14%),
-    linear-gradient(200deg, rgb(11 13 30 / 30%) 0%, rgb(5 6 15 / 44%) 100%);
-  backdrop-filter: blur(6px);
+    linear-gradient(180deg, rgb(170 180 255 / 3%), transparent 14%),
+    linear-gradient(200deg, rgb(11 13 30 / 22%) 0%, rgb(5 6 15 / 34%) 100%);
+  backdrop-filter: blur(4px);
 }
 
 .hero-wave-strip {
@@ -2284,4 +2284,169 @@
     padding-bottom: 0.42rem;
     font-size: 0.64rem;
   }
+}
+
+/* Entry gate — cinematic overlay above chrome, 3D visible through veil */
+.entry-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 14;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  padding: max(1.5rem, env(safe-area-inset-top)) 1.5rem max(1.5rem, env(safe-area-inset-bottom));
+  background:
+    radial-gradient(circle at 50% 38%, rgb(34 211 238 / 10%), transparent 38%),
+    radial-gradient(circle at 50% 50%, rgb(5 6 15 / 42%), rgb(0 2 9 / 78%) 70%);
+  color: var(--ink);
+  text-align: center;
+  opacity: 1;
+  transition: opacity 700ms ease;
+}
+
+.entry-gate.is-closing {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.entry-gate-mark {
+  width: 4.2rem;
+  height: 4.2rem;
+  margin-bottom: 0.35rem;
+  color: rgb(238 241 255 / 78%);
+  filter: drop-shadow(0 0 1.1rem rgb(34 211 238 / 28%));
+  animation: entry-gate-mark-pulse 4.8s ease-in-out infinite;
+}
+
+.entry-gate-mark svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.entry-gate-eyebrow {
+  margin: 0;
+  color: var(--muted);
+  font-family: var(--mono-font);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.entry-gate-title {
+  margin: 0 0 0.55rem;
+  background: var(--hero-gradient);
+  background-clip: text;
+  color: transparent;
+  font-family: var(--display-font);
+  font-size: clamp(2.8rem, 7vw, 4.4rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+}
+
+.entry-gate-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.55rem;
+  min-width: 13.5rem;
+  padding: 0.55rem 1.35rem;
+  border: 1px solid rgb(238 241 255 / 42%);
+  border-radius: 0.2rem;
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--mono-font);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    border-color 180ms ease,
+    background 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease,
+    color 180ms ease;
+}
+
+.entry-gate-cta-primary {
+  border-color: rgb(34 211 238 / 55%);
+  box-shadow:
+    0 0 0 1px rgb(34 211 238 / 12%) inset,
+    0 0 1.4rem rgb(34 211 238 / 18%);
+}
+
+.entry-gate-cta-primary:hover,
+.entry-gate-cta-primary:focus-visible {
+  border-color: rgb(34 211 238 / 85%);
+  background: rgb(34 211 238 / 10%);
+  box-shadow:
+    0 0 0 1px rgb(34 211 238 / 22%) inset,
+    0 0 1.8rem rgb(34 211 238 / 28%);
+  transform: translateY(-1px);
+}
+
+.entry-gate-cta-ghost {
+  min-height: auto;
+  min-width: auto;
+  margin-top: 0.35rem;
+  padding: 0.2rem 0.4rem;
+  border: none;
+  border-bottom: 1px solid rgb(238 241 255 / 35%);
+  border-radius: 0;
+  color: var(--ink-soft);
+  letter-spacing: 0.1em;
+}
+
+.entry-gate-cta-ghost:hover,
+.entry-gate-cta-ghost:focus-visible {
+  color: var(--ink);
+  border-bottom-color: rgb(238 241 255 / 70%);
+}
+
+.entry-gate-note {
+  position: absolute;
+  bottom: max(1.4rem, env(safe-area-inset-bottom));
+  left: 1rem;
+  right: 1rem;
+  margin: 0;
+  color: var(--muted);
+  font-family: var(--mono-font);
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  line-height: 1.45;
+  text-transform: uppercase;
+}
+
+@keyframes entry-gate-mark-pulse {
+  0%,
+  100% {
+    opacity: 0.72;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+}
+
+.page-shell:has(.entry-gate:not(.is-closing)) .theme-toggle-shell,
+.page-shell:has(.entry-gate:not(.is-closing)) .site-footer,
+.page-shell:has(.entry-gate:not(.is-closing)) .command-deck,
+.page-shell:has(.entry-gate:not(.is-closing)) .cosmic-stage-caption {
+  pointer-events: none;
+  opacity: 0;
+}
+
+.page-shell:has(.entry-gate.is-closing) .theme-toggle-shell,
+.page-shell:has(.entry-gate.is-closing) .site-footer,
+.page-shell:has(.entry-gate.is-closing) .command-deck,
+.page-shell:has(.entry-gate.is-closing) .cosmic-stage-caption {
+  opacity: 1;
+  transition: opacity 700ms ease;
 }

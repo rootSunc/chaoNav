@@ -323,7 +323,7 @@ describe('personal card navigation page', () => {
     ).toBeInTheDocument();
   });
 
-  it('renders all four project destinations from the projects command', () => {
+  it('renders all project destinations from the projects command', () => {
     render(<App />);
 
     fireEvent.click(screen.getByRole('tab', { name: 'Projects' }));
@@ -343,6 +343,10 @@ describe('personal card navigation page', () => {
     expect(screen.getByRole('link', { name: /open arkiwatch/i })).toHaveAttribute(
       'href',
       'https://arkiwatch.chaosun.xyz/',
+    );
+    expect(screen.getByRole('link', { name: /view ashare/i })).toHaveAttribute(
+      'href',
+      'https://github.com/rootSunc/ashare-workbench',
     );
     expect(screen.queryByText('target')).not.toBeInTheDocument();
   });

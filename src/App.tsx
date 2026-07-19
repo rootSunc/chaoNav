@@ -1,6 +1,7 @@
-import { Suspense, lazy, useEffect, useRef, useState } from 'react';
+import { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react';
 import { DestinationTabs } from './components/DestinationTabs';
 import { DraggablePlayerDock } from './components/DraggablePlayerDock';
+import { EntryGate } from './components/EntryGate';
 import { HeroWaveStrip } from './components/HeroWaveStrip';
 import { ProjectsPage } from './components/ProjectsPage';
 import { SceneErrorBoundary } from './components/scene/SceneErrorBoundary';
@@ -9,6 +10,7 @@ import { ThemeToggle } from './components/ThemeToggle';
 import { VinylPlayer } from './components/VinylPlayer';
 import { MUSIC_LIBRARY } from './data/musicLibrary';
 import { siteContent, type NavigationId } from './data/siteContent';
+import { useEntryExperience } from './hooks/useEntryExperience';
 import { useMusicPlayer } from './hooks/useMusicPlayer';
 import { useRouteFocus, useTerminalFocus } from './hooks/useRouteFocus';
 import { useSceneQuality } from './hooks/useSceneQuality';
@@ -49,6 +51,13 @@ export default function App() {
   const sceneQuality = useSceneQuality();
   const pageShellRef = useRef<HTMLDivElement>(null);
   const emailAnchorRef = useRef<HTMLAnchorElement>(null);
+  const { isPlaying, togglePlaying } = player;
+  const enterWithAudio = useCallback(() => {
+    if (!isPlaying) {
+      togglePlaying();
+    }
+  }, [isPlaying, togglePlaying]);
+  const entry = useEntryExperience(sceneQuality.quality, currentPage, enterWithAudio);
 
   const activeLink = links.find((link) => link.id === selectedLinkId) ?? links[0];
   useSessionAccent(activeLink.id);
@@ -61,6 +70,7 @@ export default function App() {
   const showCosmicStage =
     sceneQuality.quality !== 'off' && currentPage === 'home' && sceneQuality.audioStage;
   const cosmicQuality = sceneQuality.quality === 'off' ? 'low' : sceneQuality.quality;
+  const gateBlocksUi = entry.entryOpen;
 
   useRouteFocus(currentPage);
   useTerminalFocus(currentPage, activeLink.id);
@@ -122,7 +132,11 @@ export default function App() {
         Skip to main content
       </a>
 
-      <div className="theme-toggle-shell">
+      <div
+        aria-hidden={gateBlocksUi || undefined}
+        className="theme-toggle-shell"
+        inert={gateBlocksUi || undefined}
+      >
         <ThemeToggle />
       </div>
 
@@ -132,6 +146,7 @@ export default function App() {
             <SharedHomeScene
               activeLinkId={activeLink.id}
               containerRef={pageShellRef}
+              introPhase={entry.introPhase}
               isPlaying={player.isPlaying}
               particleCount={sceneQuality.particleCount}
               quality={sceneQuality.quality}
@@ -151,11 +166,20 @@ export default function App() {
           <SceneErrorBoundary fallback={null} label="cosmic-stage">
             <CosmicStage
               activeLinkId={activeLink.id}
+              introPhase={entry.introPhase}
               isPlaying={player.isPlaying}
               quality={cosmicQuality}
             />
           </SceneErrorBoundary>
         </Suspense>
+      ) : null}
+
+      {entry.entryVisible ? (
+        <EntryGate
+          active={entry.entryOpen}
+          onEnterSilent={entry.dismissSilent}
+          onEnterWithAudio={entry.dismissWithAudio}
+        />
       ) : null}
 
       <audio
@@ -178,7 +202,12 @@ export default function App() {
           sceneQuality={sceneQuality.quality}
         />
       ) : (
-        <main className="command-deck" id="profile">
+        <main
+          aria-hidden={gateBlocksUi || undefined}
+          className="command-deck"
+          id="profile"
+          inert={gateBlocksUi || undefined}
+        >
           <div className="hero-wing">
             <section aria-labelledby="site-title" className="hero-copy">
               <p className="hero-eyebrow">{profile.heroEyebrow}</p>
@@ -253,7 +282,11 @@ export default function App() {
         </main>
       )}
 
-      <footer className="site-footer">
+      <footer
+        aria-hidden={gateBlocksUi || undefined}
+        className="site-footer"
+        inert={gateBlocksUi || undefined}
+      >
         <p>
           <span aria-hidden="true" className="footer-cube" />
           © 2026 Software designed by Chao

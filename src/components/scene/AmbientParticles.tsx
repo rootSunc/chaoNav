@@ -5,6 +5,7 @@ import * as THREE from 'three';
 export type AmbientParticlesProps = {
   readonly count: number;
   readonly gather: number;
+  readonly introPhase?: number;
   readonly isPlaying: boolean;
   readonly pointer: {
     readonly x: number;
@@ -74,15 +75,23 @@ function wrapAxis(value: number, limit: number): number {
   return value;
 }
 
-export function AmbientParticles({ count, gather, isPlaying, pointer }: AmbientParticlesProps) {
+export function AmbientParticles({
+  count,
+  gather,
+  introPhase = 0,
+  isPlaying,
+  pointer,
+}: AmbientParticlesProps) {
   const pointsRef = useRef<THREE.Points>(null);
   const materialRef = useRef<THREE.PointsMaterial>(null);
   const pointerRef = useRef(pointer);
   const gatherRef = useRef(gather);
+  const introRef = useRef(introPhase);
   const playingRef = useRef(isPlaying);
 
   pointerRef.current = pointer;
   gatherRef.current = gather;
+  introRef.current = introPhase;
   playingRef.current = isPlaying;
 
   const particleData = useMemo(() => createParticleData(count), [count]);
@@ -98,27 +107,33 @@ export function AmbientParticles({ count, gather, isPlaying, pointer }: AmbientP
     const positions = points.geometry.attributes.position.array as Float32Array;
     const elapsed = state.clock.elapsedTime;
     const currentPointer = pointerRef.current;
-    const currentGather = gatherRef.current;
+    const currentGather = Math.max(gatherRef.current, introRef.current);
+    const intro = introRef.current;
     const playing = playingRef.current;
     const pulse = playing ? 0.55 + Math.sin(elapsed * 2.8) * 0.18 : 0;
+    const driftScale = playing ? 1.35 : 1 + intro * 0.8;
 
     for (let index = 0; index < count; index += 1) {
       const offset = index * 3;
       const seed = particleData.seeds[index];
 
       positions[offset] +=
-        particleData.velocities[offset] + Math.sin(elapsed * 0.34 + seed * 6.2) * 0.0018;
+        (particleData.velocities[offset] + Math.sin(elapsed * 0.34 + seed * 6.2) * 0.0018) *
+        driftScale;
       positions[offset + 1] +=
-        particleData.velocities[offset + 1] + Math.cos(elapsed * 0.28 + seed * 5.4) * 0.0014;
+        (particleData.velocities[offset + 1] + Math.cos(elapsed * 0.28 + seed * 5.4) * 0.0014) *
+        driftScale;
       positions[offset + 2] +=
-        particleData.velocities[offset + 2] + Math.sin(elapsed * 0.22 + seed * 4.8) * 0.001;
+        (particleData.velocities[offset + 2] + Math.sin(elapsed * 0.22 + seed * 4.8) * 0.001) *
+        driftScale;
 
       positions[offset] += currentPointer.x * 0.0045;
       positions[offset + 1] += currentPointer.y * 0.0035;
 
       if (currentGather > 0.01) {
-        positions[offset] += (GATHER_TARGET.x - positions[offset]) * currentGather * 0.014;
-        positions[offset + 1] += (GATHER_TARGET.y - positions[offset + 1]) * currentGather * 0.014;
+        const pull = 0.014 + intro * 0.02;
+        positions[offset] += (GATHER_TARGET.x - positions[offset]) * currentGather * pull;
+        positions[offset + 1] += (GATHER_TARGET.y - positions[offset + 1]) * currentGather * pull;
         positions[offset + 2] += (GATHER_TARGET.z - positions[offset + 2]) * currentGather * 0.01;
       }
 
@@ -130,8 +145,8 @@ export function AmbientParticles({ count, gather, isPlaying, pointer }: AmbientP
     points.geometry.attributes.position.needsUpdate = true;
 
     if (material) {
-      material.opacity = 0.34 + currentGather * 0.08 + pulse * 0.12;
-      material.size = 0.055 + pulse * 0.014 + currentGather * 0.006;
+      material.opacity = 0.36 + currentGather * 0.1 + pulse * 0.14 + intro * 0.12;
+      material.size = 0.055 + pulse * 0.016 + currentGather * 0.008 + intro * 0.01;
     }
   });
 

@@ -100,6 +100,41 @@
     linear-gradient(180deg, #f7f6f4 0%, #f2f0f0 100%);
 }
 
+[data-theme="light"] .entry-gate {
+  background:
+    radial-gradient(circle at 50% 38%, rgb(40 109 104 / 14%), transparent 38%),
+    radial-gradient(circle at 50% 50%, rgb(242 240 240 / 48%), rgb(234 232 230 / 82%) 70%);
+  color: var(--ink);
+}
+
+[data-theme="light"] .entry-gate-mark {
+  color: rgb(23 24 24 / 72%);
+  filter: drop-shadow(0 0 0.9rem rgb(40 109 104 / 22%));
+}
+
+[data-theme="light"] .entry-gate-cta {
+  border-color: rgb(23 24 24 / 28%);
+  color: var(--ink);
+}
+
+[data-theme="light"] .entry-gate-cta-primary {
+  border-color: rgb(40 109 104 / 55%);
+  box-shadow:
+    0 0 0 1px rgb(40 109 104 / 10%) inset,
+    0 0 1.2rem rgb(40 109 104 / 14%);
+}
+
+[data-theme="light"] .entry-gate-cta-primary:hover,
+[data-theme="light"] .entry-gate-cta-primary:focus-visible {
+  border-color: rgb(40 109 104 / 80%);
+  background: rgb(40 109 104 / 8%);
+}
+
+[data-theme="light"] .entry-gate-cta-ghost {
+  border-bottom-color: rgb(23 24 24 / 28%);
+  color: var(--ink-soft);
+}
+
 [data-theme="light"] .player-dock {
   border-color: rgb(23 24 24 / 10%);
   background:

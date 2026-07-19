@@ -15,6 +15,16 @@
     animation: none;
   }
 
+  .entry-gate-mark {
+    animation: none;
+  }
+
+  .entry-gate,
+  .entry-gate.is-closing {
+    opacity: 1;
+    transition: none;
+  }
+
   .scene-canvas,
   .sonic-stage-3d,
   .project-device-stage {
