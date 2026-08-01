@@ -8,10 +8,12 @@ export function useSessionAccent(activeLinkId: NavigationId) {
 
     document.documentElement.style.setProperty('--session-accent', accent);
     document.body.dataset.activeLink = activeLinkId;
+  }, [activeLinkId]);
 
+  useEffect(() => {
     return () => {
       document.documentElement.style.removeProperty('--session-accent');
       delete document.body.dataset.activeLink;
     };
-  }, [activeLinkId]);
+  }, []);
 }

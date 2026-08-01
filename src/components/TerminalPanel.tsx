@@ -106,7 +106,7 @@ export function TerminalPanel({ activeLink }: { readonly activeLink: NavigationL
         <p className="terminal-path">session://chao/{activeLink.id}</p>
         <p className="terminal-link-state">linked to {activeLink.label}</p>
       </div>
-      <div className={`terminal-content${isSwapping ? ' is-swapping' : ''}`} key={activeLink.id}>
+      <div className="terminal-content" key={activeLink.id}>
         <p className="terminal-command">
           <span aria-hidden="true" className="terminal-prompt">
             chao@nav:{activeLink.id}$
