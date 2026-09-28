@@ -1,402 +1,200 @@
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import { afterEach, beforeAll, vi } from 'vitest';
-import App from './App';
-import { siteContent } from './data/siteContent';
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
+import { afterEach, beforeAll, vi } from "vitest";
+import App from "./App";
+import { siteContent } from "./data/siteContent";
 
 beforeAll(() => {
-  Object.defineProperty(window.HTMLMediaElement.prototype, 'play', {
+  Object.defineProperty(window.HTMLMediaElement.prototype, "play", {
     configurable: true,
     value: vi.fn().mockResolvedValue(undefined),
   });
-  Object.defineProperty(window.HTMLMediaElement.prototype, 'pause', {
+  Object.defineProperty(window.HTMLMediaElement.prototype, "pause", {
     configurable: true,
     value: vi.fn(),
   });
-  Object.defineProperty(window.HTMLMediaElement.prototype, 'load', {
+  Object.defineProperty(window.HTMLMediaElement.prototype, "load", {
+    configurable: true,
+    value: vi.fn(),
+  });
+  Object.defineProperty(window, "scrollTo", {
     configurable: true,
     value: vi.fn(),
   });
 });
-
 afterEach(() => {
   vi.clearAllMocks();
-  window.history.replaceState(null, '', '/');
-  delete document.body.dataset.page;
+  window.history.replaceState(null, "", "/");
 });
 
-describe('personal card navigation page', () => {
-  it('renders the configured developer identity', () => {
+describe("personal card", () => {
+  it("renders the real identity, contact, and social destinations", () => {
     render(<App />);
-
     expect(
-      screen.getByRole('heading', { level: 1, name: siteContent.profile.name }),
+      screen.getByRole("heading", { level: 1, name: "Chao." }),
     ).toBeInTheDocument();
     expect(screen.getByText(siteContent.profile.role)).toBeInTheDocument();
-    expect(screen.getByText(siteContent.profile.descriptor)).toBeInTheDocument();
-  });
-
-  it('renders the agreed primary navigation tabs', () => {
-    render(<App />);
-
-    const navigation = screen.getByRole('navigation', {
-      name: /primary destinations/i,
-    });
-
-    const tabs = within(navigation).getAllByRole('tab');
-
-    expect(tabs.map((tab) => tab.getAttribute('aria-label'))).toEqual([
-      'Profile',
-      'Projects',
-      'GitHub',
-      'LinkedIn',
-      'Resume',
-      'Blog',
-    ]);
-  });
-
-  it('starts with the default profile command selected', () => {
-    render(<App />);
-
-    const terminal = screen.getByRole('tabpanel');
-    const player = screen.getByRole('region', { name: /interactive resonance audio player/i });
-    const profileLink = siteContent.links.find((link) => link.id === 'profile');
-
-    expect(screen.getByRole('tab', { name: /Profile/i })).toHaveAttribute(
-      'aria-selected',
-      'true',
-    );
     expect(
-      within(player).getByText(/idle \/ the four seasons: spring i\. allegro \/ profile/i),
+      screen.getByText(siteContent.profile.descriptor),
     ).toBeInTheDocument();
-    expect(within(terminal).getByText(profileLink?.command ?? '')).toBeInTheDocument();
-    expect(within(terminal).queryByText(/chao sun/i)).not.toBeInTheDocument();
-  });
-
-  it('starts paused, uses the sculpture for playback, and updates the playing track from tabs', () => {
-    render(<App />);
-
-    const player = screen.getByRole('region', { name: /interactive resonance audio player/i });
-    const playRecordButton = within(player).getByRole('button', {
-      name: /play classical music/i,
-    });
-
-    expect(playRecordButton).toHaveAttribute('aria-pressed', 'false');
-
-    fireEvent.click(playRecordButton);
-
-    const pauseRecordButton = within(player).getByRole('button', {
-      name: /pause classical music/i,
-    });
-
-    expect(pauseRecordButton).toHaveAttribute('aria-pressed', 'true');
-
-    fireEvent.click(pauseRecordButton);
-
-    expect(
-      within(player).getByRole('button', { name: /play classical music/i }),
-    ).toHaveAttribute('aria-pressed', 'false');
-
-    fireEvent.click(within(player).getByRole('button', { name: /play classical music/i }));
-
-    fireEvent.click(screen.getByRole('tab', { name: 'Projects' }));
-
-    expect(
-      within(player).getByText(/live \/ the four seasons: spring i\. allegro \/ projects/i),
-    ).toBeInTheDocument();
-  });
-
-  it('renders the paused UI on initial load', () => {
-    render(<App />);
-
-    const player = screen.getByRole('region', { name: /interactive resonance audio player/i });
-
-    expect(
-      within(player).getByRole('button', { name: /play classical music/i }),
-    ).toHaveAttribute('aria-pressed', 'false');
-  });
-
-  it('retries blocked playback on the first page interaction', async () => {
-    vi.mocked(window.HTMLMediaElement.prototype.play)
-      .mockRejectedValueOnce(new DOMException('Playback blocked', 'NotAllowedError'))
-      .mockResolvedValueOnce(undefined);
-
-    render(<App />);
-
-    const player = screen.getByRole('region', { name: /interactive resonance audio player/i });
-
-    fireEvent.click(within(player).getByRole('button', { name: /play classical music/i }));
-
-    await waitFor(() => {
-      expect(
-        within(player).getByRole('button', { name: /play classical music/i }),
-      ).toHaveAttribute('aria-pressed', 'false');
-    });
-
-    fireEvent.pointerDown(document.body);
-
-    await waitFor(() => {
-      expect(
-        within(player).getByRole('button', { name: /pause classical music/i }),
-      ).toHaveAttribute('aria-pressed', 'true');
-    });
-  });
-
-  it('uses the player play button to recover from blocked playback', async () => {
-    vi.mocked(window.HTMLMediaElement.prototype.play)
-      .mockRejectedValueOnce(new DOMException('Playback blocked', 'NotAllowedError'))
-      .mockResolvedValueOnce(undefined);
-
-    render(<App />);
-
-    const player = screen.getByRole('region', { name: /interactive resonance audio player/i });
-
-    fireEvent.click(within(player).getByRole('button', { name: /play classical music/i }));
-
-    await waitFor(() => {
-      expect(
-        within(player).getByRole('button', { name: /play classical music/i }),
-      ).toHaveAttribute('aria-pressed', 'false');
-    });
-
-    fireEvent.click(within(player).getByRole('button', { name: /play classical music/i }));
-
-    await waitFor(() => {
-      expect(
-        within(player).getByRole('button', { name: /pause classical music/i }),
-      ).toHaveAttribute('aria-pressed', 'true');
-    });
-  });
-
-  it('switches music tracks from the display arrow controls', () => {
-    render(<App />);
-
-    const player = screen.getByRole('region', { name: /interactive resonance audio player/i });
-
-    fireEvent.click(within(player).getByRole('button', { name: /next track/i }));
-
-    expect(screen.getByRole('tab', { name: 'Profile' })).toHaveAttribute(
-      'aria-selected',
-      'true',
+    expect(screen.getByRole("link", { name: /say hello/i })).toHaveAttribute(
+      "href",
+      "mailto:chao.sun.me@gmail.com",
     );
-    expect(within(player).getByText(/beethoven \/ symphony no\. 5/i)).toBeInTheDocument();
-    expect(
-      within(player).getByText(/idle \/ symphony no\. 5: iii\. allegro \/ profile/i),
-    ).toBeInTheDocument();
-
-    fireEvent.click(within(player).getByRole('button', { name: /previous track/i }));
-
-    expect(within(player).getByText(/vivaldi \/ the four seasons/i)).toBeInTheDocument();
-
-    fireEvent.click(within(player).getByRole('button', { name: /previous track/i }));
-
-    expect(within(player).getByText(/tchaikovsky \/ the nutcracker/i)).toBeInTheDocument();
-  });
-
-  it('advances to the next library track when audio ends', () => {
-    render(<App />);
-
-    const audio = screen.getByLabelText(/classical music player/i);
-    const player = screen.getByRole('region', { name: /interactive resonance audio player/i });
-
-    fireEvent.ended(audio);
-
-    expect(within(player).getByText(/beethoven \/ symphony no\. 5/i)).toBeInTheDocument();
-  });
-
-  it('keeps the tab labels compact without command subtitles', () => {
-    render(<App />);
-
-    const navigation = screen.getByRole('navigation', {
-      name: /primary destinations/i,
-    });
-
-    for (const link of siteContent.links) {
-      const tab = within(navigation).getByRole('tab', { name: link.label });
-
-      expect(within(tab).queryByText(link.command)).not.toBeInTheDocument();
-    }
-  });
-
-  it('switches the terminal command and output when each tab is clicked', () => {
-    render(<App />);
-
-    const terminal = screen.getByRole('tabpanel');
-
-    for (const link of siteContent.links) {
-      fireEvent.click(screen.getByRole('tab', { name: link.label }));
-
-      expect(screen.getByRole('tab', { name: link.label })).toHaveAttribute(
-        'aria-selected',
-        'true',
-      );
-      expect(within(terminal).getByText(link.command)).toBeInTheDocument();
-      expect(within(terminal).getByText(`session://chao/${link.id}`)).toBeInTheDocument();
-
-      const [fieldName, fieldValue] = link.lines[0].text.split(/\s{2,}/);
-
-      expect(within(terminal).getAllByText(fieldName).length).toBeGreaterThan(0);
-      expect(within(terminal).getByText(fieldValue)).toBeInTheDocument();
-    }
-  });
-
-  it('keeps external destinations as terminal output links', () => {
-    render(<App />);
-
-    for (const label of ['GitHub', 'LinkedIn']) {
-      fireEvent.click(screen.getByRole('tab', { name: label }));
-
-      const matchingLinks = screen.getAllByRole('link', {
-        name: new RegExp(`${label} opens external site`, 'i'),
-      });
-
-      expect(matchingLinks.length).toBeGreaterThan(0);
-      for (const matchingLink of matchingLinks) {
-        expect(matchingLink).toHaveAttribute('target', '_blank');
-      }
-    }
-  });
-
-  it('renders real terminal action targets for contact and social links', () => {
-    render(<App />);
-
-    fireEvent.click(screen.getByRole('tab', { name: 'GitHub' }));
-    expect(screen.getByRole('link', { name: /open github/i })).toHaveAttribute(
-      'href',
-      'https://github.com/rootSunc',
+    expect(screen.getByRole("link", { name: "GitHub" })).toHaveAttribute(
+      "href",
+      "https://github.com/rootSunc",
     );
-
-    fireEvent.click(screen.getByRole('tab', { name: 'LinkedIn' }));
-    expect(screen.getByRole('link', { name: /open linkedin/i })).toHaveAttribute(
-      'href',
-      'https://www.linkedin.com/in/chaosun526/',
+    expect(screen.getByRole("link", { name: "LinkedIn" })).toHaveAttribute(
+      "href",
+      "https://www.linkedin.com/in/chaosun526/",
+    );
+    expect(screen.getByRole("link", { name: "Résumé" })).toHaveAttribute(
+      "href",
+      expect.stringContaining("subject=Resume"),
     );
   });
-
-  it('opens a dedicated projects page with concise portfolio copy and real screenshots', () => {
+  it("navigates to the portfolio, preserves real project links, and focuses the heading", () => {
     render(<App />);
-
-    fireEvent.click(screen.getByRole('button', { name: /open projects page/i }));
-
+    fireEvent.click(screen.getByRole("link", { name: "Explore my work" }));
+    expect(window.location.pathname).toBe("/projects");
     expect(
-      screen.getByRole('heading', {
-        level: 1,
-        name: siteContent.projectsPage.title,
-      }),
-    ).toBeInTheDocument();
-    expect(screen.queryByText(/A compact portfolio of apps/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/Commercial enough to sell/i)).not.toBeInTheDocument();
-
+      screen.getByRole("heading", { level: 1, name: "Projects." }),
+    ).toHaveFocus();
     for (const project of siteContent.projectsPage.projects) {
-      expect(screen.getByRole('heading', { name: project.name })).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: project.name }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: project.ctaLabel }),
+      ).toHaveAttribute("href", project.href);
       expect(screen.getByAltText(project.screenshots.web.alt)).toHaveAttribute(
-        'src',
+        "src",
         project.screenshots.web.src,
       );
-      expect(screen.getByAltText(project.screenshots.mobile.alt)).toHaveAttribute(
-        'src',
-        project.screenshots.mobile.src,
-      );
-      expect(
-        screen.getByRole('link', {
-          name: new RegExp(`${project.ctaLabel} opens external site`, 'i'),
-        }),
-      ).toHaveAttribute('href', project.href);
     }
   });
-
-  it('supports loading the projects route directly and returning home', () => {
-    window.history.replaceState(null, '', '/projects');
-
+  it("loads a direct project route and returns home", () => {
+    window.history.replaceState(null, "", "/projects/");
     render(<App />);
-
     expect(
-      screen.getByRole('heading', {
-        level: 1,
-        name: siteContent.projectsPage.title,
-      }),
+      screen.getByRole("heading", { name: "Projects." }),
     ).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Home' }));
-
+    fireEvent.click(screen.getByRole("link", { name: "About" }));
+    expect(window.location.pathname).toBe("/");
+    expect(screen.getByRole("heading", { name: "Chao." })).toHaveFocus();
+  });
+  it("responds to browser history navigation", () => {
+    render(<App />);
+    window.history.replaceState(null, "", "/notes");
+    fireEvent.popState(window);
+    expect(screen.getByRole("heading", { name: "Notes." })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Notes" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+  });
+  it("keeps modified navigation clicks available to the browser", () => {
+    render(<App />);
+    fireEvent.click(screen.getByRole("link", { name: "Work" }), {
+      ctrlKey: true,
+    });
+    expect(screen.getByRole("heading", { name: "Chao." })).toBeInTheDocument();
+  });
+  it("switches featured projects and their real destinations", () => {
+    render(<App />);
+    fireEvent.click(screen.getByRole("button", { name: "Show ArkiWatch" }));
     expect(
-      screen.getByRole('heading', { level: 1, name: siteContent.profile.name }),
+      screen.getByRole("heading", { name: "ArkiWatch" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Show ArkiWatch" }),
+    ).toHaveAttribute("aria-pressed", "true");
+    expect(
+      screen
+        .getByAltText("ArkiWatch live dashboard web screenshot")
+        .closest("a"),
+    ).toHaveAttribute("href", "https://arkiwatch.chaosun.xyz/");
+  });
+  it("starts with audio paused and supports playback and track changes", async () => {
+    render(<App />);
+    const player = screen.getByRole("region", { name: "Music player" });
+    expect(
+      within(player).getByRole("button", { name: "Play classical music" }),
+    ).toHaveAttribute("aria-pressed", "false");
+    fireEvent.click(
+      within(player).getByRole("button", { name: "Play classical music" }),
+    );
+    await waitFor(() =>
+      expect(window.HTMLMediaElement.prototype.play).toHaveBeenCalled(),
+    );
+    fireEvent.click(
+      within(player).getByRole("button", { name: "Pause classical music" }),
+    );
+    expect(
+      within(player).getByRole("button", { name: "Play classical music" }),
+    ).toHaveAttribute("aria-pressed", "false");
+    fireEvent.click(within(player).getByRole("button", { name: "Next track" }));
+    expect(
+      within(player).getByRole("heading", { name: "Beethoven" }),
+    ).toBeInTheDocument();
+    fireEvent.click(
+      within(player).getByRole("button", { name: "Previous track" }),
+    );
+    expect(
+      within(player).getByRole("heading", { name: "Vivaldi" }),
+    ).toBeInTheDocument();
+    fireEvent.ended(screen.getByLabelText("Classical music player"));
+    expect(
+      within(player).getByRole("heading", { name: "Beethoven" }),
     ).toBeInTheDocument();
   });
-
-  it('renders all project destinations from the projects command', () => {
+  it("expands notes and provides an honest longer-essay request", () => {
+    window.history.replaceState(null, "", "/notes");
     render(<App />);
-
-    fireEvent.click(screen.getByRole('tab', { name: 'Projects' }));
-
-    expect(screen.getByRole('link', { name: /open luxestate/i })).toHaveAttribute(
-      'href',
-      'https://luxestate-indol.vercel.app/',
-    );
-    expect(screen.getByRole('link', { name: /open qparking/i })).toHaveAttribute(
-      'href',
-      'https://qparking.chaosun.xyz/',
-    );
-    expect(screen.getByRole('link', { name: /open sanakirja/i })).toHaveAttribute(
-      'href',
-      'https://sanakirja.chaosun.xyz/',
-    );
-    expect(screen.getByRole('link', { name: /open arkiwatch/i })).toHaveAttribute(
-      'href',
-      'https://arkiwatch.chaosun.xyz/',
-    );
-    expect(screen.getByRole('link', { name: /view ashare/i })).toHaveAttribute(
-      'href',
-      'https://github.com/rootSunc/ashare-workbench',
-    );
-    expect(screen.queryByText('target')).not.toBeInTheDocument();
+    const note = screen.getByRole("button", { name: /Calmer study tools/ });
+    expect(note).toHaveAttribute("aria-expanded", "false");
+    fireEvent.click(note);
+    expect(note).toHaveAttribute("aria-expanded", "true");
+    expect(
+      screen.getByRole("link", { name: "Ask for the longer essay" }),
+    ).toHaveAttribute("href", expect.stringContaining("mailto:"));
+    fireEvent.click(note);
+    expect(
+      screen.queryByRole("link", { name: "Ask for the longer essay" }),
+    ).not.toBeInTheDocument();
   });
-
-  it('renders blog notes in the terminal without masquerading product pages as articles', () => {
+  it("copies the email and announces success", async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText },
+    });
     render(<App />);
-
-    fireEvent.click(screen.getByRole('tab', { name: 'Blog' }));
-
-    const terminal = screen.getByRole('tabpanel');
-
-    expect(within(terminal).getByText(/calmer study tools/i)).toBeInTheDocument();
-    expect(within(terminal).getByText(/public data in daily life/i)).toBeInTheDocument();
-    expect(within(terminal).queryByRole('link', { name: /sanakirja build notes/i })).not.toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /ask for a longer essay/i })).toHaveAttribute(
-      'href',
-      'mailto:chao.sun.me@gmail.com?subject=Essay%20request',
+    fireEvent.click(screen.getByRole("button", { name: "Copy email address" }));
+    await waitFor(() =>
+      expect(screen.getByRole("status")).toHaveTextContent(
+        "Email address copied.",
+      ),
     );
-    expect(screen.getByRole('link', { name: /browse build notes on github/i })).toHaveAttribute(
-      'href',
-      'https://github.com/rootSunc',
-    );
+    expect(writeText).toHaveBeenCalledWith("chao.sun.me@gmail.com");
   });
-
-  it('exposes a skip link and keyboard navigation between tabs', () => {
+  it("provides a manual fallback if clipboard access fails", async () => {
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText: vi.fn().mockRejectedValue(new Error("Denied")) },
+    });
     render(<App />);
-
-    expect(screen.getByRole('link', { name: /skip to main content/i })).toHaveAttribute(
-      'href',
-      '#site-title',
+    fireEvent.click(screen.getByRole("button", { name: "Copy email address" }));
+    await waitFor(() =>
+      expect(screen.getByRole("status")).toHaveTextContent(
+        "Please copy: chao.sun.me@gmail.com",
+      ),
     );
-
-    const projectsTab = screen.getByRole('tab', { name: 'Projects' });
-    projectsTab.focus();
-    fireEvent.keyDown(projectsTab, { key: 'ArrowRight' });
-
-    expect(screen.getByRole('tab', { name: 'GitHub' })).toHaveFocus();
-    expect(screen.getByRole('tab', { name: 'GitHub' })).toHaveAttribute('aria-selected', 'true');
-  });
-
-  it('shows project craft notes and a projects hero eyebrow on the projects page', () => {
-    render(<App />);
-
-    fireEvent.click(screen.getByRole('button', { name: /open projects page/i }));
-
-    expect(screen.getByText(siteContent.projectsPage.eyebrow)).toBeInTheDocument();
-
-    for (const project of siteContent.projectsPage.projects) {
-      expect(project.note).toBeTruthy();
-      expect(screen.getByText(project.note ?? '')).toBeInTheDocument();
-    }
   });
 });

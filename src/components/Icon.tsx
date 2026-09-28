@@ -52,7 +52,7 @@ export function Icon({ id }: { id: NavigationId }) {
         stroke={id === 'github' ? 'none' : 'currentColor'}
         strokeLinecap="round"
         strokeLinejoin="round"
-        strokeWidth="2"
+        strokeWidth="1.5"
       >
         {iconPaths[id]}
       </g>

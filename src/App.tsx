@@ -1,296 +1,420 @@
-import { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react';
-import { DestinationTabs } from './components/DestinationTabs';
-import { DraggablePlayerDock } from './components/DraggablePlayerDock';
-import { EntryGate } from './components/EntryGate';
-import { HeroWaveStrip } from './components/HeroWaveStrip';
-import { ProjectsPage } from './components/ProjectsPage';
-import { SceneErrorBoundary } from './components/scene/SceneErrorBoundary';
-import { TerminalPanel } from './components/TerminalPanel';
-import { ThemeToggle } from './components/ThemeToggle';
-import { VinylPlayer } from './components/VinylPlayer';
-import { MUSIC_LIBRARY } from './data/musicLibrary';
-import { siteContent, type NavigationId } from './data/siteContent';
-import { useEntryExperience } from './hooks/useEntryExperience';
-import { useMusicPlayer } from './hooks/useMusicPlayer';
-import { useRouteFocus, useTerminalFocus } from './hooks/useRouteFocus';
-import { useSceneQuality } from './hooks/useSceneQuality';
-import { useSessionAccent } from './hooks/useSessionAccent';
-import type { CssVars } from './lib/cssVars';
+import { useEffect, useRef, useState, type MouseEvent } from "react";
+import { notes } from "./data/notes";
+import { MusicCard } from "./components/MusicCard";
+import { FeaturedWork } from "./components/FeaturedWork";
+import { Glyph } from "./components/CardIcons";
+import { Icon } from "./components/Icon";
+import { SignatureSculpture } from "./components/SignatureSculpture";
+import { siteContent } from "./data/siteContent";
+import { MUSIC_LIBRARY } from "./data/musicLibrary";
+import { useMusicPlayer } from "./hooks/useMusicPlayer";
+import { useTheme } from "./hooks/useTheme";
 
-const SharedHomeScene = lazy(() =>
-  import('./components/scene/shared/SharedHomeScene').then((module) => ({
-    default: module.SharedHomeScene,
-  })),
-);
+type Page = "home" | "projects" | "notes";
+const route = (): Page =>
+  window.location.pathname.replace(/\/$/, "") === "/projects"
+    ? "projects"
+    : window.location.pathname.replace(/\/$/, "") === "/notes"
+      ? "notes"
+      : "home";
+const email = "chao.sun.me@gmail.com";
 
-const SharedProjectsScene = lazy(() =>
-  import('./components/scene/shared/SharedProjectsScene').then((module) => ({
-    default: module.SharedProjectsScene,
-  })),
-);
-
-const CosmicStage = lazy(() =>
-  import('./components/scene/shared/CosmicStage').then((module) => ({
-    default: module.CosmicStage,
-  })),
-);
-
-type PageId = 'home' | 'projects';
-
-const PROJECTS_PATH = '/projects';
-
-function getPageFromLocation(): PageId {
-  return window.location.pathname.replace(/\/$/, '') === PROJECTS_PATH ? 'projects' : 'home';
+function LocalTime() {
+  const format = () =>
+    new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Europe/Helsinki",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).format(new Date());
+  const [time, setTime] = useState(format);
+  useEffect(() => {
+    const timer = window.setInterval(() => setTime(format()), 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
+  return (
+    <span className="local-time">
+      Helsinki, FI <span className="time-divider">/</span> <time>{time}</time>
+    </span>
+  );
 }
 
 export default function App() {
-  const { initialLinkId, links, profile } = siteContent;
-  const [selectedLinkId, setSelectedLinkId] = useState<NavigationId>(initialLinkId);
-  const [currentPage, setCurrentPage] = useState<PageId>(() => getPageFromLocation());
+  const [page, setPage] = useState<Page>(route);
+  const [copied, setCopied] = useState(false);
+  const [copyError, setCopyError] = useState(false);
+  const [openNote, setOpenNote] = useState<number | null>(null);
+  const copyTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
+  const heading = useRef<HTMLHeadingElement>(null);
+  const hasNavigated = useRef(false);
+  const { theme, toggleTheme } = useTheme();
   const player = useMusicPlayer(MUSIC_LIBRARY.length);
-  const sceneQuality = useSceneQuality();
-  const pageShellRef = useRef<HTMLDivElement>(null);
-  const emailAnchorRef = useRef<HTMLAnchorElement>(null);
-  const { isPlaying, togglePlaying } = player;
-  const enterWithAudio = useCallback(() => {
-    if (!isPlaying) {
-      togglePlaying();
-    }
-  }, [isPlaying, togglePlaying]);
-  const entry = useEntryExperience(sceneQuality.quality, currentPage, enterWithAudio);
-
-  const activeLink = links.find((link) => link.id === selectedLinkId) ?? links[0];
-  useSessionAccent(activeLink.id);
-  const activeTrack = MUSIC_LIBRARY[player.trackIndex] ?? MUSIC_LIBRARY[0];
-  const projectsLink = links.find((link) => link.id === 'projects') ?? activeLink;
-  const showSharedHomeScene =
-    sceneQuality.quality !== 'off' && currentPage === 'home' && sceneQuality.projectStage;
-  const showSharedProjectsScene =
-    sceneQuality.quality !== 'off' && currentPage === 'projects' && sceneQuality.projectStage;
-  const showCosmicStage =
-    sceneQuality.quality !== 'off' && currentPage === 'home' && sceneQuality.audioStage;
-  const cosmicQuality = sceneQuality.quality === 'off' ? 'low' : sceneQuality.quality;
-  const gateBlocksUi = entry.entryOpen;
-
-  useRouteFocus(currentPage);
-  useTerminalFocus(currentPage, activeLink.id);
+  const track = MUSIC_LIBRARY[player.trackIndex];
 
   useEffect(() => {
-    const handlePopState = () => setCurrentPage(getPageFromLocation());
-
-    window.addEventListener('popstate', handlePopState);
-
-    return () => window.removeEventListener('popstate', handlePopState);
+    const onPopState = () => {
+      hasNavigated.current = true;
+      setPage(route());
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => {
+      window.removeEventListener("popstate", onPopState);
+      clearTimeout(copyTimer.current);
+    };
   }, []);
-
   useEffect(() => {
-    document.body.dataset.page = currentPage;
+    document.title =
+      page === "home"
+        ? "Chao — Software Architect & Maker"
+        : `${page === "projects" ? "Projects" : "Notes"} — Chao`;
+    if (hasNavigated.current) heading.current?.focus({ preventScroll: true });
+  }, [page]);
 
-    return () => {
-      delete document.body.dataset.page;
-    };
-  }, [currentPage]);
-
-  useEffect(() => {
-    if (sceneQuality.quality === 'off') {
-      delete document.body.dataset.scene;
+  function navigate(event: MouseEvent<HTMLAnchorElement>, next: Page) {
+    if (
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey ||
+      event.button !== 0
+    )
       return;
+    event.preventDefault();
+    if (page === next) return;
+    window.history.pushState({}, "", next === "home" ? "/" : `/${next}`);
+    hasNavigated.current = true;
+    setPage(next);
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }
+  async function copyEmail() {
+    try {
+      await navigator.clipboard.writeText(email);
+      setCopied(true);
+      setCopyError(false);
+      clearTimeout(copyTimer.current);
+      copyTimer.current = setTimeout(() => setCopied(false), 2500);
+    } catch {
+      setCopyError(true);
     }
-
-    document.body.dataset.scene = sceneQuality.quality;
-
-    return () => {
-      delete document.body.dataset.scene;
-    };
-  }, [sceneQuality.quality]);
-
-  const navigateToPage = (page: PageId) => {
-    const nextPath = page === 'projects' ? PROJECTS_PATH : '/';
-
-    if (window.location.pathname !== nextPath) {
-      window.history.pushState({ page }, '', nextPath);
-    }
-
-    if (page === 'projects') {
-      setSelectedLinkId(projectsLink.id);
-    }
-
-    setCurrentPage(page);
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
-  };
+  }
+  const pageLink = (next: Page) => ({
+    href: next === "home" ? "/" : `/${next}`,
+    onClick: (event: MouseEvent<HTMLAnchorElement>) => navigate(event, next),
+  });
 
   return (
-    <div
-      className={`page-shell ${currentPage === 'projects' ? 'page-shell-projects' : ''}`}
-      ref={pageShellRef}
-    >
-      <a
-        className="skip-link"
-        href={currentPage === 'projects' ? '#projects-title' : '#site-title'}
-      >
+    <div className="site-shell">
+      <a className="skip-link" href="#site-title">
         Skip to main content
       </a>
-
-      <div
-        aria-hidden={gateBlocksUi || undefined}
-        className="theme-toggle-shell"
-        inert={gateBlocksUi || undefined}
-      >
-        <ThemeToggle />
-      </div>
-
-      {showSharedHomeScene ? (
-        <Suspense fallback={null}>
-          <SceneErrorBoundary fallback={null} label="shared-home-scene">
-            <SharedHomeScene
-              activeLinkId={activeLink.id}
-              containerRef={pageShellRef}
-              introPhase={entry.introPhase}
-              isPlaying={player.isPlaying}
-              particleCount={sceneQuality.particleCount}
-              quality={sceneQuality.quality}
-            />
-          </SceneErrorBoundary>
-        </Suspense>
-      ) : null}
-
-      {showSharedProjectsScene ? (
-        <Suspense fallback={null}>
-          <SharedProjectsScene containerRef={pageShellRef} quality={sceneQuality.quality} />
-        </Suspense>
-      ) : null}
-
-      {showCosmicStage ? (
-        <Suspense fallback={null}>
-          <SceneErrorBoundary fallback={null} label="cosmic-stage">
-            <CosmicStage
-              activeLinkId={activeLink.id}
-              introPhase={entry.introPhase}
-              isPlaying={player.isPlaying}
-              quality={cosmicQuality}
-            />
-          </SceneErrorBoundary>
-        </Suspense>
-      ) : null}
-
-      {entry.entryVisible ? (
-        <EntryGate
-          active={entry.entryOpen}
-          onEnterSilent={entry.dismissSilent}
-          onEnterWithAudio={entry.dismissWithAudio}
-        />
-      ) : null}
+      <header className="site-header">
+        <a {...pageLink("home")} className="brand" aria-label="Chao — Home">
+          <span className="brand-symbol">
+            c<span>·</span>
+          </span>
+          <span>
+            chao<span className="brand-slash"> / </span>
+            <span className="brand-caption">personal space</span>
+          </span>
+        </a>
+        <nav aria-label="Primary destinations" className="main-nav">
+          {(["home", "projects", "notes"] as const).map((item) => (
+            <a
+              key={item}
+              {...pageLink(item)}
+              aria-current={page === item ? "page" : undefined}
+            >
+              {item === "home"
+                ? "About"
+                : item === "projects"
+                  ? "Work"
+                  : "Notes"}
+              <span className="nav-dot" />
+            </a>
+          ))}
+        </nav>
+        <div className="header-actions">
+          {page !== "home" && player.isPlaying ? (
+            <button
+              className="icon-button"
+              data-music-control="true"
+              aria-label="Pause classical music"
+              onClick={player.togglePlaying}
+            >
+              <Glyph name="pause" />
+            </button>
+          ) : null}
+          <button
+            className="icon-button theme-switch"
+            onClick={toggleTheme}
+            aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
+          >
+            <Glyph name={theme === "dark" ? "sun" : "moon"} />
+          </button>
+          <a className="header-contact" href={`mailto:${email}`}>
+            Let’s talk <Glyph name="arrow" />
+          </a>
+        </div>
+      </header>
 
       <audio
         aria-label="Classical music player"
-        onEnded={() => player.selectRelativeTrack(1)}
-        playsInline
-        preload="auto"
         ref={player.audioRef}
+        onEnded={() => player.selectRelativeTrack(1)}
+        preload="none"
+        playsInline
       >
-        {activeTrack.sources.map((source) => (
-          <source key={source.src} src={source.src} type={source.type} />
+        {track.sources.map((source) => (
+          <source key={source.src} {...source} />
         ))}
       </audio>
 
-      {currentPage === 'projects' ? (
-        <ProjectsPage
-          content={siteContent.projectsPage}
-          onBackHome={() => navigateToPage('home')}
-          projectStage={sceneQuality.projectStage}
-          sceneQuality={sceneQuality.quality}
-        />
-      ) : (
-        <main
-          aria-hidden={gateBlocksUi || undefined}
-          className="command-deck"
-          id="profile"
-          inert={gateBlocksUi || undefined}
-        >
-          <div className="hero-wing">
-            <section aria-labelledby="site-title" className="hero-copy">
-              <p className="hero-eyebrow">{profile.heroEyebrow}</p>
-              <h1 id="site-title" tabIndex={-1}>{profile.name}</h1>
-              <p className="role">{profile.role}</p>
-              <p className="descriptor">{profile.descriptor}</p>
-
-              <div aria-label="Interest tags" className="tag-cloud">
-                {profile.tags.map((tag, index) => (
-                  <span className="tag-pill" key={tag} style={{ '--tag-index': index } as CssVars}>
-                    {tag}
-                  </span>
-                ))}
+      <main key={page} className={`page-content page-${page}`}>
+        {page === "home" ? (
+          <>
+            <section className="hero" aria-labelledby="site-title">
+              <div className="hero-copy">
+                <div className="eyebrow availability">
+                  <span className="status-dot" /> OPEN TO THOUGHTFUL
+                  COLLABORATIONS
+                </div>
+                <h1 id="site-title" ref={heading} tabIndex={-1}>
+                  Chao<span className="name-period">.</span>
+                </h1>
+                <div className="hero-role">
+                  <span>Software Architect</span>
+                  <span className="role-line" />
+                  <span className="maker">& curious human</span>
+                </div>
+                <h2 className="hero-statement">
+                  Thoughtful software.
+                  <br />
+                  <span>A little more human.</span>
+                </h2>
+                <p className="hero-description">
+                  {siteContent.profile.descriptor}
+                </p>
+                <div className="hero-actions">
+                  <a className="button button-primary" href={`mailto:${email}`}>
+                    <Glyph name="mail" /> Say hello <Glyph name="arrow" />
+                  </a>
+                  <a className="text-link" {...pageLink("projects")}>
+                    Explore my work <span aria-hidden="true">↗</span>
+                  </a>
+                </div>
+                <div className="hero-location">
+                  <Glyph name="pin" />
+                  <LocalTime />
+                  <span className="location-dot">·</span>
+                  <span>Building for everywhere</span>
+                </div>
               </div>
-
-              <div aria-label="Primary actions" className="hero-actions">
-                <a
-                  className="action-button action-button-primary"
-                  href="mailto:chao.sun.me@gmail.com"
-                  ref={emailAnchorRef}
-                >
-                  Email
-                </a>
-                <button
-                  aria-label="Open projects page"
-                  className="action-button action-button-secondary"
-                  onClick={() => navigateToPage('projects')}
-                  type="button"
-                >
-                  Projects
-                </button>
-              </div>
-
-              <div className="deck-player-slot">
-                <DraggablePlayerDock anchorRef={emailAnchorRef}>
-                  {(dock) => (
-                    <VinylPlayer
-                      activeLink={activeLink}
-                      activeTrack={activeTrack}
-                      dockRef={dock.dockRef}
-                      dockStyle={dock.dockStyle}
-                      isFloating={dock.isFloating}
-                      isPlaying={player.isPlaying}
-                      onDragHandlePointerCancel={dock.onDragHandlePointerCancel}
-                      onDragHandlePointerDown={dock.onDragHandlePointerDown}
-                      onDragHandlePointerMove={dock.onDragHandlePointerMove}
-                      onDragHandlePointerUp={dock.onDragHandlePointerUp}
-                      onNextTrack={() => player.selectRelativeTrack(1)}
-                      onPreviousTrack={() => player.selectRelativeTrack(-1)}
-                      onTogglePlaying={player.togglePlaying}
-                      progressBarRef={player.progressBarRef}
-                      timeTextRef={player.timeTextRef}
-                      visualizerRef={player.visualizerRef}
-                    />
-                  )}
-                </DraggablePlayerDock>
-              </div>
+              <SignatureSculpture />
             </section>
 
-            <HeroWaveStrip isPlaying={player.isPlaying} />
+            <section
+              className="glimpse-section"
+              aria-labelledby="glimpse-title"
+            >
+              <div className="section-heading">
+                <h2 id="glimpse-title">A FEW THINGS IN MY ORBIT</h2>
+                <span>THE WORK. THE PERSON. THE SOUNDTRACK.</span>
+              </div>
+              <div className="orbit-grid">
+                <FeaturedWork projectsLink={pageLink("projects")} />
+                <article className="orbit-card person-card">
+                  <div className="card-topline">
+                    <span className="eyebrow">
+                      <Glyph name="plus" /> BEYOND THE KEYBOARD
+                    </span>
+                    <span className="tiny-spark">✳</span>
+                  </div>
+                  <h3>
+                    Curiosity doesn’t
+                    <br />
+                    clock out.
+                  </h3>
+                  <p>
+                    Good coffee. Long bike rides.
+                    <br />A new word in Finnish.
+                    <br />
+                    Finding the interesting in the everyday.
+                  </p>
+                  <div className="interest-tags">
+                    <span>Coffee</span>
+                    <span>Cycling</span>
+                    <span>Finnish life</span>
+                  </div>
+                  <a className="card-bottom-link" {...pageLink("notes")}>
+                    Notes on life & building <Glyph name="arrow" />
+                  </a>
+                </article>
+                <MusicCard player={player} />
+              </div>
+            </section>
+          </>
+        ) : page === "projects" ? (
+          <>
+            <section className="inner-hero">
+              <span className="eyebrow">SELECTED WORK / 2024–2026</span>
+              <h1 id="site-title" ref={heading} tabIndex={-1}>
+                Projects<span className="name-period">.</span>
+              </h1>
+              <p>
+                Small ideas, made real.
+                <br />
+                <span>
+                  Useful products, considered interfaces, and a little
+                  curiosity.
+                </span>
+              </p>
+            </section>
+            <div className="projects-grid">
+              {siteContent.projectsPage.projects.map((item, index) => (
+                <article
+                  className="portfolio-card"
+                  key={item.id}
+                  style={{ animationDelay: `${index * 75}ms` }}
+                >
+                  <a
+                    href={item.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="portfolio-image"
+                    aria-label={item.ctaLabel}
+                  >
+                    <img
+                      src={item.screenshots.web.src}
+                      alt={item.screenshots.web.alt}
+                      loading={index > 1 ? "lazy" : "eager"}
+                    />
+                    <span className="project-open">
+                      <Glyph name="arrow" />
+                    </span>
+                  </a>
+                  <div className="portfolio-copy">
+                    <div className="portfolio-category">
+                      <span>{item.category}</span>
+                      <span>0{index + 1}</span>
+                    </div>
+                    <h2>
+                      <a href={item.href} target="_blank" rel="noreferrer">
+                        {item.name}
+                        <Glyph name="arrow" />
+                      </a>
+                    </h2>
+                    <p>{item.summary}</p>
+                    <div className="portfolio-note">{item.note}</div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </>
+        ) : (
+          <>
+            <section className="inner-hero">
+              <span className="eyebrow">A DIGITAL NOTEBOOK</span>
+              <h1 id="site-title" ref={heading} tabIndex={-1}>
+                Notes<span className="name-period">.</span>
+              </h1>
+              <p>
+                Thinking out loud.
+                <br />
+                <span>Short notes on making things and making a life.</span>
+              </p>
+            </section>
+            <div className="notes-list">
+              {notes.map((note, index) => (
+                <article
+                  className={`note ${openNote === index ? "note-open" : ""}`}
+                  key={note.title}
+                >
+                  <button
+                    className="note-toggle"
+                    aria-expanded={openNote === index}
+                    aria-controls={`note-${index}`}
+                    onClick={() =>
+                      setOpenNote(openNote === index ? null : index)
+                    }
+                  >
+                    <span className="note-date">{note.date}</span>
+                    <span className="note-summary">
+                      <span className="note-title">{note.title}</span>
+                      <span>{note.text}</span>
+                    </span>
+                    <Glyph name="plus" />
+                  </button>
+                  <div
+                    className="note-body"
+                    id={`note-${index}`}
+                    hidden={openNote !== index}
+                  >
+                    <p>{note.body}</p>
+                    <a
+                      className="text-link"
+                      href={`mailto:${email}?subject=${encodeURIComponent(`Essay request: ${note.title}`)}`}
+                    >
+                      Ask for the longer essay <Glyph name="arrow" />
+                    </a>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </>
+        )}
+        <section className="connection-bar" aria-label="Connect with Chao">
+          <div className="connection-intro">
+            <span className="status-dot" />
+            <span>Good things start with a conversation.</span>
           </div>
-
-          <section aria-label="Command interface" className="command-stage">
-            <DestinationTabs
-              links={links}
-              onSelect={setSelectedLinkId}
-              selectedLinkId={activeLink.id}
-            />
-
-            <TerminalPanel activeLink={activeLink} />
-          </section>
-        </main>
-      )}
-
-      <footer
-        aria-hidden={gateBlocksUi || undefined}
-        className="site-footer"
-        inert={gateBlocksUi || undefined}
-      >
-        <p>
-          <span aria-hidden="true" className="footer-cube" />
-          © 2026 Software designed by Chao
-        </p>
+          <div className="social-links">
+            <a
+              href="https://github.com/rootSunc"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <Icon id="github" />
+              GitHub
+              <Glyph name="arrow" />
+            </a>
+            <a
+              href="https://www.linkedin.com/in/chaosun526/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <Icon id="linkedin" />
+              LinkedIn
+              <Glyph name="arrow" />
+            </a>
+            <a href={`mailto:${email}?subject=Resume%20request`}>
+              <Icon id="resume" />
+              Résumé
+              <Glyph name="arrow" />
+            </a>
+            <button onClick={copyEmail} aria-label="Copy email address">
+              <Glyph name={copied ? "check" : "copy"} />
+              <span>{copied ? "Copied!" : "Email"}</span>
+            </button>
+          </div>
+          <span className="copy-status" role="status">
+            {copyError
+              ? `Please copy: ${email}`
+              : copied
+                ? "Email address copied."
+                : ""}
+          </span>
+        </section>
+      </main>
+      <footer className="site-footer">
+        <span>© {new Date().getFullYear()} Chao Sun</span>
+        <span className="footer-note">
+          Made with intention. Always evolving.
+        </span>
+        <span className="footer-signoff">
+          Thanks for stopping by <span>↗</span>
+        </span>
       </footer>
     </div>
   );

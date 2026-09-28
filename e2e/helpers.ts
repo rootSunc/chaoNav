@@ -1,7 +1,7 @@
-import { expect, type Page } from '@playwright/test';
+import { type Page } from "@playwright/test";
 
-export type VisualTheme = 'dark' | 'light';
-export type MotionPreference = 'reduce' | 'no-preference';
+export type VisualTheme = "dark" | "light";
+export type MotionPreference = "reduce" | "no-preference";
 
 type PreparePageOptions = {
   readonly theme?: VisualTheme;
@@ -10,12 +10,15 @@ type PreparePageOptions = {
 
 export async function preparePage(
   page: Page,
-  { theme = 'dark', motion = 'reduce' }: PreparePageOptions = {},
+  { theme = "dark", motion = "reduce" }: PreparePageOptions = {},
 ) {
   await page.addInitScript((selectedTheme) => {
-    window.localStorage.setItem('chaonav-theme', selectedTheme);
-    document.documentElement.dataset.theme = selectedTheme;
+    if (!window.localStorage.getItem("chaonav-theme")) {
+      window.localStorage.setItem("chaonav-theme", selectedTheme);
+    }
   }, theme);
+
+  await page.clock.setFixedTime(new Date("2026-09-28T12:00:00Z"));
 
   await page.emulateMedia({
     reducedMotion: motion,
@@ -23,53 +26,27 @@ export async function preparePage(
   });
 }
 
-export async function prepareVisualPage(page: Page, theme: VisualTheme = 'dark') {
-  await preparePage(page, { theme, motion: 'reduce' });
-}
-
-export async function prepareWebGLPage(page: Page, theme: VisualTheme = 'dark') {
-  await preparePage(page, { theme, motion: 'no-preference' });
-  await page.addInitScript(() => {
-    window.sessionStorage.setItem('chao-entry-seen', '1');
-  });
+export async function prepareVisualPage(
+  page: Page,
+  theme: VisualTheme = "dark",
+) {
+  await preparePage(page, { theme, motion: "reduce" });
 }
 
 export async function waitForStableShell(page: Page) {
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState("networkidle");
   await page.evaluate(async () => {
-    if ('fonts' in document) {
+    await Promise.all(
+      Array.from(document.images).map(async (image) => {
+        image.loading = "eager";
+        await image.decode();
+      }),
+    );
+    if ("fonts" in document) {
       await document.fonts.ready;
     }
   });
   await page.waitForTimeout(250);
-}
-
-export async function waitForWebGLCanvas(page: Page, hostSelector: string) {
-  const canvas = page.locator(`${hostSelector} canvas`).first();
-  await expect(canvas).toBeVisible({ timeout: 20_000 });
-  await page.waitForFunction(
-    (selector) => {
-      const host = document.querySelector(selector);
-      const element = host?.querySelector('canvas');
-
-      return (
-        element instanceof HTMLCanvasElement &&
-        element.width > 0 &&
-        element.height > 0
-      );
-    },
-    hostSelector,
-    { timeout: 20_000 },
-  );
-}
-
-export async function expectSceneQuality(page: Page, mode: 'off' | 'active') {
-  if (mode === 'off') {
-    await expect(page.locator('body')).not.toHaveAttribute('data-scene', /.+/);
-    return;
-  }
-
-  await expect(page.locator('body')).toHaveAttribute('data-scene', /^(low|high)$/);
 }
 
 export function visualDiffTolerance(): number {

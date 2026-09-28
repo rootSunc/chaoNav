@@ -1,6 +1,1 @@
-@import "./styles/tokens.css";
-@import "./styles/base.css";
-@import "./styles/theme-light.css";
-@import "./styles/home.css";
-@import "./styles/projects.css";
-@import "./styles/motion.css";
+@import "./styles/card.css";
