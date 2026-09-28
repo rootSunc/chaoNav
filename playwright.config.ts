@@ -25,6 +25,15 @@ export default defineConfig({
   },
   projects: [
     {
+      name: "mobile-chromium",
+      testMatch: /mobile\.spec\.ts/,
+      use: {
+        ...devices["iPhone 13"],
+        defaultBrowserType: "chromium",
+        browserName: "chromium",
+      },
+    },
+    {
       name: "chromium",
       testMatch: /visual\.spec\.ts/,
       use: {

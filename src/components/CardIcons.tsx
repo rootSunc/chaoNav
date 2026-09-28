@@ -1,6 +1,8 @@
 import type { CSSProperties } from "react";
 
 type GlyphName =
+  | "profile"
+  | "chevron"
   | "arrow"
   | "mail"
   | "copy"
@@ -17,6 +19,13 @@ type GlyphName =
   | "headphones"
   | "plus";
 const paths: Record<GlyphName, React.ReactNode> = {
+  profile: (
+    <>
+      <circle cx="12" cy="8" r="3.5" />
+      <path d="M5 21v-2a7 7 0 0 1 14 0v2" />
+    </>
+  ),
+  chevron: <path d="m9 5 7 7-7 7" />,
   arrow: (
     <>
       <path d="M5 19 19 5M5 5h14v14" />

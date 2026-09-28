@@ -35,3 +35,14 @@ notes, and music are editable under `src/data/`.
 Run `pnpm test --run` for unit tests and `pnpm test:e2e` for browser and visual
 checks. Install Chromium with `pnpm exec playwright install chromium` first,
 or use `PLAYWRIGHT_CHANNEL=chrome pnpm test:e2e` with an installed Chrome.
+
+### Mobile experience
+
+At widths up to 600px the page uses a thumb-reachable bottom navigation,
+native scroll-snap project browsing, a compact music row, and a contact
+sheet with clipboard and vCard actions. Tab navigation retains reading
+positions. The player stays accessible on other pages while audio is playing.
+`src/styles/mobile.css` owns this mobile composition; `useMobileLayout`
+selects the interaction surfaces. Safe-area insets and reduced motion are
+supported. Run the touch-emulated checks with
+`pnpm test:e2e --project=mobile-chromium`.

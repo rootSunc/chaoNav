@@ -1,4 +1,13 @@
-import { useEffect, useRef, useState, type MouseEvent } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type MouseEvent,
+} from "react";
+import { ContactSheet } from "./components/ContactSheet";
+import { MobileWorkCarousel } from "./components/MobileWorkCarousel";
+import { useMobileLayout } from "./hooks/useMobileLayout";
 import { notes } from "./data/notes";
 import { MusicCard } from "./components/MusicCard";
 import { FeaturedWork } from "./components/FeaturedWork";
@@ -40,6 +49,8 @@ function LocalTime() {
 }
 
 export default function App() {
+  const mobile = useMobileLayout();
+  const [contactOpen, setContactOpen] = useState(false);
   const [page, setPage] = useState<Page>(route);
   const [copied, setCopied] = useState(false);
   const [copyError, setCopyError] = useState(false);
@@ -49,12 +60,15 @@ export default function App() {
   );
   const heading = useRef<HTMLHeadingElement>(null);
   const hasNavigated = useRef(false);
+  const scrollPositions = useRef<Partial<Record<Page, number>>>({});
+  const currentPage = useRef(page);
   const { theme, toggleTheme } = useTheme();
   const player = useMusicPlayer(MUSIC_LIBRARY.length);
   const track = MUSIC_LIBRARY[player.trackIndex];
 
   useEffect(() => {
     const onPopState = () => {
+      scrollPositions.current[currentPage.current] = window.scrollY;
       hasNavigated.current = true;
       setPage(route());
     };
@@ -64,6 +78,14 @@ export default function App() {
       clearTimeout(copyTimer.current);
     };
   }, []);
+  useLayoutEffect(() => {
+    currentPage.current = page;
+    if (hasNavigated.current)
+      window.scrollTo({
+        top: scrollPositions.current[page] ?? 0,
+        behavior: "instant",
+      });
+  }, [page]);
   useEffect(() => {
     document.title =
       page === "home"
@@ -83,10 +105,10 @@ export default function App() {
       return;
     event.preventDefault();
     if (page === next) return;
+    scrollPositions.current[page] = window.scrollY;
     window.history.pushState({}, "", next === "home" ? "/" : `/${next}`);
     hasNavigated.current = true;
     setPage(next);
-    window.scrollTo({ top: 0, behavior: "instant" });
   }
   async function copyEmail() {
     try {
@@ -105,7 +127,9 @@ export default function App() {
   });
 
   return (
-    <div className="site-shell">
+    <div
+      className={`site-shell ${mobile && page !== "home" && player.isPlaying && !mobile ? "has-mini-player" : ""}`}
+    >
       <a className="skip-link" href="#site-title">
         Skip to main content
       </a>
@@ -126,6 +150,16 @@ export default function App() {
               {...pageLink(item)}
               aria-current={page === item ? "page" : undefined}
             >
+              <Glyph
+                className="mobile-nav-icon"
+                name={
+                  item === "home"
+                    ? "profile"
+                    : item === "projects"
+                      ? "code"
+                      : "book"
+                }
+              />
               {item === "home"
                 ? "About"
                 : item === "projects"
@@ -134,6 +168,16 @@ export default function App() {
               <span className="nav-dot" />
             </a>
           ))}
+          {mobile && (
+            <button
+              className="nav-contact"
+              onClick={() => setContactOpen(true)}
+              aria-label="Contact Chao"
+            >
+              <Glyph name="mail" />
+              <span>Connect</span>
+            </button>
+          )}
         </nav>
         <div className="header-actions">
           {page !== "home" && player.isPlaying ? (
@@ -197,11 +241,21 @@ export default function App() {
                   {siteContent.profile.descriptor}
                 </p>
                 <div className="hero-actions">
-                  <a className="button button-primary" href={`mailto:${email}`}>
+                  <a
+                    className="button button-primary"
+                    href={`mailto:${email}`}
+                    onClick={(event) => {
+                      if (mobile) {
+                        event.preventDefault();
+                        setContactOpen(true);
+                      }
+                    }}
+                  >
                     <Glyph name="mail" /> Say hello <Glyph name="arrow" />
                   </a>
                   <a className="text-link" {...pageLink("projects")}>
-                    Explore my work <span aria-hidden="true">↗</span>
+                    {mobile ? "View work" : "Explore my work"}{" "}
+                    <span aria-hidden="true">↗</span>
                   </a>
                 </div>
                 <div className="hero-location">
@@ -223,7 +277,11 @@ export default function App() {
                 <span>THE WORK. THE PERSON. THE SOUNDTRACK.</span>
               </div>
               <div className="orbit-grid">
-                <FeaturedWork projectsLink={pageLink("projects")} />
+                {mobile ? (
+                  <MobileWorkCarousel />
+                ) : (
+                  <FeaturedWork projectsLink={pageLink("projects")} />
+                )}
                 <article className="orbit-card person-card">
                   <div className="card-topline">
                     <span className="eyebrow">
@@ -232,8 +290,7 @@ export default function App() {
                     <span className="tiny-spark">✳</span>
                   </div>
                   <h3>
-                    Curiosity doesn’t
-                    <br />
+                    Curiosity doesn’t <br />
                     clock out.
                   </h3>
                   <p>
@@ -407,6 +464,38 @@ export default function App() {
           </span>
         </section>
       </main>
+      {mobile && page !== "home" && player.isPlaying && (
+        <aside
+          className="mobile-mini-player"
+          aria-label="Playing music"
+          data-music-control="true"
+        >
+          <Glyph name="headphones" />
+          <div>
+            <strong>{track.composer}</strong>
+            <span>{track.title}</span>
+          </div>
+          <button
+            className="icon-button"
+            aria-label="Pause classical music"
+            onClick={player.togglePlaying}
+          >
+            <Glyph name="pause" />
+          </button>
+          <button
+            className="icon-button"
+            aria-label="Next track"
+            onClick={() => player.selectRelativeTrack(1)}
+          >
+            <Glyph name="next" />
+          </button>
+        </aside>
+      )}
+      <ContactSheet
+        open={contactOpen}
+        onClose={() => setContactOpen(false)}
+        email={email}
+      />
       <footer className="site-footer">
         <span>© {new Date().getFullYear()} Chao Sun</span>
         <span className="footer-note">
