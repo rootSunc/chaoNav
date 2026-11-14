@@ -1,14 +1,16 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { formatTime } from '../lib/time';
+import { useCallback, useEffect, useRef, useState } from "react";
 
 type TrackDirection = 1 | -1;
 
 function isAutoplayBlocked(error: unknown) {
-  return error instanceof DOMException && error.name === 'NotAllowedError';
+  return error instanceof DOMException && error.name === "NotAllowedError";
 }
 
 function isFromMusicControl(target: EventTarget | null) {
-  return target instanceof Element && target.closest('[data-music-control="true"]');
+  return (
+    target instanceof Element &&
+    target.closest('[data-music-control="true"]')
+  );
 }
 
 export function useMusicPlayer(trackCount: number) {
@@ -16,6 +18,8 @@ export function useMusicPlayer(trackCount: number) {
   const [trackIndex, setTrackIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [needsUserActivation, setNeedsUserActivation] = useState(false);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [durationSeconds, setDurationSeconds] = useState(0);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const animationFrameRef = useRef<number | null>(null);
@@ -23,55 +27,49 @@ export function useMusicPlayer(trackCount: number) {
   const didLoadInitialTrackRef = useRef(false);
   const isPlayingRef = useRef(isPlaying);
   const progressBarRef = useRef<HTMLSpanElement | null>(null);
-  const timeTextRef = useRef<HTMLSpanElement | null>(null);
-  const visualizerRef = useRef<HTMLDivElement | null>(null);
+  const playheadRef = useRef<SVGLineElement | null>(null);
+  const lastReportedSecondRef = useRef(-1);
 
-  const resetVisualizer = useCallback(() => {
-    if (!visualizerRef.current) {
-      return;
+  const applyProgressRatio = useCallback((ratio: number) => {
+    const clamped = Math.max(0, Math.min(1, ratio));
+    const pct = `${(clamped * 100).toFixed(2)}%`;
+    if (progressBarRef.current) {
+      progressBarRef.current.style.width = pct;
     }
-
-    for (const bar of visualizerRef.current.children) {
-      (bar as HTMLElement).style.setProperty('--bar-height', '18%');
+    if (playheadRef.current) {
+      const x = (clamped * 320).toFixed(2);
+      playheadRef.current.setAttribute("x1", x);
+      playheadRef.current.setAttribute("x2", x);
     }
   }, []);
 
-  const resetPlaybackDisplay = useCallback(() => {
-    if (timeTextRef.current) {
-      timeTextRef.current.innerText = '00:00';
-    }
+  const resetProgress = useCallback(() => {
+    applyProgressRatio(0);
+    lastReportedSecondRef.current = 0;
+    setElapsedSeconds(0);
+  }, [applyProgressRatio]);
 
-    if (progressBarRef.current) {
-      progressBarRef.current.style.width = '0%';
-    }
-
-    resetVisualizer();
-  }, [resetVisualizer]);
-
-  const tickVisualizer = useCallback(() => {
+  const tickProgress = useCallback(() => {
     const audio = audioRef.current;
     const current = audio?.currentTime ?? 0;
-    const total = audio?.duration && Number.isFinite(audio.duration) ? audio.duration : 30;
+    const total =
+      audio?.duration && Number.isFinite(audio.duration) && audio.duration > 0
+        ? audio.duration
+        : 120;
 
-    if (timeTextRef.current) {
-      timeTextRef.current.innerText = `${formatTime(current)} / ${formatTime(total)}`;
+    applyProgressRatio(current / total);
+
+    const wholeSec = Math.floor(current);
+    if (wholeSec !== lastReportedSecondRef.current) {
+      lastReportedSecondRef.current = wholeSec;
+      setElapsedSeconds(wholeSec);
+      if (audio?.duration && Number.isFinite(audio.duration)) {
+        setDurationSeconds(Math.floor(audio.duration));
+      }
     }
 
-    if (progressBarRef.current) {
-      progressBarRef.current.style.width = `${Math.min(100, (current / total) * 100)}%`;
-    }
-
-    if (visualizerRef.current) {
-      const bars = Array.from(visualizerRef.current.children) as HTMLElement[];
-
-      bars.forEach((bar, index) => {
-        const motion = Math.abs(Math.sin(Date.now() * 0.006 + index * 0.7));
-        bar.style.setProperty('--bar-height', `${Math.max(18, motion * 100)}%`);
-      });
-    }
-
-    animationFrameRef.current = requestAnimationFrame(tickVisualizer);
-  }, []);
+    animationFrameRef.current = requestAnimationFrame(tickProgress);
+  }, [applyProgressRatio]);
 
   const requestAudioPlay = useCallback((audio: HTMLAudioElement | null) => {
     const playAttempt = playAttemptRef.current + 1;
@@ -99,11 +97,40 @@ export function useMusicPlayer(trackCount: number) {
 
   const selectRelativeTrack = useCallback(
     (direction: TrackDirection) => {
-      setTrackIndex((currentIndex) => {
-        return (currentIndex + direction + safeTrackCount) % safeTrackCount;
-      });
+      setTrackIndex(
+        (currentIndex) =>
+          (currentIndex + direction + safeTrackCount) % safeTrackCount,
+      );
     },
     [safeTrackCount],
+  );
+
+  const selectTrack = useCallback(
+    (nextIndex: number) => {
+      const normalized =
+        ((Math.trunc(nextIndex) % safeTrackCount) + safeTrackCount) %
+        safeTrackCount;
+      setTrackIndex(normalized);
+    },
+    [safeTrackCount],
+  );
+
+  const seekToRatio = useCallback(
+    (ratio: number) => {
+      const clamped = Math.max(0, Math.min(1, ratio));
+      const audio = audioRef.current;
+      if (
+        audio &&
+        audio.duration &&
+        Number.isFinite(audio.duration) &&
+        audio.duration > 0
+      ) {
+        audio.currentTime = clamped * audio.duration;
+        setElapsedSeconds(Math.floor(audio.currentTime));
+      }
+      applyProgressRatio(clamped);
+    },
+    [applyProgressRatio],
   );
 
   const togglePlaying = useCallback(() => {
@@ -134,12 +161,12 @@ export function useMusicPlayer(trackCount: number) {
       setIsPlaying(true);
     };
 
-    document.addEventListener('pointerdown', resumeFromGesture, true);
-    document.addEventListener('keydown', resumeFromGesture, true);
+    document.addEventListener("pointerdown", resumeFromGesture, true);
+    document.addEventListener("keydown", resumeFromGesture, true);
 
     return () => {
-      document.removeEventListener('pointerdown', resumeFromGesture, true);
-      document.removeEventListener('keydown', resumeFromGesture, true);
+      document.removeEventListener("pointerdown", resumeFromGesture, true);
+      document.removeEventListener("keydown", resumeFromGesture, true);
     };
   }, [needsUserActivation]);
 
@@ -151,7 +178,7 @@ export function useMusicPlayer(trackCount: number) {
     const audio = audioRef.current;
 
     if (audio) {
-      audio.volume = 0.7;
+      audio.volume = 0.72;
     }
 
     if (isPlaying) {
@@ -161,7 +188,7 @@ export function useMusicPlayer(trackCount: number) {
         cancelAnimationFrame(animationFrameRef.current);
       }
 
-      animationFrameRef.current = requestAnimationFrame(tickVisualizer);
+      animationFrameRef.current = requestAnimationFrame(tickProgress);
     } else {
       playAttemptRef.current += 1;
       audio?.pause();
@@ -170,8 +197,6 @@ export function useMusicPlayer(trackCount: number) {
         cancelAnimationFrame(animationFrameRef.current);
         animationFrameRef.current = null;
       }
-
-      resetVisualizer();
     }
 
     return () => {
@@ -179,7 +204,7 @@ export function useMusicPlayer(trackCount: number) {
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [isPlaying, requestAudioPlay, resetVisualizer, tickVisualizer]);
+  }, [isPlaying, requestAudioPlay, tickProgress]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -189,30 +214,26 @@ export function useMusicPlayer(trackCount: number) {
       return;
     }
 
-    resetPlaybackDisplay();
+    resetProgress();
+    setDurationSeconds(0);
     audio?.load();
 
     if (isPlayingRef.current) {
       requestAudioPlay(audio);
     }
-  }, [trackIndex, requestAudioPlay, resetPlaybackDisplay]);
-
-  useEffect(() => {
-    return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-    };
-  }, []);
+  }, [trackIndex, requestAudioPlay, resetProgress]);
 
   return {
     audioRef,
+    durationSeconds,
+    elapsedSeconds,
     isPlaying,
+    playheadRef,
     progressBarRef,
+    seekToRatio,
     selectRelativeTrack,
-    timeTextRef,
+    selectTrack,
     togglePlaying,
     trackIndex,
-    visualizerRef,
   };
 }

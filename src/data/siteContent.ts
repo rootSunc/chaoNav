@@ -1,51 +1,38 @@
-export type NavigationId = 'profile' | 'projects' | 'github' | 'linkedin' | 'resume' | 'blog';
+import type { NoteId } from "./notes";
 
 type NonEmptyArray<T> = readonly [T, ...T[]];
 
-export type ProjectId = 'sanakirja' | 'arkiwatch' | 'qparking' | 'luxestate' | 'ashare';
+export type ProjectId =
+  | "cnequity"
+  | "arkiwatch"
+  | "suomeksi"
+  | "daisynotice"
+  | "qparking";
+
+export type CadenceArtifactId = NoteId | "score" | "coast";
 
 export type Profile = {
   readonly name: string;
-  readonly role: string;
-  readonly descriptor: string;
-  readonly heroEyebrow: string;
-  readonly tags: readonly string[];
-};
-
-export type TerminalAction = {
-  readonly label: string;
-  readonly href: string;
-  readonly external?: boolean;
-};
-
-export type TerminalLine =
-  | {
-      readonly kind: 'text';
-      readonly text: string;
-    }
-  | {
-      readonly kind: 'link';
-      readonly label: string;
-      readonly href: string;
-      readonly text: string;
-      readonly external?: boolean;
-    };
-
-export type NavigationLink = {
-  readonly id: NavigationId;
-  readonly label: string;
-  readonly external?: boolean;
-  readonly command: string;
-  readonly lines: NonEmptyArray<TerminalLine>;
-  readonly actions: readonly TerminalAction[];
+  readonly fullName: string;
+  readonly coordinates: string;
+  readonly place: string;
+  readonly inscription: string;
+  readonly subInscription: string;
+  readonly email: string;
+  readonly githubUrl: string;
+  readonly linkedinUrl: string;
 };
 
 export type ProjectShowcaseItem = {
   readonly id: ProjectId;
+  readonly index: string;
   readonly name: string;
   readonly category: string;
+  readonly stackMark: string;
   readonly headline: string;
   readonly summary: string;
+  readonly resonanceLine: string;
+  readonly resonances: readonly CadenceArtifactId[];
   readonly href: string;
   readonly ctaLabel: string;
   readonly external: boolean;
@@ -54,393 +41,185 @@ export type ProjectShowcaseItem = {
       readonly src: string;
       readonly alt: string;
     };
-    readonly mobile: {
-      readonly src: string;
-      readonly alt: string;
-    };
   };
   readonly highlights: readonly [string, string];
-  readonly note?: string;
+  readonly note: string;
 };
 
 export type ProjectsPageContent = {
   readonly eyebrow: string;
   readonly title: string;
+  readonly lead: string;
   readonly intro: string;
   readonly projects: NonEmptyArray<ProjectShowcaseItem>;
 };
 
 export type SiteContent = {
   readonly profile: Profile;
-  readonly links: NonEmptyArray<NavigationLink>;
   readonly projectsPage: ProjectsPageContent;
-  readonly initialLinkId: NavigationId;
 };
 
 export const siteContent = {
   profile: {
-    name: 'Chao',
-    role: 'Software Architect',
-    descriptor: 'Crafting tools, chasing ideas, and enjoying life one commit at a time.',
-    heroEyebrow: 'Personal navigation / session online',
-    tags: [
-      'Full-Stack',
-      'Open Source',
-      'Typography',
-      'Coffee',
-      'Vinyl',
-      'Photography',
-      'Minimalism',
-      'Cycling',
-      'Reading',
-      'Finnish Life',
-    ],
+    name: "Chao Sun",
+    fullName: "Chao Sun",
+    coordinates: "60°10′N · 24°56′E",
+    place: "Helsinki",
+    inscription:
+      "Systems built for permanence; instruments shaped by everyday life in the north.",
+    subInscription:
+      "Software architect and builder working across local-first data infrastructure, civic telemetry, and quiet daily tools.",
+    email: "chao.sun.me@gmail.com",
+    githubUrl: "https://github.com/rootSunc",
+    linkedinUrl: "https://www.linkedin.com/in/chaosun526/",
   },
-  links: [
-    {
-      id: 'profile',
-      label: 'Profile',
-      command: 'cat ~/life-and-work/manifesto.txt',
-      lines: [
-        {
-          kind: 'text',
-          text: 'focus       product-minded developer shaping reliable systems with human pace',
-        },
-        {
-          kind: 'text',
-          text: 'base        Helsinki, building for the web between coffee, bikes, and northern light',
-        },
-        {
-          kind: 'text',
-          text: 'craft       turns fuzzy ideas into calm interfaces, useful automation, and maintainable code',
-        },
-        {
-          kind: 'text',
-          text: 'ai          AI practitioner applying models to daily tools, product loops, and useful automation',
-        },
-        {
-          kind: 'text',
-          text: 'standard    clear tradeoffs, steady delivery, thoughtful tests, and no drama in prod',
-        },
-        {
-          kind: 'text',
-          text: 'life        good meals, photo walks, reading nights, and energy kept sustainable',
-        },
-        {
-          kind: 'text',
-          text: 'open        selective collaborations on products that make daily life better',
-        },
-      ],
-      actions: [
-        {
-          label: 'Start a conversation',
-          href: 'mailto:chao.sun.me@gmail.com',
-        },
-      ],
-    },
-    {
-      id: 'projects',
-      label: 'Projects',
-      command: 'ls ~/craft/selected-work --with-context',
-      lines: [
-        {
-          kind: 'text',
-          text: 'Sanakirja   Finnish vocabulary practice for slow, steady language progress',
-        },
-        {
-          kind: 'text',
-          text: 'ArkiWatch   Finland-focused life-data assistant for weather, transit, air, and energy signals',
-        },
-        {
-          kind: 'text',
-          text: 'QParking    quick parking-zone lookup for Helsinki errands and less curbside guessing',
-        },
-        {
-          kind: 'text',
-          text: 'LuxEstate   premium property search with a calm, polished presentation layer',
-        },
-        {
-          kind: 'text',
-          text: 'Ashare      local A-share data lake plus research workbench for factors and signals',
-        },
-      ],
-      actions: [
-        {
-          label: 'Open Sanakirja',
-          href: 'https://sanakirja.chaosun.xyz/',
-          external: true,
-        },
-        {
-          label: 'Open ArkiWatch',
-          href: 'https://arkiwatch.chaosun.xyz/',
-          external: true,
-        },
-        {
-          label: 'Open QParking',
-          href: 'https://qparking.chaosun.xyz/',
-          external: true,
-        },
-        {
-          label: 'Open LuxEstate',
-          href: 'https://luxestate-indol.vercel.app/',
-          external: true,
-        },
-        {
-          label: 'View Ashare',
-          href: 'https://github.com/rootSunc/ashare-workbench',
-          external: true,
-        },
-      ],
-    },
-    {
-      id: 'github',
-      label: 'GitHub',
-      external: true,
-      command: 'gh repo list rootSunc --public --source',
-      lines: [
-        {
-          kind: 'link',
-          label: 'GitHub',
-          href: 'https://github.com/rootSunc',
-          text: 'account     rootSunc',
-          external: true,
-        },
-        {
-          kind: 'text',
-          text: 'rhythm      experiments, product code, and steady commits when the problem deserves it',
-        },
-        {
-          kind: 'text',
-          text: 'style       pragmatic architecture, readable code, and curiosity kept in motion',
-        },
-        {
-          kind: 'text',
-          text: 'balance     tools for work, side projects for play, learning folded into daily life',
-        },
-      ],
-      actions: [
-        {
-          label: 'Open GitHub',
-          href: 'https://github.com/rootSunc',
-          external: true,
-        },
-      ],
-    },
-    {
-      id: 'linkedin',
-      label: 'LinkedIn',
-      external: true,
-      command: 'open ~/network/professional-context',
-      lines: [
-        {
-          kind: 'link',
-          label: 'LinkedIn',
-          href: 'https://www.linkedin.com/in/chaosun526/',
-          text: 'network     professional context, shared references, and practical collaboration history',
-          external: true,
-        },
-        {
-          kind: 'text',
-          text: 'use         introductions, role context, and the human side of the work',
-        },
-        {
-          kind: 'text',
-          text: 'signal      concise background for teams who value clarity, trust, and momentum',
-        },
-      ],
-      actions: [
-        {
-          label: 'Open LinkedIn',
-          href: 'https://www.linkedin.com/in/chaosun526/',
-          external: true,
-        },
-      ],
-    },
-    {
-      id: 'resume',
-      label: 'Resume',
-      command: 'request ~/resume.pdf --channel=email --context=collaboration',
-      lines: [
-        {
-          kind: 'text',
-          text: 'status      private one-page PDF, kept current for serious conversations',
-        },
-        {
-          kind: 'text',
-          text: 'contains    recent projects, architecture range, delivery habits, and contact details',
-        },
-        {
-          kind: 'text',
-          text: 'route       request by email when a formal document would make the next step easier',
-        },
-      ],
-      actions: [
-        {
-          label: 'Request resume',
-          href: 'mailto:chao.sun.me@gmail.com?subject=Resume%20request',
-        },
-      ],
-    },
-    {
-      id: 'blog',
-      label: 'Blog',
-      command: 'cat ~/writing/index.txt --recent 3',
-      lines: [
-        {
-          kind: 'text',
-          text: '2025-12   calmer study tools — fewer surfaces, tighter loops, Finnish on the side',
-        },
-        {
-          kind: 'text',
-          text: '2025-10   public data in daily life — weather, air, and commute as one morning glance',
-        },
-        {
-          kind: 'text',
-          text: '2025-06   shipping without burnout — scope tiers, good-enough polish, and weekend boundaries',
-        },
-        {
-          kind: 'text',
-          text: 'channel     short notes live here; longer essays shared by email when they help',
-        },
-      ],
-      actions: [
-        {
-          label: 'Ask for a longer essay',
-          href: 'mailto:chao.sun.me@gmail.com?subject=Essay%20request',
-        },
-        {
-          label: 'Browse build notes on GitHub',
-          href: 'https://github.com/rootSunc',
-          external: true,
-        },
-      ],
-    },
-  ],
   projectsPage: {
-    eyebrow: 'Selected work / 2024–2026',
-    title: 'Projects',
+    eyebrow: "I. SYSTEMS LEDGER / 2024–2026",
+    title: "Systems",
+    lead: "Local-first infrastructure, civic telemetry, and calm daily instruments.",
     intro:
-      'A small set of products and experiments—language tools, local data dashboards, urban utilities, and a quant research stack—built for daily use rather than demo polish.',
+      "Five working systems—each represented first by how it thinks, with full interface plates and live deployments beneath.",
     projects: [
       {
-        id: 'sanakirja',
-        name: 'Sanakirja',
-        category: 'Language learning',
-        headline: 'Finnish dictionary and study workspace for everyday learning.',
+        id: "cnequity",
+        index: "01",
+        name: "CNEquity",
+        category: "Data infrastructure · MCP",
+        stackMark: "Parquet · DuckDB · Python · MCP",
+        headline:
+          "Open-source China A-share local data lake and point-in-time quant research stack.",
         summary:
-          'A clean learning surface that keeps dictionary lookup, grammar help, translation, flashcards, and notes close together.',
-        href: 'https://sanakirja.chaosun.xyz/',
-        ctaLabel: 'Open Sanakirja',
+          "Self-hosted columnar data lake covering 86 daily-updated datasets with strict point-in-time adjustments, historical constituents, row-level lineage, and a native MCP server—paired with EquityLab for factor research.",
+        resonanceLine:
+          "Temporal discipline: history held invariant, like measures in a score.",
+        resonances: ["note-pit", "score"],
+        href: "https://github.com/rootSunc/CNEquity",
+        ctaLabel: "Explore CNEquity",
         external: true,
         screenshots: {
           web: {
-            src: '/images/projects/sanakirja-web.jpg',
-            alt: 'Sanakirja web screenshot',
-          },
-          mobile: {
-            src: '/images/projects/sanakirja-mobile.jpg',
-            alt: 'Sanakirja mobile screenshot',
-          },
-        },
-        highlights: ['Focused learning workflow', 'Responsive product shell'],
-        note: 'Built while learning Finnish—calm rhythm over streak pressure.',
-      },
-      {
-        id: 'arkiwatch',
-        name: 'ArkiWatch',
-        category: 'Local intelligence',
-        headline: 'Live Finland public-data dashboard for daily life signals.',
-        summary:
-          'A running dashboard that turns weather, air quality, commute, energy, and city signals into one daily operating view for Finland.',
-        href: 'https://arkiwatch.chaosun.xyz/',
-        ctaLabel: 'Open ArkiWatch',
-        external: true,
-        screenshots: {
-          web: {
-            src: '/images/projects/arkiwatch-web.jpg',
-            alt: 'ArkiWatch live dashboard web screenshot',
-          },
-          mobile: {
-            src: '/images/projects/arkiwatch-mobile.jpg',
-            alt: 'ArkiWatch live dashboard mobile screenshot',
-          },
-        },
-        highlights: ['Weather, transit, air, and energy signals', 'FastAPI + Next.js public-data pipeline'],
-        note: 'Public APIs piped into one morning glance—accuracy before feature sprawl.',
-      },
-      {
-        id: 'qparking',
-        name: 'QParking',
-        category: 'Urban utility',
-        headline: 'Helsinki parking-zone lookup with fast comparison.',
-        summary:
-          'A compact parking app that makes zones, city filtering, and price context easier to scan before a trip.',
-        href: 'https://qparking.chaosun.xyz/',
-        ctaLabel: 'Open QParking',
-        external: true,
-        screenshots: {
-          web: {
-            src: '/images/projects/qparking-web.jpg',
-            alt: 'QParking web screenshot',
-          },
-          mobile: {
-            src: '/images/projects/qparking-mobile.jpg',
-            alt: 'QParking mobile screenshot',
-          },
-        },
-        highlights: ['City-focused data presentation', 'Mobile-first errand flow'],
-        note: 'Errand-scale utility: scan zones quickly, decide, and move on.',
-      },
-      {
-        id: 'luxestate',
-        name: 'LuxEstate',
-        category: 'Property search',
-        headline: 'Real-estate marketplace with polished browsing and search.',
-        summary:
-          'A property search interface focused on strong first impression, listing cards, filtering, and a clear marketplace browsing path.',
-        href: 'https://luxestate-indol.vercel.app/',
-        ctaLabel: 'Open LuxEstate',
-        external: true,
-        screenshots: {
-          web: {
-            src: '/images/projects/luxestate-web.jpg',
-            alt: 'LuxEstate web screenshot',
-          },
-          mobile: {
-            src: '/images/projects/luxestate-mobile.jpg',
-            alt: 'LuxEstate mobile screenshot',
-          },
-        },
-        highlights: ['Hero-led marketplace positioning', 'Responsive listing layout'],
-        note: 'Presentation-layer exploration—search UX and listing rhythm over backend depth.',
-      },
-      {
-        id: 'ashare',
-        name: 'Ashare',
-        category: 'Quant research',
-        headline: 'Local A-share data lake and research workbench.',
-        summary:
-          'ashare-lake ingests and curates multi-source Parquet market data; ashare-workbench turns it into factors, backtests, daily signals, and review—advisory only, no order routing.',
-        href: 'https://github.com/rootSunc/ashare-workbench',
-        ctaLabel: 'View on GitHub',
-        external: true,
-        screenshots: {
-          web: {
-            src: '/images/projects/ashare-web.jpg',
-            alt: 'Ashare workbench dashboard web screenshot',
-          },
-          mobile: {
-            src: '/images/projects/ashare-mobile.jpg',
-            alt: 'Ashare workbench dashboard mobile screenshot',
+            src: "/images/projects/ashare-web.jpg",
+            alt: "CNEquity and EquityLab quant research workbench screenshot",
           },
         },
         highlights: [
-          'Parquet lake with multi-source daily refresh',
-          'Factors, walk-forward backtests, and daily brief',
+          "86 daily Parquet/DuckDB datasets with strict point-in-time lineage",
+          "Native MCP server + EquityLab factor & walk-forward backtest workbench",
         ],
-        note: 'Two repos, one stack—ashare-lake for data, ashare-workbench for research.',
+        note: "1,000+ GitHub stars—token-free, single-machine data infrastructure for research and agents.",
+      },
+      {
+        id: "arkiwatch",
+        index: "02",
+        name: "ArkiWatch",
+        category: "Civic telemetry",
+        stackMark: "Go · Next.js · Open APIs",
+        headline:
+          "Live Finland public-data workspace turning municipal signals into one morning view.",
+        summary:
+          "Aggregates weather warnings, air quality, HSL transit disruptions, electricity spot prices, and city events across Finland into a single calm operational surface.",
+        resonanceLine:
+          "Born from checking wind, air, and rail before heading out into Helsinki.",
+        resonances: ["note-civic", "coast"],
+        href: "https://arkiwatch.chaosun.xyz/",
+        ctaLabel: "Open ArkiWatch",
+        external: true,
+        screenshots: {
+          web: {
+            src: "/images/projects/arkiwatch-web.jpg",
+            alt: "ArkiWatch live dashboard web screenshot",
+          },
+        },
+        highlights: [
+          "Weather, HSL transit, air quality, and NordPool spot energy feeds",
+          "Go ingestion pipeline + calm morning operating view",
+        ],
+        note: "Public endpoints distilled into one glance—signal clarity over dashboard sprawl.",
+      },
+      {
+        id: "suomeksi",
+        index: "03",
+        name: "Suomeksi",
+        category: "Language workspace",
+        stackMark: "TypeScript · Morphology · SRS",
+        headline:
+          "Self-hostable Finnish dictionary, morphological analyzer, and study workspace.",
+        summary:
+          "Places morphological inflection lookup, grammar reference, bilingual context, and Anki-ready flashcards onto one quiet study desk at sanakirja.chaosun.xyz.",
+        resonanceLine:
+          "Unpacking an agglutinative language one root at a time, without streak noise.",
+        resonances: ["note-study"],
+        href: "https://sanakirja.chaosun.xyz/",
+        ctaLabel: "Open Suomeksi",
+        external: true,
+        screenshots: {
+          web: {
+            src: "/images/projects/sanakirja-web.jpg",
+            alt: "Suomeksi Finnish dictionary and study workspace screenshot",
+          },
+        },
+        highlights: [
+          "Morphological stem & case lookup paired with grammar context",
+          "Spaced-repetition flashcards & personal notebook without gamification",
+        ],
+        note: "Evolved from Sanakirja—steady comprehension over daily notification pressure.",
+      },
+      {
+        id: "daisynotice",
+        index: "04",
+        name: "DaisyNotice",
+        category: "Zero-VPS automation",
+        stackMark: "Playwright · GitHub Actions · Webhooks",
+        headline:
+          "Daycare bulletin monitor with Finnish-to-English translation and deduplicated fanout.",
+        summary:
+          "Polls Pilke DaisyFamily on a serverless schedule via headless Playwright, translates notices into English, and dispatches deduplicated alerts with attachments to Telegram, Email, and WeChat Work.",
+        resonanceLine:
+          "Quiet domestic reliability so a rain-gear note never slips past a busy morning.",
+        resonances: ["note-family"],
+        href: "https://github.com/rootSunc/DaisyNotice",
+        ctaLabel: "View DaisyNotice",
+        external: true,
+        screenshots: {
+          web: {
+            src: "/images/projects/daisynotice-web.jpg",
+            alt: "DaisyNotice message monitor and translation pipeline screenshot",
+          },
+        },
+        highlights: [
+          "Headless Playwright polling with deterministic state deduplication",
+          "Automatic FI→EN translation & multi-channel family fanout",
+        ],
+        note: "Runs entirely on scheduled GitHub Actions—zero servers to babysit.",
+      },
+      {
+        id: "qparking",
+        index: "05",
+        name: "QParking",
+        category: "Urban utility",
+        stackMark: "GeoJSON · Capital Region · PWA",
+        headline:
+          "Helsinki, Espoo, and Vantaa parking-zone lookup with instant rate comparison.",
+        summary:
+          "A compact urban instrument for the Finnish capital region that makes municipal and commercial parking zones, hourly rates, and map handoff effortless to scan curbside.",
+        resonanceLine:
+          "Scoped strictly to the ten seconds between pulling over and locking the door.",
+        resonances: ["note-pace", "coast"],
+        href: "https://qparking.chaosun.xyz/",
+        ctaLabel: "Open QParking",
+        external: true,
+        screenshots: {
+          web: {
+            src: "/images/projects/qparking-web.jpg",
+            alt: "QParking web screenshot",
+          },
+        },
+        highlights: [
+          "Helsinki, Espoo & Vantaa municipal zone and tariff comparison",
+          "Errand-scale mobile flow with instant map handoff",
+        ],
+        note: "Small on purpose: scan capital-region zones, decide, and move on.",
       },
     ],
   },
-  initialLinkId: 'profile',
 } satisfies SiteContent;

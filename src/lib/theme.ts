@@ -3,8 +3,8 @@ export type Theme = "dark" | "light";
 export const THEME_STORAGE_KEY = "chaonav-theme";
 
 const THEME_COLORS: Record<Theme, string> = {
-  dark: "#101211",
-  light: "#f3f4ef",
+  dark: "#0c1117",
+  light: "#f2efe8",
 };
 
 export function resolveTheme(storedTheme: string | null): Theme {

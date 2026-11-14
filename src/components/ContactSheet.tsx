@@ -13,6 +13,7 @@ export function ContactSheet({
   const dialog = useRef<HTMLDialogElement>(null);
   const [status, setStatus] = useState("");
   const dragStart = useRef<number | null>(null);
+
   useEffect(() => {
     if (!open) {
       if (dialog.current?.open) dialog.current.close();
@@ -26,6 +27,7 @@ export function ContactSheet({
       document.body.style.overflow = previous;
     };
   }, [open]);
+
   async function copyEmail() {
     try {
       await navigator.clipboard.writeText(email);
@@ -34,6 +36,7 @@ export function ContactSheet({
       setStatus(`Copy this address: ${email}`);
     }
   }
+
   return (
     <dialog
       ref={dialog}
@@ -47,6 +50,7 @@ export function ContactSheet({
     >
       <div className="sheet-content">
         <button
+          type="button"
           className="sheet-drag-handle"
           aria-label="Dismiss contact panel"
           onClick={onClose}
@@ -55,8 +59,9 @@ export function ContactSheet({
             event.currentTarget.setPointerCapture(event.pointerId);
           }}
           onPointerMove={(event) => {
-            if (dragStart.current !== null && dialog.current)
+            if (dragStart.current !== null && dialog.current) {
               dialog.current.style.translate = `0 ${Math.max(0, event.clientY - dragStart.current)}px`;
+            }
           }}
           onPointerUp={(event) => {
             const distance =
@@ -74,9 +79,11 @@ export function ContactSheet({
         >
           <span className="sheet-handle" />
         </button>
+
         <div className="sheet-heading">
-          <span className="eyebrow">LET’S CONNECT</span>
+          <span className="specimen-mono-label">CORRESPONDENCE · HELSINKI</span>
           <button
+            type="button"
             className="icon-button"
             aria-label="Close contact options"
             onClick={onClose}
@@ -84,49 +91,56 @@ export function ContactSheet({
             <Glyph name="plus" className="close-icon" />
           </button>
         </div>
-        <h2 id="contact-title">
-          A conversation
-          <br />
-          is a good start<span>.</span>
-        </h2>
-        <p>Have an idea, a question, or just a hello?</p>
+
+        <h2 id="contact-title">Write a note.</h2>
+        <p>
+          For architectural questions, thoughtful collaborations, or an unhurried
+          exchange of ideas.
+        </p>
+
         <a className="sheet-email" href={`mailto:${email}`}>
           <Glyph name="mail" />
           <span>
-            <strong>Send an email</strong>
+            <strong>Direct email</strong>
             <small>{email}</small>
           </span>
           <Glyph name="arrow" />
         </a>
+
         <div className="sheet-actions">
-          <button onClick={copyEmail}>
+          <button type="button" onClick={copyEmail}>
             <Glyph name="copy" />
-            Copy email
+            <span>Copy email</span>
           </button>
           <a href="/chao.vcf" download="Chao-Sun.vcf">
             <Glyph name="profile" />
-            Save contact
+            <span>Save contact</span>
           </a>
         </div>
+
         <div className="sheet-socials">
           <a
             href="https://github.com/rootSunc"
             target="_blank"
             rel="noreferrer"
           >
-            GitHub <Glyph name="arrow" />
+            <span>GitHub</span>
+            <Glyph name="arrow" />
           </a>
           <a
             href="https://www.linkedin.com/in/chaosun526/"
             target="_blank"
             rel="noreferrer"
           >
-            LinkedIn <Glyph name="arrow" />
+            <span>LinkedIn</span>
+            <Glyph name="arrow" />
           </a>
           <a href={`mailto:${email}?subject=Resume%20request`}>
-            Résumé <Glyph name="arrow" />
+            <span>Résumé</span>
+            <Glyph name="arrow" />
           </a>
         </div>
+
         <div className="sheet-status" role="status">
           {status}
         </div>

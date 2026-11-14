@@ -1,48 +1,26 @@
-# Chao Navi
+# Chao Sun — Contrapuntal Workbench (`chaosun.xyz`)
 
-A compact personal navigation page built with React, Vite, and TypeScript.
+A personal space and engineering workbench built with React, Vite, and TypeScript—set in Helsinki (`60°10′N, 24°56′E`).
 
 ## Commands
 
 ```sh
 pnpm install
 pnpm dev
-pnpm test
+pnpm test --run
 pnpm build
 ```
 
-## Structure
+## Architecture
 
-- `src/App.tsx` wires the page-level state and layout.
-- `src/components/` contains presentational UI pieces.
-- `src/data/` contains profile/navigation content and music metadata.
-- `src/hooks/` contains browser-facing stateful behavior.
-- `src/lib/` contains small pure utilities and shared types.
-- `public/` contains static media served by Vite.
+- `src/lib/helsinkiSolar.ts` computes deterministic solar elevation, azimuth, sunrise/sunset, and northern sky light phases for Helsinki directly on the client clock (with a 24-hour scrubbable horizon curve in `SolarHorizonBar.tsx`).
+- `src/App.tsx` wires route lenses (`/` Field, `/projects` Systems, `/notes` Cadence), persistent classical audio playback, and Northern Slate / Daylight Paper polarity.
+- `src/components/HomeView.tsx` composes the two-voice **Contrapuntal Workbench** (`I. Systems` and `II. Cadence`) bridged by a live `ResizeObserver`-measured SVG Bézier resonance spine.
+- `src/components/specimens/ProjectSpecimens.tsx` & `SystemArtifact.tsx` pair working miniature instruments (`CNEquity`, `ArkiWatch`, `Suomeksi`, `DaisyNotice`, `QParking`) with optional deep-inspection interface plates.
+- `src/components/ScorePlayer.tsx`, `CoastalContour.tsx`, and `FieldNotesLedger.tsx` house chamber recordings, the 26.4 km western Helsinki islands coastal loop, and expandable field notes.
+- `src/styles/workbench.css` and `src/styles/mobile.css` define the visual system, northern horizon atmosphere, responsive breakpoints, thumb-level mobile lens bar (`<= 600px`), and `prefers-reduced-motion` support.
 
-Music source and license metadata lives with each track in `src/data/musicLibrary.ts`.
+## Verification
 
-## Personal card
-
-The site has three static entry routes: `/`, `/projects`, and `/notes`.
-`pnpm build` produces each route in `dist/` for static hosting.
-
-The active visual system is `src/styles/card.css`, including light and dark
-palettes, responsive layouts, and reduced-motion support. The hero sculpture
-is generated as SVG, so the new pages do not require WebGL. Featured work,
-notes, and music are editable under `src/data/`.
-
-Run `pnpm test --run` for unit tests and `pnpm test:e2e` for browser and visual
-checks. Install Chromium with `pnpm exec playwright install chromium` first,
-or use `PLAYWRIGHT_CHANNEL=chrome pnpm test:e2e` with an installed Chrome.
-
-### Mobile experience
-
-At widths up to 600px the page uses a thumb-reachable bottom navigation,
-native scroll-snap project browsing, a compact music row, and a contact
-sheet with clipboard and vCard actions. Tab navigation retains reading
-positions. The player stays accessible on other pages while audio is playing.
-`src/styles/mobile.css` owns this mobile composition; `useMobileLayout`
-selects the interaction surfaces. Safe-area insets and reduced motion are
-supported. Run the touch-emulated checks with
-`pnpm test:e2e --project=mobile-chromium`.
+`pnpm build` produces static prerendered routes (`/`, `/projects`, `/notes`) in `dist/`.
+Run `pnpm test --run` for unit tests and `PLAYWRIGHT_CHANNEL=chrome pnpm test:e2e` (or `pnpm exec playwright install chromium && pnpm test:e2e`) for interaction, mobile touch, and visual regression checks.

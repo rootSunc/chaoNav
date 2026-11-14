@@ -7,13 +7,16 @@ import {
 } from "./helpers";
 
 test.describe("visual regression", () => {
-  test("personal card desktop dark", async ({ page }) => {
+  test("workbench field desktop dark", async ({ page }) => {
     await prepareVisualPage(page, "dark");
-    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.setViewportSize({ width: 1280, height: 860 });
     await page.goto("/");
     await waitForStableShell(page);
     await expect(
-      page.getByRole("heading", { level: 1, name: "Chao." }),
+      page.getByRole("heading", {
+        level: 1,
+        name: /Systems built for permanence/i,
+      }),
     ).toBeVisible();
 
     await expect(page).toHaveScreenshot("home-desktop-dark.png", {
@@ -22,13 +25,16 @@ test.describe("visual regression", () => {
     });
   });
 
-  test("personal card desktop light", async ({ page }) => {
+  test("workbench field desktop light", async ({ page }) => {
     await prepareVisualPage(page, "light");
-    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.setViewportSize({ width: 1280, height: 860 });
     await page.goto("/");
     await waitForStableShell(page);
     await expect(
-      page.getByRole("heading", { level: 1, name: "Chao." }),
+      page.getByRole("heading", {
+        level: 1,
+        name: /Systems built for permanence/i,
+      }),
     ).toBeVisible();
 
     await expect(page).toHaveScreenshot("home-desktop-light.png", {
@@ -37,13 +43,13 @@ test.describe("visual regression", () => {
     });
   });
 
-  test("projects page desktop dark", async ({ page }) => {
+  test("systems ledger desktop dark", async ({ page }) => {
     await prepareVisualPage(page, "dark");
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto("/projects");
     await waitForStableShell(page);
     await expect(
-      page.getByRole("heading", { level: 1, name: "Projects." }),
+      page.getByRole("heading", { level: 1, name: "Systems" }),
     ).toBeVisible();
 
     await expect(page).toHaveScreenshot("projects-desktop-dark.png", {
@@ -52,13 +58,13 @@ test.describe("visual regression", () => {
     });
   });
 
-  test("projects page desktop light", async ({ page }) => {
+  test("systems ledger desktop light", async ({ page }) => {
     await prepareVisualPage(page, "light");
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto("/projects");
     await waitForStableShell(page);
     await expect(
-      page.getByRole("heading", { level: 1, name: "Projects." }),
+      page.getByRole("heading", { level: 1, name: "Systems" }),
     ).toBeVisible();
 
     await expect(page).toHaveScreenshot("projects-desktop-light.png", {
@@ -67,7 +73,7 @@ test.describe("visual regression", () => {
     });
   });
 
-  test("personal card mobile dark", async ({ page }) => {
+  test("workbench field mobile dark", async ({ page }) => {
     await prepareVisualPage(page, "dark");
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/");
@@ -82,7 +88,7 @@ test.describe("visual regression", () => {
     });
   });
 
-  test("personal card mobile light", async ({ page }) => {
+  test("workbench field mobile light", async ({ page }) => {
     await prepareVisualPage(page, "light");
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/");
@@ -97,13 +103,13 @@ test.describe("visual regression", () => {
     });
   });
 
-  test("projects page mobile dark", async ({ page }) => {
+  test("systems ledger mobile dark", async ({ page }) => {
     await prepareVisualPage(page, "dark");
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/projects");
     await waitForStableShell(page);
     await expect(
-      page.getByRole("heading", { level: 1, name: "Projects." }),
+      page.getByRole("heading", { level: 1, name: "Systems" }),
     ).toBeVisible();
 
     await expect(page).toHaveScreenshot("projects-mobile-dark.png", {
@@ -112,13 +118,13 @@ test.describe("visual regression", () => {
     });
   });
 
-  test("projects page mobile light", async ({ page }) => {
+  test("systems ledger mobile light", async ({ page }) => {
     await prepareVisualPage(page, "light");
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/projects");
     await waitForStableShell(page);
     await expect(
-      page.getByRole("heading", { level: 1, name: "Projects." }),
+      page.getByRole("heading", { level: 1, name: "Systems" }),
     ).toBeVisible();
 
     await expect(page).toHaveScreenshot("projects-mobile-light.png", {

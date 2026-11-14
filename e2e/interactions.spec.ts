@@ -5,38 +5,66 @@ test.beforeEach(async ({ page }) => {
   await preparePage(page, { motion: "no-preference" });
 });
 
-test("navigation, history, direct routes, and note disclosure", async ({
+test("lens navigation, history, direct routes, and field note disclosure", async ({
   page,
 }) => {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
+
   await page.goto("/");
-  await page.getByRole("link", { name: "Work", exact: true }).click();
+  await page.getByRole("link", { name: "Systems", exact: true }).click();
   await expect(page).toHaveURL(/\/projects$/);
-  await expect(page.getByRole("heading", { name: "Projects." })).toBeFocused();
-  await expect(page.locator(".portfolio-card")).toHaveCount(5);
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Systems" }),
+  ).toBeFocused();
+  await expect(page.locator(".system-specimen")).toHaveCount(5);
+
   await page.reload();
-  await expect(page.getByRole("heading", { name: "Projects." })).toBeVisible();
-  await page.getByRole("link", { name: "Notes", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Systems" }),
+  ).toBeVisible();
+
+  await page.getByRole("link", { name: "Cadence", exact: true }).click();
+  await expect(page).toHaveURL(/\/notes$/);
   const note = page.getByRole("button", { name: /Calmer study tools/ });
   await note.click();
   await expect(note).toHaveAttribute("aria-expanded", "true");
   await expect(
     page.getByRole("link", { name: "Ask for the longer essay" }),
   ).toBeVisible();
+
   await page.goBack();
-  await expect(page.getByRole("heading", { name: "Projects." })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Systems" }),
+  ).toBeVisible();
   expect(errors).toEqual([]);
 });
 
-test("real audio playback, featured projects, clipboard, and persistent theme", async ({
+test("interactive micro-specimens, solar scrub, real audio playback, clipboard, and theme", async ({
   page,
   context,
 }) => {
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
   await page.goto("/");
-  await page.getByRole("button", { name: "Show ArkiWatch" }).click();
-  await expect(page.getByRole("heading", { name: "ArkiWatch" })).toBeVisible();
+
+  // Scrub Helsinki solar horizon slider via keyboard
+  const solarSlider = page.getByRole("slider", {
+    name: "Scrub Helsinki time of day",
+  });
+  await solarSlider.focus();
+  await page.keyboard.press("ArrowLeft");
+  await expect(
+    page.getByRole("button", { name: "Return to live Helsinki time" }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Return to live Helsinki time" })
+    .click();
+
+  // Exercise inline micro-specimen (Suomeksi morphology + CNEquity plate toggle)
+  await page.getByRole("button", { name: "+ni" }).click();
+  await expect(page.getByText(/“in my house”/)).toBeVisible();
+
+  // Exercise classical audio playback & persistence across lenses
   await page.getByRole("button", { name: "Play classical music" }).click();
   await expect
     .poll(() =>
@@ -45,9 +73,13 @@ test("real audio playback, featured projects, clipboard, and persistent theme", 
         .evaluate((element: HTMLAudioElement) => element.currentTime),
     )
     .toBeGreaterThan(0);
+
   await page.getByRole("button", { name: "Next track" }).click();
-  await expect(page.getByRole("heading", { name: "Beethoven" })).toBeVisible();
-  await page.getByRole("link", { name: "Work", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "S. Rachmaninoff" }),
+  ).toBeVisible();
+
+  await page.getByRole("link", { name: "Systems", exact: true }).click();
   await page.getByRole("button", { name: "Pause classical music" }).click();
   await expect
     .poll(() =>
@@ -56,11 +88,14 @@ test("real audio playback, featured projects, clipboard, and persistent theme", 
         .evaluate((element: HTMLAudioElement) => element.paused),
     )
     .toBe(true);
+
+  // Clipboard & persistent polarity toggle
   await page.getByRole("button", { name: "Copy email address" }).click();
   await expect(page.getByRole("status")).toHaveText("Email address copied.");
   expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
     "chao.sun.me@gmail.com",
   );
+
   await page.getByRole("button", { name: "Switch to light theme" }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
   expect(await page.evaluate(() => localStorage.getItem("chaonav-theme"))).toBe(
@@ -82,7 +117,9 @@ for (const width of [320, 390, 768, 1280]) {
   });
 }
 
-test("keyboard entry and reduced-motion preference", async ({ page }) => {
+test("keyboard skip-link entry and reduced-motion preference", async ({
+  page,
+}) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
   await page.keyboard.press("Tab");
@@ -90,10 +127,15 @@ test("keyboard entry and reduced-motion preference", async ({ page }) => {
     page.getByRole("link", { name: "Skip to main content" }),
   ).toBeFocused();
   await page.keyboard.press("Enter");
-  await expect(page.getByRole("heading", { name: "Chao." })).toBeFocused();
+  await expect(
+    page.getByRole("heading", {
+      level: 1,
+      name: /Systems built for permanence/i,
+    }),
+  ).toBeFocused();
   expect(
     await page
-      .locator(".sculpture-object")
+      .locator(".lens-main")
       .evaluate((element) => getComputedStyle(element).animationName),
   ).toBe("none");
 });
