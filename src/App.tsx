@@ -1,216 +1,139 @@
-import {
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-  type MouseEvent,
-} from "react";
-import { Glyph } from "./components/CardIcons";
-import { ConnectionBar } from "./components/ConnectionBar";
-import { ContactSheet } from "./components/ContactSheet";
-import { HomeView } from "./components/HomeView";
-import { NotesView } from "./components/NotesView";
-import { ProjectsView } from "./components/ProjectsView";
-import { SiteHeader, type Page } from "./components/SiteHeader";
+import { useEffect } from "react";
+import { Chapter } from "./components/Chapter";
+import { Closing } from "./components/Closing";
+import { Intro } from "./components/Intro";
+import { Masthead } from "./components/Masthead";
+import { Sourced } from "./components/Sourced";
+import { LakeGrid } from "./components/specimens/LakeGrid";
+import { Morphology } from "./components/specimens/Morphology";
+import { Signals } from "./components/specimens/Signals";
+import { TierLine } from "./components/specimens/TierLine";
+import { copy, projects, type GroupId, type ProjectId } from "./content";
 import { MUSIC_LIBRARY } from "./data/musicLibrary";
-import { siteContent } from "./data/siteContent";
-import { useMobileLayout } from "./hooks/useMobileLayout";
+import { useHelsinki } from "./hooks/useHelsinki";
+import { useLang } from "./hooks/useLang";
+import { useLiveSources } from "./hooks/useLiveSources";
 import { useMusicPlayer } from "./hooks/useMusicPlayer";
 import { useTheme } from "./hooks/useTheme";
-import { computeHelsinkiSolar } from "./lib/helsinkiSolar";
 
-const route = (): Page => {
-  const path = window.location.pathname.replace(/\/$/, "");
-  if (path === "/projects") return "projects";
-  if (path === "/notes") return "notes";
-  return "home";
-};
+const GROUPS: readonly GroupId[] = ["markets", "finland"];
 
 export default function App() {
-  const mobile = useMobileLayout();
-  const [contactOpen, setContactOpen] = useState(false);
-  const [page, setPage] = useState<Page>(route);
-  const [now, setNow] = useState(() => new Date());
-  const [scrubbedMinutes, setScrubbedMinutes] = useState<number | null>(null);
-
-  const heading = useRef<HTMLHeadingElement>(null);
-  const hasNavigated = useRef(false);
-  const scrollPositions = useRef<Partial<Record<Page, number>>>({});
-  const currentPage = useRef(page);
-
-  const { theme, toggleTheme } = useTheme();
+  const { lang, toggleLang } = useLang();
+  const t = copy[lang];
+  const solar = useHelsinki();
+  const { mode, cycleMode } = useTheme(solar.altitudeDeg);
+  const live = useLiveSources();
   const player = useMusicPlayer(MUSIC_LIBRARY.length);
   const track = MUSIC_LIBRARY[player.trackIndex];
-  const { email } = siteContent.profile;
 
+  // The site used to have /projects and /notes. Old links land on the page.
   useEffect(() => {
-    const timer = window.setInterval(() => setNow(new Date()), 60_000);
-    return () => window.clearInterval(timer);
+    const path = window.location.pathname.replace(/\/$/, "");
+    if (path === "/projects" || path === "/notes") {
+      window.history.replaceState({}, "", "/");
+      if (path === "/projects") {
+        document.getElementById(projects[0].id)?.scrollIntoView();
+      }
+    }
   }, []);
 
-  const solar = useMemo(
-    () => computeHelsinkiSolar(now, scrubbedMinutes),
-    [now, scrubbedMinutes],
-  );
+  const number = (value: number | null) =>
+    value === null ? "—" : value.toLocaleString("en-US");
 
-  useEffect(() => {
-    document.documentElement.dataset.lightPhase = solar.phase;
-  }, [solar.phase]);
+  const counts: Partial<Record<ProjectId, React.ReactNode>> = {
+    cnequity: (
+      <span>
+        <Sourced provenance={live.cneStars} t={t}>
+          {number(live.cneStars.value)} {t.stars}
+        </Sourced>
+        {" · "}
+        <Sourced provenance={live.cneForks} t={t}>
+          {number(live.cneForks.value)} {t.forks}
+        </Sourced>
+      </span>
+    ),
+    arkiwatch: (
+      <span>
+        <Sourced provenance={live.arkiStars} t={t}>
+          {number(live.arkiStars.value)} {t.stars}
+        </Sourced>
+      </span>
+    ),
+  };
 
-  useEffect(() => {
-    const onPopState = () => {
-      scrollPositions.current[currentPage.current] = window.scrollY;
-      hasNavigated.current = true;
-      setPage(route());
-    };
-    window.addEventListener("popstate", onPopState);
-    return () => window.removeEventListener("popstate", onPopState);
-  }, []);
-
-  useLayoutEffect(() => {
-    currentPage.current = page;
-    if (hasNavigated.current) {
-      window.scrollTo({
-        top: scrollPositions.current[page] ?? 0,
-        behavior: "instant",
-      });
-    }
-  }, [page]);
-
-  useEffect(() => {
-    document.title =
-      page === "home"
-        ? "Chao Sun — 60°10′N Workbench"
-        : `${page === "projects" ? "Systems" : "Cadence"} — Chao Sun`;
-    if (hasNavigated.current) heading.current?.focus({ preventScroll: true });
-  }, [page]);
-
-  function navigate(event: MouseEvent<HTMLAnchorElement>, next: Page) {
-    if (
-      event.metaKey ||
-      event.ctrlKey ||
-      event.shiftKey ||
-      event.altKey ||
-      event.button !== 0
-    ) {
-      return;
-    }
-    event.preventDefault();
-    if (page === next) return;
-    scrollPositions.current[page] = window.scrollY;
-    window.history.pushState({}, "", next === "home" ? "/" : `/${next}`);
-    hasNavigated.current = true;
-    setPage(next);
-  }
-
-  const pageLink = (next: Page) => ({
-    href: next === "home" ? "/" : `/${next}`,
-    onClick: (event: MouseEvent<HTMLAnchorElement>) => navigate(event, next),
-  });
-
-  const showMobileMiniPlayer = mobile && page === "projects" && player.isPlaying;
+  const specimens: Record<ProjectId, React.ReactNode> = {
+    cnequity: <LakeGrid t={t} />,
+    usequity: <TierLine t={t} />,
+    suomeksi: <Morphology t={t} lang={lang} />,
+    arkiwatch: <Signals t={t} live={live} solar={solar} />,
+  };
 
   return (
-    <div
-      className={`workbench-shell phase-${solar.phase} ${showMobileMiniPlayer ? "has-mini-player" : ""}`}
-    >
-      <div className="northern-horizon-glow" aria-hidden="true" />
-
-      <a className="skip-link" href="#site-title">
-        Skip to main content
+    <>
+      <a className="skip-link" href={`#${projects[0].id}`}>
+        {t.skip}
       </a>
 
-      <SiteHeader
-        page={page}
-        mobile={mobile}
-        theme={theme}
-        solar={solar}
-        onScrubMinutes={setScrubbedMinutes}
-        isPlaying={player.isPlaying}
-        activeTrackLabel={`${track.composer} · ${track.catalogue}`}
-        pageLink={pageLink}
-        onOpenContact={() => setContactOpen(true)}
-        onToggleTheme={toggleTheme}
-        onTogglePlaying={player.togglePlaying}
-      />
+      <main>
+        <div className="opening">
+          <Masthead
+            t={t}
+            helsinkiTime={solar.helsinkiTimeLabel}
+            mode={mode}
+            onCycleMode={cycleMode}
+            onToggleLang={toggleLang}
+          />
+          <Intro t={t} lang={lang} />
+        </div>
+
+        {GROUPS.map((group) => (
+          <section key={group} className="group" aria-label={t.groups[group]}>
+            <p className="group-label wrap">
+              <span>{t.groups[group]}</span>
+            </p>
+            {projects
+              .filter((project) => project.group === group)
+              .map((project, index) => (
+                <Chapter
+                  key={project.id}
+                  project={project}
+                  emphasis={index === 0 ? "poster" : "follow"}
+                  lang={lang}
+                  counts={counts[project.id]}
+                  specimen={specimens[project.id]}
+                />
+              ))}
+          </section>
+        ))}
+
+        <aside className="aside wrap">
+          <p>
+            <strong>{t.aside.lead}</strong> {t.aside.body}
+          </p>
+        </aside>
+
+        <Closing t={t} live={live} solar={solar} player={player} track={track} />
+      </main>
+
+      <footer className="footer wrap">
+        <span>© {new Date().getFullYear()} Chao Sun</span>
+        <span>
+          {t.footer.set} {t.footer.sky}
+        </span>
+      </footer>
 
       <audio
-        aria-label="Classical music player"
+        aria-label={t.music.title}
         ref={player.audioRef}
         onEnded={() => player.selectRelativeTrack(1)}
-        preload="none"
+        preload="auto"
         playsInline
       >
         {track.sources.map((source) => (
           <source key={source.src} {...source} />
         ))}
       </audio>
-
-      <main key={page} className={`lens-main lens-${page}`}>
-        {page === "home" ? (
-          <HomeView
-            headingRef={heading}
-            mobile={mobile}
-            player={player}
-            pageLink={pageLink}
-            onOpenContact={() => setContactOpen(true)}
-          />
-        ) : page === "projects" ? (
-          <ProjectsView headingRef={heading} />
-        ) : (
-          <NotesView headingRef={heading} player={player} />
-        )}
-        <ConnectionBar />
-      </main>
-
-      {showMobileMiniPlayer && (
-        <aside
-          className="mobile-mini-player"
-          aria-label="Playing music"
-          data-music-control="true"
-        >
-          <Glyph name="headphones" />
-          <div>
-            <strong>{track.composer}</strong>
-            <span>{track.title}</span>
-          </div>
-          <button
-            type="button"
-            className="icon-button"
-            aria-label="Pause classical music"
-            onClick={player.togglePlaying}
-          >
-            <Glyph name="pause" />
-          </button>
-          <button
-            type="button"
-            className="icon-button"
-            aria-label="Next track"
-            onClick={() => player.selectRelativeTrack(1)}
-          >
-            <Glyph name="next" />
-          </button>
-        </aside>
-      )}
-
-      <ContactSheet
-        open={contactOpen}
-        onClose={() => setContactOpen(false)}
-        email={email}
-      />
-
-      <footer className="workbench-footer">
-        <span>© {new Date().getFullYear()} Chao Sun</span>
-        <span className="footer-center">60°10′12″ N, 24°56′18″ E · Helsinki</span>
-        <button
-          type="button"
-          className="footer-correspondence"
-          onClick={() => setContactOpen(true)}
-        >
-          chao.sun.me@gmail.com
-        </button>
-      </footer>
-    </div>
+    </>
   );
 }

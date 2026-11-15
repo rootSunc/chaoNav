@@ -6,53 +6,39 @@ export type MotionPreference = "reduce" | "no-preference";
 type PreparePageOptions = {
   readonly theme?: VisualTheme;
   readonly motion?: MotionPreference;
+  readonly lang?: "en" | "zh";
 };
 
+/** Pin everything that changes between runs: theme, language, clock, network. */
 export async function preparePage(
   page: Page,
-  { theme = "dark", motion = "reduce" }: PreparePageOptions = {},
+  { theme = "light", motion = "reduce", lang = "en" }: PreparePageOptions = {},
 ) {
-  await page.addInitScript((selectedTheme) => {
-    if (!window.localStorage.getItem("chaonav-theme")) {
-      window.localStorage.setItem("chaonav-theme", selectedTheme);
-    }
-  }, theme);
+  await page.addInitScript(
+    ([selectedTheme, selectedLang]) => {
+      if (!window.localStorage.getItem("chaonav-theme")) {
+        window.localStorage.setItem("chaonav-theme", selectedTheme);
+      }
+      if (!window.localStorage.getItem("chaonav-lang")) {
+        window.localStorage.setItem("chaonav-lang", selectedLang);
+      }
+    },
+    [theme, lang] as const,
+  );
+
+  // Live sources are third parties: tests see them as unreachable, so the
+  // page shows its dated snapshots and "unavailable" labels.
+  await page.route(/api\.github\.com|open-meteo\.com/, (route) => route.abort());
 
   await page.clock.setFixedTime(new Date("2026-09-28T12:00:00Z"));
-
-  await page.emulateMedia({
-    reducedMotion: motion,
-    colorScheme: theme,
-  });
+  await page.emulateMedia({ reducedMotion: motion, colorScheme: theme });
 }
 
-export async function prepareVisualPage(
-  page: Page,
-  theme: VisualTheme = "dark",
-) {
-  await preparePage(page, { theme, motion: "reduce" });
-}
-
-export async function waitForStableShell(page: Page) {
+export async function waitForStablePage(page: Page) {
   await page.waitForLoadState("networkidle");
   await page.evaluate(async () => {
-    await Promise.all(
-      Array.from(document.images).map(async (image) => {
-        image.loading = "eager";
-        await image.decode();
-      }),
-    );
-    if ("fonts" in document) {
-      await document.fonts.ready;
-    }
+    await document.fonts.ready;
   });
-  await page.waitForTimeout(250);
-}
-
-export function visualDiffTolerance(): number {
-  return process.env.CI ? 0.03 : 0.015;
-}
-
-export function mobileVisualDiffTolerance(): number {
-  return process.env.CI ? 0.035 : 0.02;
+  await page.locator("html.ready").waitFor();
+  await page.waitForTimeout(300);
 }

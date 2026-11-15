@@ -1,6 +1,6 @@
-# Chao Sun — Contrapuntal Workbench (`chaosun.xyz`)
+# Chao Sun — `chaosun.xyz`
 
-A personal space and engineering workbench built with React, Vite, and TypeScript—set in Helsinki (`60°10′N, 24°56′E`).
+A one-page personal site built with React, Vite and TypeScript. One sentence introduces four open-source projects; each gets a chapter with a small working specimen.
 
 ## Commands
 
@@ -11,16 +11,17 @@ pnpm test --run
 pnpm build
 ```
 
-## Architecture
+## How it is put together
 
-- `src/lib/helsinkiSolar.ts` computes deterministic solar elevation, azimuth, sunrise/sunset, and northern sky light phases for Helsinki directly on the client clock (with a 24-hour scrubbable horizon curve in `SolarHorizonBar.tsx`).
-- `src/App.tsx` wires route lenses (`/` Field, `/projects` Systems, `/notes` Cadence), persistent classical audio playback, and Northern Slate / Daylight Paper polarity.
-- `src/components/HomeView.tsx` composes the two-voice **Contrapuntal Workbench** (`I. Systems` and `II. Cadence`) bridged by a live `ResizeObserver`-measured SVG Bézier resonance spine.
-- `src/components/specimens/ProjectSpecimens.tsx` & `SystemArtifact.tsx` pair working miniature instruments (`CNEquity`, `ArkiWatch`, `Suomeksi`, `DaisyNotice`, `QParking`) with optional deep-inspection interface plates.
-- `src/components/ScorePlayer.tsx`, `CoastalContour.tsx`, and `FieldNotesLedger.tsx` house chamber recordings, the 26.4 km western Helsinki islands coastal loop, and expandable field notes.
-- `src/styles/workbench.css` and `src/styles/mobile.css` define the visual system, northern horizon atmosphere, responsive breakpoints, thumb-level mobile lens bar (`<= 600px`), and `prefers-reduced-motion` support.
+- `src/content.ts` holds every word and fact on the page, in English and Chinese, plus the CNEquity dataset registry and the Finnish words used by the specimens.
+- `src/App.tsx` composes the page: masthead, intro, four chapters in two groups, the EquityLab aside, and the closing section.
+- `src/components/FitName.tsx` sets a project name as wide as the page and gives it weight as it scrolls up the viewport.
+- `src/components/specimens/` has one miniature per project: `LakeGrid` (CNEquity), `TierLine` (USEquity), `Morphology` (Suomeksi), `Signals` (ArkiWatch).
+- `src/hooks/useLiveSources.ts` fetches GitHub star counts and Helsinki weather and air quality (Open-Meteo) in the visitor's browser. A value that cannot be fetched is shown as a dated snapshot or as unavailable.
+- `src/lib/helsinkiSolar.ts` computes the sun over Helsinki locally. With no stored choice the page is light while the sun is above -4° and dark otherwise (`src/lib/theme.ts`, mirrored by the inline script in `index.html`).
+- `src/styles.css` is the whole visual system: one typeface (Recursive, self-hosted), one ink colour per theme, one red seal.
 
 ## Verification
 
-`pnpm build` produces static prerendered routes (`/`, `/projects`, `/notes`) in `dist/`.
-Run `pnpm test --run` for unit tests and `PLAYWRIGHT_CHANNEL=chrome pnpm test:e2e` (or `pnpm exec playwright install chromium && pnpm test:e2e`) for interaction, mobile touch, and visual regression checks.
+`pnpm build` writes `dist/`, with `/projects` and `/notes` kept as copies of the page so old links still land.
+Run `pnpm test --run` for unit tests and `PLAYWRIGHT_CHANNEL=chrome pnpm test:e2e` for interaction, phone and first-screen visual checks.

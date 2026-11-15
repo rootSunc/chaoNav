@@ -1,17 +1,29 @@
-import { useCallback, useEffect, useState } from 'react';
-import { applyTheme, readStoredTheme, THEME_STORAGE_KEY, type Theme } from '../lib/theme';
+import { useCallback, useEffect, useState } from "react";
+import {
+  applyTheme,
+  readStoredMode,
+  resolveTheme,
+  storeMode,
+  type ThemeMode,
+} from "../lib/theme";
 
-export function useTheme() {
-  const [theme, setTheme] = useState<Theme>(() => readStoredTheme());
+const ORDER: readonly ThemeMode[] = ["sky", "day", "night"];
+
+export function useTheme(sunAltitudeDeg: number) {
+  const [mode, setMode] = useState<ThemeMode>(readStoredMode);
+  const theme = resolveTheme(mode, sunAltitudeDeg);
 
   useEffect(() => {
     applyTheme(theme);
-    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
   }, [theme]);
 
-  const toggleTheme = useCallback(() => {
-    setTheme((currentTheme) => (currentTheme === 'dark' ? 'light' : 'dark'));
+  const cycleMode = useCallback(() => {
+    setMode((current) => {
+      const next = ORDER[(ORDER.indexOf(current) + 1) % ORDER.length];
+      storeMode(next);
+      return next;
+    });
   }, []);
 
-  return { theme, setTheme, toggleTheme };
+  return { mode, theme, cycleMode };
 }

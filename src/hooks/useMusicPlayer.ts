@@ -16,7 +16,7 @@ function isFromMusicControl(target: EventTarget | null) {
 export function useMusicPlayer(trackCount: number) {
   const safeTrackCount = Math.max(trackCount, 1);
   const [trackIndex, setTrackIndex] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(true);
   const [needsUserActivation, setNeedsUserActivation] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [durationSeconds, setDurationSeconds] = useState(0);
@@ -138,11 +138,13 @@ export function useMusicPlayer(trackCount: number) {
       playAttemptRef.current += 1;
       setNeedsUserActivation(false);
       setIsPlaying(false);
+      audioRef.current?.pause();
       return;
     }
 
     setIsPlaying(true);
-  }, []);
+    requestAudioPlay(audioRef.current);
+  }, [requestAudioPlay]);
 
   useEffect(() => {
     isPlayingRef.current = isPlaying;
@@ -158,7 +160,8 @@ export function useMusicPlayer(trackCount: number) {
         return;
       }
 
-      setIsPlaying(true);
+      // play() has to run inside the gesture. A later effect is too late.
+      requestAudioPlay(audioRef.current);
     };
 
     document.addEventListener("pointerdown", resumeFromGesture, true);
@@ -168,7 +171,7 @@ export function useMusicPlayer(trackCount: number) {
       document.removeEventListener("pointerdown", resumeFromGesture, true);
       document.removeEventListener("keydown", resumeFromGesture, true);
     };
-  }, [needsUserActivation]);
+  }, [needsUserActivation, requestAudioPlay]);
 
   useEffect(() => {
     setTrackIndex((currentIndex) => Math.min(currentIndex, safeTrackCount - 1));

@@ -1,8 +1,9 @@
-import '@testing-library/jest-dom/vitest';
+import "@testing-library/jest-dom/vitest";
+import { vi } from "vitest";
 
 class MockIntersectionObserver implements IntersectionObserver {
   readonly root: Element | Document | null = null;
-  readonly rootMargin = '0px';
+  readonly rootMargin = "0px";
   readonly thresholds: readonly number[] = [0];
 
   disconnect() {}
@@ -16,13 +17,13 @@ class MockIntersectionObserver implements IntersectionObserver {
   unobserve() {}
 }
 
-Object.defineProperty(window, 'IntersectionObserver', {
+Object.defineProperty(window, "IntersectionObserver", {
   writable: true,
   configurable: true,
   value: MockIntersectionObserver,
 });
 
-Object.defineProperty(window, 'matchMedia', {
+Object.defineProperty(window, "matchMedia", {
   writable: true,
   value: vi.fn().mockImplementation((query: string) => ({
     matches: false,
@@ -35,3 +36,16 @@ Object.defineProperty(window, 'matchMedia', {
     dispatchEvent: vi.fn(),
   })),
 });
+
+// Unit tests never touch the network: live readings stay at their defaults.
+vi.stubGlobal(
+  "fetch",
+  vi.fn(() => Promise.reject(new Error("network disabled in tests"))),
+);
+
+for (const method of ["play", "pause", "load"] as const) {
+  Object.defineProperty(window.HTMLMediaElement.prototype, method, {
+    configurable: true,
+    value: vi.fn().mockResolvedValue(undefined),
+  });
+}

@@ -1,222 +1,127 @@
-import {
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-  within,
-} from "@testing-library/react";
-import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
+import { fireEvent, render, screen, within } from "@testing-library/react";
+import { afterEach, describe, expect, it } from "vitest";
 import App from "./App";
-import { siteContent } from "./data/siteContent";
-
-beforeAll(() => {
-  Object.defineProperty(window.HTMLMediaElement.prototype, "play", {
-    configurable: true,
-    value: vi.fn().mockResolvedValue(undefined),
-  });
-  Object.defineProperty(window.HTMLMediaElement.prototype, "pause", {
-    configurable: true,
-    value: vi.fn(),
-  });
-  Object.defineProperty(window.HTMLMediaElement.prototype, "load", {
-    configurable: true,
-    value: vi.fn(),
-  });
-  Object.defineProperty(window, "scrollTo", {
-    configurable: true,
-    value: vi.fn(),
-  });
-  Object.defineProperty(Element.prototype, "scrollIntoView", {
-    configurable: true,
-    value: vi.fn(),
-  });
-});
+import { FINNISH_WORDS, LAKE_TIERS, copy, projects } from "./content";
+import { LANG_STORAGE_KEY } from "./hooks/useLang";
+import { THEME_STORAGE_KEY } from "./lib/theme";
 
 afterEach(() => {
-  vi.clearAllMocks();
-  window.history.replaceState(null, "", "/");
+  window.localStorage.clear();
+  delete document.documentElement.dataset.theme;
 });
 
-describe("contrapuntal workbench", () => {
-  it("renders identity, Helsinki solar ephemeris, and correspondence links", () => {
-    render(<App />);
-    expect(
-      screen.getByRole("heading", {
-        level: 1,
-        name: siteContent.profile.inscription,
-      }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("region", { name: "Helsinki solar ephemeris" }),
-    ).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "GitHub" })).toHaveAttribute(
-      "href",
-      "https://github.com/rootSunc",
-    );
-    expect(screen.getByRole("link", { name: "LinkedIn" })).toHaveAttribute(
-      "href",
-      "https://www.linkedin.com/in/chaosun526/",
-    );
-    expect(screen.getByRole("link", { name: "Résumé" })).toHaveAttribute(
-      "href",
-      expect.stringContaining("subject=Resume"),
-    );
+describe("content", () => {
+  it("lists all 86 CNEquity datasets across ten tiers, without repeats", () => {
+    const names = LAKE_TIERS.flat();
+    expect(LAKE_TIERS).toHaveLength(10);
+    expect(names).toHaveLength(86);
+    expect(new Set(names).size).toBe(86);
+    expect(copy.en.lake.tiers).toHaveLength(10);
+    expect(copy.zh.lake.tiers).toHaveLength(10);
   });
 
-  it("navigates to the Systems lens, reveals full interface plates, and preserves real project links", () => {
-    render(<App />);
-    fireEvent.click(screen.getByRole("link", { name: /Inspect all 5 plates/i }));
-    expect(window.location.pathname).toBe("/projects");
-    expect(
-      screen.getByRole("heading", { level: 1, name: "Systems" }),
-    ).toHaveFocus();
-    for (const project of siteContent.projectsPage.projects) {
-      expect(
-        screen.getByRole("heading", { name: project.name }),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole("link", { name: project.ctaLabel }),
-      ).toHaveAttribute("href", project.href);
-      expect(screen.getByAltText(project.screenshots.web.alt)).toHaveAttribute(
-        "src",
-        project.screenshots.web.src,
-      );
+  it("splits every Finnish word into parts that spell it back", () => {
+    for (const entry of FINNISH_WORDS) {
+      expect(entry.parts.map((part) => part.text).join("")).toBe(entry.word);
     }
   });
 
-  it("loads a direct /projects route and returns to Field", () => {
-    window.history.replaceState(null, "", "/projects/");
+  it("keeps the opening to a greeting, in both languages", () => {
+    expect(copy.en.introLead).toBe("Moi, I'm Chao.");
+    expect(copy.en.introVerse).toEqual([
+      "Tell all the truth but tell it slant —",
+    ]);
+    expect(copy.zh.introLead).toBe("Moi，我是 Chao。");
+    expect(copy.zh.introVerse).toEqual(copy.en.introVerse);
+  });
+});
+
+describe("page", () => {
+  it("introduces the four projects and gives each a chapter", () => {
     render(<App />);
+
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
+      "Moi, I'm Chao.",
+    );
     expect(
-      screen.getByRole("heading", { level: 1, name: "Systems" }),
+      screen.getByText("Tell all the truth but tell it slant —"),
     ).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("link", { name: "Field" }));
-    expect(window.location.pathname).toBe("/");
-    expect(
-      screen.getByRole("heading", {
-        level: 1,
-        name: siteContent.profile.inscription,
-      }),
-    ).toHaveFocus();
+
+    const nav = screen.getByRole("navigation", { name: "Projects" });
+    for (const project of projects) {
+      expect(within(nav).getByRole("link", { name: project.name })).toHaveAttribute(
+        "href",
+        `#${project.id}`,
+      );
+      expect(
+        screen.getByRole("heading", { level: 2, name: project.name }),
+      ).toBeInTheDocument();
+    }
   });
 
-  it("responds to browser history navigation across lenses", () => {
+  it("links only to repositories that are public", () => {
     render(<App />);
-    window.history.replaceState(null, "", "/notes");
-    fireEvent.popState(window);
-    expect(
-      screen.getByRole("heading", { level: 1, name: "Cadence" }),
-    ).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Cadence/ })).toHaveAttribute(
-      "aria-current",
-      "page",
-    );
+
+    const github = screen
+      .getAllByRole("link", { name: "GitHub" })
+      .map((link) => link.getAttribute("href"));
+    expect(github).toContain("https://github.com/rootSunc/CNEquity");
+    expect(github).toContain("https://github.com/rootSunc/ArkiWatch");
+    expect(github.join(" ")).not.toMatch(/USEquity|Suomeksi/);
+    expect(screen.getAllByText(/isn't public yet/)).toHaveLength(2);
   });
 
-  it("keeps modified navigation clicks available to the browser", () => {
+  it("labels an unfetched star count as a dated snapshot", () => {
     render(<App />);
-    fireEvent.click(screen.getByRole("link", { name: /Systems/ }), {
-      ctrlKey: true,
-    });
-    expect(
-      screen.getByRole("heading", {
-        level: 1,
-        name: siteContent.profile.inscription,
-      }),
-    ).toBeInTheDocument();
+
+    const row = screen.getByRole("rowheader", { name: "CNEquity stars" }).closest("tr")!;
+    expect(row).toHaveTextContent("1,033");
+    expect(row).toHaveTextContent("api.github.com · snapshot · 2026-11-14");
   });
 
-  it("supports interactive micro-specimens and optional interface plate inspection on Field", () => {
+  it("switches language and remembers the choice", () => {
     render(<App />);
-    const taloStem = screen.getByRole("button", { name: "+ni" });
-    expect(taloStem).toHaveAttribute("aria-pressed", "false");
-    fireEvent.click(taloStem);
-    expect(taloStem).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByText(/“in my house”/)).toBeInTheDocument();
 
-    const plateButtons = screen.getAllByRole("button", {
-      name: "Interface plate",
-    });
-    expect(plateButtons[0]).toHaveAttribute("aria-expanded", "false");
-    fireEvent.click(plateButtons[0]);
-    expect(
-      screen.getByRole("button", { name: "Close plate" }),
-    ).toHaveAttribute("aria-expanded", "true");
-    expect(
-      screen.getByAltText(
-        "CNEquity and EquityLab quant research workbench screenshot",
-      ),
-    ).toBeVisible();
-  });
+    fireEvent.click(screen.getByRole("button", { name: "切换到中文" }));
 
-  it("starts with audio at rest and supports playback and repertoire changes", async () => {
-    render(<App />);
-    const player = screen.getByRole("region", { name: "Music player" });
-    expect(
-      within(player).getByRole("button", { name: "Play classical music" }),
-    ).toHaveAttribute("aria-pressed", "false");
-
-    fireEvent.click(
-      within(player).getByRole("button", { name: "Play classical music" }),
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
+      "Moi，我是 Chao。",
     );
-    await waitFor(() =>
-      expect(window.HTMLMediaElement.prototype.play).toHaveBeenCalled(),
-    );
-
-    fireEvent.click(
-      within(player).getByRole("button", { name: "Pause classical music" }),
-    );
+    expect(document.documentElement.lang).toBe("zh-Hans");
+    expect(window.localStorage.getItem(LANG_STORAGE_KEY)).toBe("zh");
     expect(
-      within(player).getByRole("button", { name: "Play classical music" }),
-    ).toHaveAttribute("aria-pressed", "false");
-
-    fireEvent.click(within(player).getByRole("button", { name: "Next track" }));
-    expect(
-      within(player).getByRole("heading", { name: "S. Rachmaninoff" }),
-    ).toBeInTheDocument();
-
-    fireEvent.click(
-      within(player).getByRole("button", { name: "Previous track" }),
-    );
-    expect(
-      within(player).getByRole("heading", { name: "J. S. Bach" }),
-    ).toBeInTheDocument();
-
-    fireEvent.ended(screen.getByLabelText("Classical music player"));
-    expect(
-      within(player).getByRole("heading", { name: "S. Rachmaninoff" }),
+      screen.getByRole("button", { name: "Switch to English" }),
     ).toBeInTheDocument();
   });
 
-  it("expands field notes on /notes and provides longer-essay correspondence", () => {
-    window.history.replaceState(null, "", "/notes");
+  it("cycles the theme from the Helsinki sky to day, night and back", () => {
     render(<App />);
-    const note = screen.getByRole("button", { name: /Calmer study tools/ });
-    expect(note).toHaveAttribute("aria-expanded", "false");
-    fireEvent.click(note);
-    expect(note).toHaveAttribute("aria-expanded", "true");
-    expect(
-      screen.getByRole("link", { name: "Ask for the longer essay" }),
-    ).toHaveAttribute("href", expect.stringContaining("mailto:"));
-    fireEvent.click(note);
-    expect(
-      screen.queryByRole("link", { name: "Ask for the longer essay" }),
-    ).not.toBeInTheDocument();
+
+    const toggle = () => screen.getByRole("button", { name: /^Theme:/ });
+    expect(toggle()).toHaveAccessibleName(/Sky/);
+    expect(window.localStorage.getItem(THEME_STORAGE_KEY)).toBeNull();
+
+    fireEvent.click(toggle());
+    expect(document.documentElement.dataset.theme).toBe("light");
+    expect(window.localStorage.getItem(THEME_STORAGE_KEY)).toBe("light");
+
+    fireEvent.click(toggle());
+    expect(document.documentElement.dataset.theme).toBe("dark");
+    expect(window.localStorage.getItem(THEME_STORAGE_KEY)).toBe("dark");
+
+    fireEvent.click(toggle());
+    expect(toggle()).toHaveAccessibleName(/Sky/);
+    expect(window.localStorage.getItem(THEME_STORAGE_KEY)).toBeNull();
   });
 
-  it("copies email and announces status with fallback", async () => {
-    const writeText = vi.fn().mockResolvedValue(undefined);
-    Object.defineProperty(navigator, "clipboard", {
-      configurable: true,
-      value: { writeText },
-    });
+  it("lets the reader pick which Finnish word to take apart", () => {
     render(<App />);
-    fireEvent.click(screen.getByRole("button", { name: "Copy email address" }));
-    await waitFor(() =>
-      expect(screen.getByRole("status")).toHaveTextContent(
-        "Email address copied.",
-      ),
-    );
-    expect(writeText).toHaveBeenCalledWith("chao.sun.me@gmail.com");
+
+    const picker = screen.getByRole("group", { name: "Pick a word" });
+    const word = within(picker).getByRole("button", { name: "taloissani" });
+    fireEvent.click(word);
+
+    expect(word).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByText("“in my houses”")).toBeInTheDocument();
   });
 });

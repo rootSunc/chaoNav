@@ -8,40 +8,95 @@
     />
     <meta
       name="description"
-      content="Chao Sun — Systems and everyday instruments from Helsinki (60°10′N, 24°56′E). Local-first data lakes, civic signal workspaces, and calm software."
+      content="Chao Sun, software architect in Helsinki. Open-source data tools that show their sources: CNEquity, USEquity, Suomeksi and ArkiWatch."
     />
-    <meta name="theme-color" content="#0c1117" />
+    <link rel="canonical" href="https://chaosun.xyz/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Chao Sun" />
+    <meta property="og:url" content="https://chaosun.xyz/" />
+    <meta property="og:title" content="Chao Sun — data tools that show their sources" />
+    <meta
+      property="og:description"
+      content="Software architect in Helsinki. Open-source data tools: CNEquity, USEquity, Suomeksi and ArkiWatch."
+    />
+    <meta property="og:image" content="https://chaosun.xyz/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Chao Sun: data tools that show their sources"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://chaosun.xyz/og.png" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Chao Sun",
+        "url": "https://chaosun.xyz/",
+        "jobTitle": "Software Architect",
+        "homeLocation": { "@type": "Place", "name": "Helsinki, Finland" },
+        "sameAs": [
+          "https://github.com/rootSunc",
+          "https://www.linkedin.com/in/chaosun526/"
+        ]
+      }
+    </script>
+    <meta name="theme-color" content="#f4f3ee" />
     <script>
+      // Stored choice wins; otherwise the page follows the sun over Helsinki
+      // (same Spencer formula as src/lib/helsinkiSolar.ts, dusk at -4 degrees).
       (function () {
-        var storageKey = "chaonav-theme";
-        var storedTheme = localStorage.getItem(storageKey);
-        var theme =
-          storedTheme === "light" || storedTheme === "dark"
-            ? storedTheme
-            : window.matchMedia("(prefers-color-scheme: light)").matches
-              ? "light"
-              : "dark";
-        document.documentElement.dataset.theme = theme;
-        var themeColor = document.querySelector('meta[name="theme-color"]');
-        if (themeColor) {
-          themeColor.setAttribute(
-            "content",
-            theme === "light" ? "#f2efe8" : "#0c1117",
+        var theme = null;
+        try {
+          theme = localStorage.getItem("chaonav-theme");
+        } catch (e) {}
+        if (theme !== "light" && theme !== "dark") {
+          var d = new Date();
+          var rad = Math.PI / 180;
+          var year = d.getUTCFullYear();
+          var day = Math.floor(
+            (Date.UTC(year, d.getUTCMonth(), d.getUTCDate()) -
+              Date.UTC(year, 0, 0)) /
+              864e5,
           );
+          var min = d.getUTCHours() * 60 + d.getUTCMinutes();
+          var g = ((2 * Math.PI) / 365) * (day - 1 + (min / 60 - 12) / 24);
+          var eq =
+            229.18 *
+            (0.000075 +
+              0.001868 * Math.cos(g) -
+              0.032077 * Math.sin(g) -
+              0.014615 * Math.cos(2 * g) -
+              0.040849 * Math.sin(2 * g));
+          var dec =
+            0.006918 -
+            0.399912 * Math.cos(g) +
+            0.070257 * Math.sin(g) -
+            0.006758 * Math.cos(2 * g) +
+            0.000907 * Math.sin(2 * g) -
+            0.002697 * Math.cos(3 * g) +
+            0.00148 * Math.sin(3 * g);
+          var hour = ((min + eq + 4 * 24.9384) / 4 - 180) * rad;
+          var lat = 60.1699 * rad;
+          var alt =
+            Math.asin(
+              Math.sin(lat) * Math.sin(dec) +
+                Math.cos(lat) * Math.cos(dec) * Math.cos(hour),
+            ) / rad;
+          theme = alt > -4 ? "light" : "dark";
+        }
+        document.documentElement.dataset.theme = theme;
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) {
+          meta.setAttribute("content", theme === "light" ? "#f4f3ee" : "#0a0e2a");
         }
       })();
     </script>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400..500;1,6..72,400&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="icon" href="/favicon.ico" sizes="any" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate icon" href="/favicon.ico" sizes="any" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-    <title>Chao Sun — 60°10′N Workbench</title>
+    <title>Chao Sun — data tools that show their sources</title>
   </head>
   <body>
     <div id="root"></div>
