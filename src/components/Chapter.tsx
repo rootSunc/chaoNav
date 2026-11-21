@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import type { Lang, Project } from "../content";
 import { useCentered, useSeen } from "../hooks/useInView";
 import { FitName } from "./FitName";
+import { Scribble, seedOf } from "./Scribble";
 
 type ChapterProps = {
   readonly project: Project;
@@ -33,6 +34,7 @@ export function Chapter({
       data-emphasis={emphasis}
     >
       <header className="chapter-meta">
+        <Scribble className="meta-rule" seed={seedOf(project.id)} />
         <p className="chapter-kind">{project.kind[lang]}</p>
         <p className="chapter-facts">
           {counts}

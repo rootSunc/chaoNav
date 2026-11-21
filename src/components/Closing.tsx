@@ -5,6 +5,7 @@ import type { useMusicPlayer } from "../hooks/useMusicPlayer";
 import type { LiveSources } from "../hooks/useLiveSources";
 import type { HelsinkiSolarState } from "../lib/helsinkiSolar";
 import { FitName } from "./FitName";
+import { Scribble, seedOf } from "./Scribble";
 import { describeProvenance, type Provenance } from "./Sourced";
 import { formatAqi, formatDaylight, formatWeather } from "./specimens/Signals";
 
@@ -67,6 +68,7 @@ export function Closing({ t, live, solar, player, track }: ClosingProps) {
   return (
     <section className="closing wrap" aria-labelledby="closing-title">
       <header className="chapter-meta">
+        <Scribble className="meta-rule" seed={seedOf("closing")} />
         <h2 id="closing-title" className="chapter-kind">
           {t.closing.title}
         </h2>

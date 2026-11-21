@@ -15,6 +15,7 @@ import { useLang } from "./hooks/useLang";
 import { useLiveSources } from "./hooks/useLiveSources";
 import { useMusicPlayer } from "./hooks/useMusicPlayer";
 import { useTheme } from "./hooks/useTheme";
+import { duskGlow, nightGlow } from "./lib/theme";
 
 const GROUPS: readonly GroupId[] = ["markets", "finland"];
 
@@ -26,6 +27,16 @@ export default function App() {
   const live = useLiveSources();
   const player = useMusicPlayer(MUSIC_LIBRARY.length);
   const track = MUSIC_LIBRARY[player.trackIndex];
+
+  // Late afternoon in Helsinki warms the page; `?dusk` previews it any time.
+  useEffect(() => {
+    const preview = new URLSearchParams(window.location.search).has("dusk");
+    const glow = preview ? 1 : duskGlow(solar.altitudeDeg, solar.azimuthDeg);
+    const night = preview ? 1 : nightGlow(solar.altitudeDeg, solar.azimuthDeg);
+    const root = document.documentElement.style;
+    root.setProperty("--dusk", glow.toFixed(3));
+    root.setProperty("--night", night.toFixed(3));
+  }, [solar.altitudeDeg, solar.azimuthDeg]);
 
   // The site used to have /projects and /notes. Old links land on the page.
   useEffect(() => {

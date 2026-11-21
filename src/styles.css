@@ -91,6 +91,47 @@ body {
   overflow-x: clip;
 }
 
+/* Late afternoon in Helsinki: low sun rakes across the paper from the west,
+   warming everything it touches, until the page goes dark. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 95% at 108% 92%, rgb(255 112 56 / 0.34), rgb(255 150 90 / 0.12) 45%, transparent 72%),
+    linear-gradient(105deg, transparent 35%, rgb(255 196 140 / 0.14) 70%, rgb(255 140 90 / 0.2));
+  mix-blend-mode: multiply;
+  opacity: var(--dusk, 0);
+  transition: opacity 2400ms ease;
+}
+
+:root[data-theme="dark"] body::after {
+  opacity: 0;
+}
+
+/* After dark: the last of the sunset hangs low in the west, rose fading into
+   violet, then settles to a faint glow for the rest of the night. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  background:
+    radial-gradient(130% 80% at 104% 108%, rgb(232 84 104 / 0.42), rgb(150 64 170 / 0.22) 42%, transparent 70%),
+    radial-gradient(90% 60% at 70% 118%, rgb(255 128 80 / 0.22), transparent 60%),
+    linear-gradient(to top, rgb(90 70 200 / 0.12), transparent 55%);
+  mix-blend-mode: screen;
+  opacity: 0;
+  transition: opacity 2400ms ease;
+}
+
+:root[data-theme="dark"] body::before {
+  opacity: var(--night, 0.4);
+}
+
 :lang(zh) body,
 body:lang(zh) {
   line-height: 1.7;
@@ -299,6 +340,20 @@ ul {
   line-height: 0.96;
   letter-spacing: -0.04em;
   text-wrap: balance;
+  font-variation-settings:
+    "CASL" var(--casl),
+    "slnt" var(--slnt),
+    "MONO" 0;
+  transition:
+    --casl 700ms var(--ease),
+    --slnt 700ms var(--ease);
+}
+
+
+/* Hover the name and the whole line relaxes into the same hand. */
+.intro-text:hover {
+  --casl: 1;
+  --slnt: -6;
 }
 
 .intro-text:lang(zh) {
@@ -329,6 +384,58 @@ ul {
   animation-delay: calc(var(--i) * 120ms + 140ms);
 }
 
+/* After the pen, the rest of the line is typed: each letter lands on its beat
+   (--d) and carries the caret for its slot (--life). */
+.type-ch {
+  position: relative;
+  opacity: 0;
+}
+
+.type-ch::after {
+  content: "";
+  position: absolute;
+  top: 0.08em;
+  bottom: 0.02em;
+  right: -0.07em;
+  width: 0.06em;
+  background: var(--ink);
+  visibility: hidden;
+}
+
+.ready .type-ch {
+  animation: type-on 1ms linear var(--d) forwards;
+}
+
+/* The caret lives on a letter for exactly its slot (--life), then is gone. */
+.ready .type-ch::after {
+  animation: caret-life var(--life) linear var(--d);
+}
+
+.ready .type-last::after {
+  animation:
+    caret-life var(--life) linear var(--d),
+    caret-blink 1060ms steps(1, end) var(--d) infinite;
+}
+
+@keyframes type-on {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes caret-life {
+  from,
+  to {
+    visibility: visible;
+  }
+}
+
+@keyframes caret-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
 @keyframes ink-in {
   to {
     opacity: 1;
@@ -349,8 +456,8 @@ ul {
   letter-spacing: 0;
   font-variation-settings:
     "wght" 480,
-    "CASL" 0,
-    "slnt" 0,
+    "CASL" 1,
+    "slnt" -8,
     "MONO" 0;
 }
 
@@ -420,22 +527,84 @@ ul {
   transform: rotate(-5deg);
 }
 
+/* Once the line is typed, the seal comes down: it hovers lifted with its
+   shadow, drops hard, squashes into the paper, and leaves an ink bloom. */
+.intro-foot {
+  position: relative;
+  --stamp-at: calc(var(--typed-end, 2400ms) + 380ms);
+}
+
 .ready .intro-seal {
-  animation: stamp 520ms cubic-bezier(0.3, 1.4, 0.5, 1) 1500ms forwards;
+  animation: stamp 760ms linear var(--stamp-at) forwards;
 }
 
 @keyframes stamp {
   0% {
     opacity: 0;
-    transform: rotate(-15deg) scale(2.2);
+    transform: translate(-18px, -46px) rotate(-16deg) scale(1.75);
+    filter: drop-shadow(22px 34px 16px rgb(10 14 42 / 0.28));
+    animation-timing-function: cubic-bezier(0.55, 0, 0.9, 0.4);
   }
-  55% {
+  30% {
     opacity: 1;
-    transform: rotate(-4deg) scale(0.93);
+    transform: translate(-12px, -30px) rotate(-13deg) scale(1.5);
+    filter: drop-shadow(16px 24px 12px rgb(10 14 42 / 0.24));
+    animation-timing-function: cubic-bezier(0.7, 0, 1, 0.6);
+  }
+  52% {
+    opacity: 1;
+    transform: translate(0, 2px) rotate(-5deg) scale(0.9, 0.86);
+    filter: drop-shadow(0 0 0 rgb(10 14 42 / 0));
+    animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1);
+  }
+  70% {
+    transform: translate(0, 0) rotate(-5deg) scale(1.04);
   }
   100% {
     opacity: 1;
     transform: rotate(-5deg) scale(1);
+    filter: none;
+  }
+}
+
+/* Ink squeezed out at the moment of impact. */
+.intro-foot::before {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: -0.6em;
+  width: clamp(64px, 7.4vw, 124px);
+  aspect-ratio: 1;
+  border-radius: 14%;
+  background: radial-gradient(closest-side, transparent 62%, color-mix(in oklab, var(--seal) 45%, transparent) 78%, transparent);
+  opacity: 0;
+  transform: rotate(-5deg);
+  pointer-events: none;
+}
+
+.ready .intro-foot::before {
+  animation: ink-bloom 700ms var(--ease) calc(var(--stamp-at) + 380ms);
+}
+
+@keyframes ink-bloom {
+  0% {
+    opacity: 0.9;
+    transform: rotate(-5deg) scale(0.95);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(-5deg) scale(1.6);
+  }
+}
+
+/* The page takes the hit: a one-pixel thud. */
+.ready .intro {
+  animation: thud 220ms ease-out calc(var(--typed-end, 2400ms) + 380ms + 390ms);
+}
+
+@keyframes thud {
+  35% {
+    transform: translateY(2px);
   }
 }
 
@@ -472,9 +641,83 @@ ul {
   justify-content: space-between;
   gap: 8px 28px;
   flex-wrap: wrap;
+  position: relative;
   padding-top: 14px;
-  border-top: 1px solid var(--rule);
   font-size: 14.5px;
+}
+
+/* Ballpoint lines: drawn by hand, and drawn in front of you the first time. */
+.scribble {
+  display: block;
+  overflow: visible;
+  fill: none;
+  stroke: var(--ink-3);
+  stroke-width: 1.3px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+  clip-path: inset(-200% 100% -200% -2%);
+  transition: clip-path 1200ms var(--ease);
+}
+
+.scribble[data-drawn] {
+  clip-path: inset(-200% -2% -200% -2%);
+}
+
+.meta-rule {
+  position: absolute;
+  top: -3px;
+  left: 0;
+  width: 100%;
+  height: 6px;
+}
+
+/* "Moi," is written by a ballpoint in seal red; the type follows the pen. */
+.pen-greeting {
+  display: inline-block;
+  height: 1.14em;
+  width: 1.653em;
+  margin-right: 0.06em;
+  vertical-align: -0.24em;
+  overflow: visible;
+  transform: skewX(-7deg);
+}
+
+.pen-stroke {
+  fill: none;
+  stroke: var(--seal);
+  stroke-width: 8.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pen {
+  transition: opacity 240ms;
+}
+
+.pen-tip {
+  fill: var(--seal);
+}
+
+.pen-grip,
+.pen-body,
+.pen-clip {
+  fill: var(--paper);
+  stroke: var(--ink);
+  stroke-width: 1.6;
+}
+
+.pen-grip {
+  fill: var(--ink);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .chapter-kind {
@@ -1147,6 +1390,25 @@ ul {
 .closing-note {
   margin-top: 14px;
   color: var(--ink-2);
+}
+
+/* The personal lines in the closing share the greeting's hand and seal. */
+.closing .chapter-kind,
+.closing-note,
+.closing-music .small-title {
+  font-variation-settings:
+    "CASL" 1,
+    "slnt" -8,
+    "MONO" 0;
+}
+
+.closing .chapter-kind,
+.closing-music .small-title {
+  color: var(--seal);
+}
+
+.closing-music .player-line span {
+  background: var(--seal);
 }
 
 .small-title {
